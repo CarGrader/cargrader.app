@@ -7,30 +7,25 @@ import json
 
 app = Flask(__name__)
 
-BLURBS = {}
-
 def _load_blurbs():
-    """
-    Load blurbs from the nested path:
-    repo_root / 'cargrader.app' / 'static' / 'blurbs.json'
-    """
-    # app file is .../cargrader.app/app/app.py (for example)
-    # parent -> .../cargrader.app/app
-    # parents[1] -> .../cargrader.app   (repo root)
-    repo_root = Path(__file__).resolve().parents[1]
-    path = repo_root / "cargrader.app" / "static" / "blurbs.json"
+    # app file: .../cargrader.app/app/your_file.py
+    repo_root = Path(__file__).resolve().parents[1]                # -> .../cargrader.app
+    path = repo_root / "cargrader.app" / "static" / "blurbs.json"  # nested location you chose
+    app.logger.info(f"[blurbs] looking for: {path}")
     try:
-        app.config["BLURBS"] = json.loads(path.read_text(encoding="utf-8"))
-        app.logger.info(f"[blurbs] loaded {len(app.config['BLURBS'])} keys from {path}")
+        raw = path.read_text(encoding="utf-8")
+        app.logger.info(f"[blurbs] file exists={path.exists()} size={len(raw)}")
+        data = json.loads(raw)
+        app.config["BLURBS"] = data
+        app.logger.info(f"[blurbs] loaded keys={list(data.keys())}")
     except Exception as e:
-        app.logger.warning(f"[blurbs] couldn't load {path}: {e}")
+        app.logger.warning(f"[blurbs] load failed: {e}")
         app.config["BLURBS"] = {}
 
 _load_blurbs()
 
 @app.context_processor
 def inject_blurbs():
-    # make `blurbs` available in every Jinja template
     return {"blurbs": app.config.get("BLURBS", {})}
 
 # (optional, handy in dev to reload without restart)
@@ -225,6 +220,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
