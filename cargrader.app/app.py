@@ -27,6 +27,8 @@ def inject_blurbs():
     # Makes `blurbs` available in every Jinja template
     return dict(blurbs=BLURBS)
 
+return app
+
 # === CONFIG ===
 # Prefer a mounted disk in production: set DB_DIR=/var/data in Render Env.
 # Optional overrides:
@@ -213,6 +215,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
