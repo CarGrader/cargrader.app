@@ -6,4 +6,5 @@ class Config:
     DEBUG = ENV == "development"
 
     # SQLite URI like: file:path?mode=ro&cache=shared (we’ll centralize connection in app/db/connection.py)
-    DB_PATH = os.environ.get("DB_PATH", "C:/Users/woogl/OneDrive/Documents/The CarGrader/Databases/GraderRater.db")
+   DB_PATH = os.environ.get("DB_PATH") or "/opt/render/project/src/data/GraderRater.db"
+
