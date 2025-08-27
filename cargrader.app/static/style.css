@@ -1,0 +1,24 @@
+.info-blurb {
+  display: inline-block;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.info-blurb > summary {
+  cursor: pointer;
+  display: inline;
+  text-decoration: underline;
+  list-style: none;
+}
+
+.info-blurb[open] > summary {
+  text-decoration: none;
+}
+
+.info-blurb__content {
+  margin-top: 0.5rem;
+  max-width: 34rem; /* keep lines readable */
+  font-size: 0.9rem;
+  line-height: 1.35rem;
+  opacity: 0.95;
+}
