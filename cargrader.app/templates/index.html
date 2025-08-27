@@ -41,6 +41,12 @@
       color: var(--muted);
       font-weight: 600;
     }
+    .info-blurb { display:inline-block; margin-left:.5rem; vertical-align:middle; }
+    .info-blurb > summary { cursor:pointer; display:inline; text-decoration:underline; list-style:none; }
+    .info-blurb > summary::-webkit-details-marker { display:none; }
+    .info-blurb[open] > summary { text-decoration:none; 
+    }
+    .info-blurb__content { margin-top:.25rem; font-size:.9rem; color:var(--muted); max-width:42ch; }
     .score-value { display:flex; align-items: baseline; justify-content:center; gap:12px; }
     .reels { display:inline-flex; gap:.06em; transform: translateZ(0); }
     .reel { position:relative; overflow:hidden; height:1em; width:.65em; }
@@ -91,6 +97,7 @@
           </div>
           <div class="score-footnote">
             Certainty: <span id="certVal">—</span>
+            {{ info_blurb('certainty', 'What is this?') }}
           </div>
         </div>
       </section>
@@ -282,3 +289,4 @@ function animateScoreReels(containerEl, value){
   </script>
 </body>
 </html>
+
