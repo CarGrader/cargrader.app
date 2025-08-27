@@ -1,0 +1,9 @@
+{% macro info_blurb(key, label="What is this?") -%}
+  {% set text = blurbs.get(key) %}
+  {% if text %}
+    <details class="info-blurb">
+      <summary class="info-blurb__summary">{{ label }}</summary>
+      <div class="info-blurb__content">{{ text | safe }}</div>
+    </details>
+  {% endif %}
+{%- endmacro %}
