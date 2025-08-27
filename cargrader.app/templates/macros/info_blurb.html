@@ -1,5 +1,5 @@
 {% macro info_blurb(key, label="What is this?") -%}
-  {% set text = blurbs.get(key) %}
+  {% set text = (blurbs|default({})).get(key) %}
   {% if text %}
     <details class="info-blurb">
       <summary class="info-blurb__summary">{{ label }}</summary>
