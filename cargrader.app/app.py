@@ -7,14 +7,42 @@ import json
 
 app = Flask(__name__)
 
+ChatGPT said:
+Thought for 2m 47s
+
+You’re 95% there—the “Info coming soon.” means the macro is rendering but blurbs['certainty'] isn’t being found at runtime. That’s almost always one of these:
+
+The loader is reading the wrong path (file isn’t where the code expects)
+
+The loader didn’t actually run on the same app used by wsgi.py
+
+Path wasn’t imported, so the loader failed silently before populating BLURBS
+
+Here’s how to fix/verify it immediately, plus exactly which files to share if you want me to check your wiring.
+
+Do-this-now (copy-paste)
+A) Make the loader bulletproof on a global app
+
+In the file that defines app = Flask(__name__) (the one your wsgi.py imports), replace your blurbs loader with this exact block:
+
+# add near the top with other imports
+from pathlib import Path
+import json
+
+# ... after: app = Flask(__name__)
+
 def _load_blurbs():
-    # app file: .../cargrader.app/app/your_file.py
+    # OPTION 1: load from the nested path: cargrader.app/cargrader.app/static/blurbs.json
     repo_root = Path(__file__).resolve().parents[1]                # -> .../cargrader.app
-    path = repo_root / "cargrader.app" / "static" / "blurbs.json"  # nested location you chose
+    path = repo_root / "cargrader.app" / "static" / "blurbs.json"
+
+    # OPTION 2 (alternative): load from the app's actual static folder
+    # path = Path(app.static_folder) / "blurbs.json"
+
     app.logger.info(f"[blurbs] looking for: {path}")
     try:
         raw = path.read_text(encoding="utf-8")
-        app.logger.info(f"[blurbs] file exists={path.exists()} size={len(raw)}")
+        app.logger.info(f"[blurbs] exists={path.exists()} size={len(raw)}")
         data = json.loads(raw)
         app.config["BLURBS"] = data
         app.logger.info(f"[blurbs] loaded keys={list(data.keys())}")
@@ -28,11 +56,13 @@ _load_blurbs()
 def inject_blurbs():
     return {"blurbs": app.config.get("BLURBS", {})}
 
-# (optional, handy in dev to reload without restart)
-@app.get("/admin/reload-blurbs")
-def admin_reload_blurbs():
-    _load_blurbs()
-    return {"ok": True, "count": len(app.config.get("BLURBS", {}))}
+@app.get("/admin/blurbs-debug")
+def bl_debug():
+    payload = app.config.get("BLURBS", {})
+    return {
+        "keys": list(payload.keys()) if isinstance(payload, dict) else "not-dict",
+        "count": len(payload) if isinstance(payload, dict) else 0
+    }
         
 # === CONFIG ===
 # Prefer a mounted disk in production: set DB_DIR=/var/data in Render Env.
@@ -220,6 +250,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
