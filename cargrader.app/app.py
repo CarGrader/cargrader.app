@@ -8,26 +8,31 @@ app = Flask(__name__)
 
 BLURBS = {}
 
-def load_blurbs():
-    """Load reusable explainer blurbs from static JSON."""
-    global BLURBS
-    path = os.path.join(os.path.dirname(__file__), "static", "blurbs.json")
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            BLURBS = json.load(f)
-    except Exception as e:
-        # Don't crash on missing/invalid file; just log and proceed.
-        app.logger.warning(f"Couldn't load blurbs.json: {e}")
-        BLURBS = {}
+def _load_blurbs():
+        # __file__ = .../cargrader.app/app/__init__.py
+        repo_root = Path(__file__).resolve().parent.parent  # -> .../cargrader.app
+        path = repo_root / "cargrader.app" / "static" / "blurbs.json"
+        app.logger.info(f"[blurbs] loading {path}")
+        try:
+            app.config["BLURBS"] = json.loads(path.read_text(encoding="utf-8"))
+            app.logger.info(f"[blurbs] loaded {len(app.config['BLURBS'])} keys")
+        except Exception as e:
+            app.logger.warning(f"[blurbs] couldn't load {path}: {e}")
+            app.config["BLURBS"] = {}
 
-load_blurbs()
+    _load_blurbs()
 
-@app.context_processor
-def inject_blurbs():
-    # Makes `blurbs` available in every Jinja template
-    return dict(blurbs=BLURBS)
+    @app.context_processor
+    def inject_blurbs():
+        return {"blurbs": app.config.get("BLURBS", {})}
 
-return app
+    # (optional dev endpoint)
+    @app.get("/admin/reload-blurbs")
+    def admin_reload_blurbs():
+        _load_blurbs()
+        return {"ok": True, "count": len(app.config.get("BLURBS", {}))}
+
+    return app
 
 # === CONFIG ===
 # Prefer a mounted disk in production: set DB_DIR=/var/data in Render Env.
@@ -215,6 +220,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
