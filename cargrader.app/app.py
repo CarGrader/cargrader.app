@@ -2,47 +2,57 @@ from flask import Flask, g, render_template, request, jsonify, url_for, abort
 from pathlib import Path
 import sqlite3, os, shutil, json
 
-app = Flask(__name__)
-
-def _load_blurbs_for(app):
-    """Load blurbs from the app's real static folder (cargrader.app/static/blurbs.json)."""
-    static_dir = Path(app.static_folder)
-    path = static_dir / "blurbs.json"
-    # Loud, helpful logs so you can see what's happening on Render:
-    app.logger.info(f"[blurbs] static_folder={static_dir}")
-    app.logger.info(f"[blurbs] trying path={path}")
-    try:
-        raw = path.read_text(encoding="utf-8")
-        app.logger.info(f"[blurbs] file exists={path.exists()} size={len(raw)}")
-        data = json.loads(raw)
-        app.config["BLURBS"] = data
-        app.logger.info(f"[blurbs] loaded keys={list(data.keys())}")
-    except Exception as e:
-        app.logger.warning(f"[blurbs] load failed from {path}: {e}")
-        app.config["BLURBS"] = {}
-
-@app.context_processor
-def inject_blurbs():
-    # always present; macro uses a safe default anyway
-    return {"blurbs": app.config.get("BLURBS", {})}
-
-# Load once at import time (okay with a factory too; see create_app below)
-_load_blurbs_for(app)
-
 def create_app():
-    # If gunicorn/WSGI uses the factory, make sure BLURBS is loaded on THIS instance
-    if not app.config.get("BLURBS"):
-        _load_blurbs_for(app)
-    return app
+    # Figure out where this file lives and derive the project root.
+    # If app.py is at .../cargrader.app/app.py -> root_dir = parent (cargrader.app)
+    # If app.py is at .../cargrader.app/app/__init__.py -> parent() again would be root.
+    pkg_dir = Path(__file__).resolve().parent        # e.g., .../cargrader.app  OR  .../cargrader.app/app
+    # Prefer the directory that actually contains /static/blurbs.json
+    if (pkg_dir / "static" / "blurbs.json").exists():
+        root_dir = pkg_dir
+    else:
+        root_dir = pkg_dir.parent
 
-# Optional debug endpoint you can hit after deploy (remove later if you want)
-@app.get("/admin/blurbs-debug")
-def bl_debug():
-    payload = app.config.get("BLURBS", {})
-    return {
-        "count": len(payload) if isinstance(payload, dict) else 0,
-        "keys": list(payload.keys()) if isinstance(payload, dict) else "not-dict"
-    }
+    # IMPORTANT: Point Flask at the top-level static/templates folders
+    app = Flask(
+        __name__,
+        static_folder=str(root_dir / "static"),
+        template_folder=str(root_dir / "templates"),
+    )
+
+    # ---- blurbs wiring (BEGIN) ----
+    def _load_blurbs_for(app):
+        path = Path(app.static_folder) / "blurbs.json"   # cargrader.app/static/blurbs.json
+        app.logger.info(f"[blurbs] loading from {path}")
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            app.config["BLURBS"] = data
+            app.logger.info(f"[blurbs] loaded keys={list(data.keys())}")
+        except Exception as e:
+            app.logger.warning(f"[blurbs] load failed from {path}: {e}")
+            app.config["BLURBS"] = {}
+
+    _load_blurbs_for(app)
+
+    @app.context_processor
+    def inject_blurbs():
+        return {"blurbs": app.config.get("BLURBS", {})}
+
+    # Optional helper while iterating; remove later if you want
+    @app.get("/admin/blurbs-debug")
+    def bl_debug():
+        payload = app.config.get("BLURBS", {})
+        return {
+            "count": len(payload) if isinstance(payload, dict) else 0,
+            "keys": list(payload.keys()) if isinstance(payload, dict) else [],
+        }
+    # ---- blurbs wiring (END) ----
+
+    # TODO: register your existing blueprints/routes here if applicable, e.g.:
+    # from app.routes.public import bp as public_bp
+    # app.register_blueprint(public_bp)
+
+    return app
         
 # === CONFIG ===
 # Prefer a mounted disk in production: set DB_DIR=/var/data in Render Env.
@@ -230,6 +240,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
