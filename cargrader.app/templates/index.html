@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- simpler: serve favicon from /static -->
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
     :root{
       --bg:#f5f7fb; --panel:#fff; --text:#0f172a; --muted:#64748b;
@@ -41,12 +42,6 @@
       color: var(--muted);
       font-weight: 600;
     }
-    .info-blurb { display:inline-block; margin-left:.5rem; vertical-align:middle; }
-    .info-blurb > summary { cursor:pointer; display:inline; text-decoration:underline; list-style:none; }
-    .info-blurb > summary::-webkit-details-marker { display:none; }
-    .info-blurb[open] > summary { text-decoration:none; 
-    }
-    .info-blurb__content { margin-top:.25rem; font-size:.9rem; color:var(--muted); max-width:42ch; }
     .score-value { display:flex; align-items: baseline; justify-content:center; gap:12px; }
     .reels { display:inline-flex; gap:.06em; transform: translateZ(0); }
     .reel { position:relative; overflow:hidden; height:1em; width:.65em; }
@@ -64,6 +59,7 @@
   </style>
 </head>
 <body>
+  {% from "macros/info_blurb.html" import info_blurb %}
   <main class="shell">
     <h1>CarGrader</h1>
     <p class="sub">Is it <em>Great</em> or is it <em>Garbage</em>?</p>
@@ -289,4 +285,5 @@ function animateScoreReels(containerEl, value){
   </script>
 </body>
 </html>
+
 
