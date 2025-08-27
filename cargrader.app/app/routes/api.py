@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request
+import os
+from flask import Blueprint, jsonify, request, current_app
 from app.db.connection import get_conn
 from app.db import queries
 
@@ -18,9 +19,8 @@ def health():
             info["error"] = "DB_PATH not set in config"
             return jsonify(info), 500
 
-        import os as _os
-        info["db_exists"] = _os.path.exists(cfg_db)
-        info["db_size_bytes"] = _os.path.getsize(cfg_db) if info["db_exists"] else 0
+        info["db_exists"] = os.path.exists(cfg_db)
+        info["db_size_bytes"] = os.path.getsize(cfg_db) if info["db_exists"] else 0
 
         with get_conn(readonly=True) as con:
             y = con.execute("""
@@ -94,4 +94,5 @@ def score():
         })
     except Exception as e:
         return jsonify(error=f"/api/score failed: {e}"), 500
+
 
