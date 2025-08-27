@@ -1,4 +1,5 @@
 from flask import Flask, g, render_template, request, jsonify, url_for, abort
+from pathlib import Path
 import sqlite3
 import os
 import shutil
@@ -9,31 +10,35 @@ app = Flask(__name__)
 BLURBS = {}
 
 def _load_blurbs():
-        # __file__ = .../cargrader.app/app/__init__.py
-        repo_root = Path(__file__).resolve().parent.parent  # -> .../cargrader.app
-        path = repo_root / "cargrader.app" / "static" / "blurbs.json"
-        app.logger.info(f"[blurbs] loading {path}")
-        try:
-            app.config["BLURBS"] = json.loads(path.read_text(encoding="utf-8"))
-            app.logger.info(f"[blurbs] loaded {len(app.config['BLURBS'])} keys")
-        except Exception as e:
-            app.logger.warning(f"[blurbs] couldn't load {path}: {e}")
-            app.config["BLURBS"] = {}
+    """
+    Load blurbs from the nested path:
+    repo_root / 'cargrader.app' / 'static' / 'blurbs.json'
+    """
+    # app file is .../cargrader.app/app/app.py (for example)
+    # parent -> .../cargrader.app/app
+    # parents[1] -> .../cargrader.app   (repo root)
+    repo_root = Path(__file__).resolve().parents[1]
+    path = repo_root / "cargrader.app" / "static" / "blurbs.json"
+    try:
+        app.config["BLURBS"] = json.loads(path.read_text(encoding="utf-8"))
+        app.logger.info(f"[blurbs] loaded {len(app.config['BLURBS'])} keys from {path}")
+    except Exception as e:
+        app.logger.warning(f"[blurbs] couldn't load {path}: {e}")
+        app.config["BLURBS"] = {}
 
+_load_blurbs()
+
+@app.context_processor
+def inject_blurbs():
+    # make `blurbs` available in every Jinja template
+    return {"blurbs": app.config.get("BLURBS", {})}
+
+# (optional, handy in dev to reload without restart)
+@app.get("/admin/reload-blurbs")
+def admin_reload_blurbs():
     _load_blurbs()
-
-    @app.context_processor
-    def inject_blurbs():
-        return {"blurbs": app.config.get("BLURBS", {})}
-
-    # (optional dev endpoint)
-    @app.get("/admin/reload-blurbs")
-    def admin_reload_blurbs():
-        _load_blurbs()
-        return {"ok": True, "count": len(app.config.get("BLURBS", {}))}
-
-    return app
-
+    return {"ok": True, "count": len(app.config.get("BLURBS", {}))}
+        
 # === CONFIG ===
 # Prefer a mounted disk in production: set DB_DIR=/var/data in Render Env.
 # Optional overrides:
@@ -220,6 +225,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
