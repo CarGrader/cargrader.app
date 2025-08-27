@@ -1,41 +1,47 @@
 from flask import Flask, g, render_template, request, jsonify, url_for, abort
 from pathlib import Path
-import sqlite3
-import os
-import shutil
-import json
+import sqlite3, os, shutil, json
 
 app = Flask(__name__)
 
 def _load_blurbs_for(app):
-    """Load blurbs from cargrader.app/static/blurbs.json."""
-    path = Path(app.static_folder) / "blurbs.json"
+    """Load blurbs from the app's real static folder (cargrader.app/static/blurbs.json)."""
+    static_dir = Path(app.static_folder)
+    path = static_dir / "blurbs.json"
+    # Loud, helpful logs so you can see what's happening on Render:
+    app.logger.info(f"[blurbs] static_folder={static_dir}")
+    app.logger.info(f"[blurbs] trying path={path}")
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        raw = path.read_text(encoding="utf-8")
+        app.logger.info(f"[blurbs] file exists={path.exists()} size={len(raw)}")
+        data = json.loads(raw)
         app.config["BLURBS"] = data
-        app.logger.info(f"[blurbs] loaded keys={list(data.keys())} from {path}")
+        app.logger.info(f"[blurbs] loaded keys={list(data.keys())}")
     except Exception as e:
         app.logger.warning(f"[blurbs] load failed from {path}: {e}")
         app.config["BLURBS"] = {}
 
 @app.context_processor
 def inject_blurbs():
+    # always present; macro uses a safe default anyway
     return {"blurbs": app.config.get("BLURBS", {})}
 
+# Load once at import time (okay with a factory too; see create_app below)
 _load_blurbs_for(app)
 
 def create_app():
-    # if BLURBS not loaded for some reason, load now
-    if "BLURBS" not in app.config:
+    # If gunicorn/WSGI uses the factory, make sure BLURBS is loaded on THIS instance
+    if not app.config.get("BLURBS"):
         _load_blurbs_for(app)
     return app
-    
+
+# Optional debug endpoint you can hit after deploy (remove later if you want)
 @app.get("/admin/blurbs-debug")
 def bl_debug():
     payload = app.config.get("BLURBS", {})
     return {
-        "keys": list(payload.keys()) if isinstance(payload, dict) else "not-dict",
-        "count": len(payload) if isinstance(payload, dict) else 0
+        "count": len(payload) if isinstance(payload, dict) else 0,
+        "keys": list(payload.keys()) if isinstance(payload, dict) else "not-dict"
     }
         
 # === CONFIG ===
@@ -224,6 +230,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
