@@ -7,55 +7,29 @@ import json
 
 app = Flask(__name__)
 
-ChatGPT said:
-Thought for 2m 47s
-
-You’re 95% there—the “Info coming soon.” means the macro is rendering but blurbs['certainty'] isn’t being found at runtime. That’s almost always one of these:
-
-The loader is reading the wrong path (file isn’t where the code expects)
-
-The loader didn’t actually run on the same app used by wsgi.py
-
-Path wasn’t imported, so the loader failed silently before populating BLURBS
-
-Here’s how to fix/verify it immediately, plus exactly which files to share if you want me to check your wiring.
-
-Do-this-now (copy-paste)
-A) Make the loader bulletproof on a global app
-
-In the file that defines app = Flask(__name__) (the one your wsgi.py imports), replace your blurbs loader with this exact block:
-
-# add near the top with other imports
-from pathlib import Path
-import json
-
-# ... after: app = Flask(__name__)
-
-def _load_blurbs():
-    # OPTION 1: load from the nested path: cargrader.app/cargrader.app/static/blurbs.json
-    repo_root = Path(__file__).resolve().parents[1]                # -> .../cargrader.app
-    path = repo_root / "cargrader.app" / "static" / "blurbs.json"
-
-    # OPTION 2 (alternative): load from the app's actual static folder
-    # path = Path(app.static_folder) / "blurbs.json"
-
-    app.logger.info(f"[blurbs] looking for: {path}")
+def _load_blurbs_for(app):
+    """Load blurbs from cargrader.app/static/blurbs.json."""
+    path = Path(app.static_folder) / "blurbs.json"
     try:
-        raw = path.read_text(encoding="utf-8")
-        app.logger.info(f"[blurbs] exists={path.exists()} size={len(raw)}")
-        data = json.loads(raw)
+        data = json.loads(path.read_text(encoding="utf-8"))
         app.config["BLURBS"] = data
-        app.logger.info(f"[blurbs] loaded keys={list(data.keys())}")
+        app.logger.info(f"[blurbs] loaded keys={list(data.keys())} from {path}")
     except Exception as e:
-        app.logger.warning(f"[blurbs] load failed: {e}")
+        app.logger.warning(f"[blurbs] load failed from {path}: {e}")
         app.config["BLURBS"] = {}
-
-_load_blurbs()
 
 @app.context_processor
 def inject_blurbs():
     return {"blurbs": app.config.get("BLURBS", {})}
 
+_load_blurbs_for(app)
+
+def create_app():
+    # if BLURBS not loaded for some reason, load now
+    if "BLURBS" not in app.config:
+        _load_blurbs_for(app)
+    return app
+    
 @app.get("/admin/blurbs-debug")
 def bl_debug():
     payload = app.config.get("BLURBS", {})
@@ -250,6 +224,7 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
