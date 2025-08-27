@@ -5,6 +5,27 @@ import shutil
 
 app = Flask(__name__)
 
+BLURBS = {}
+
+def load_blurbs():
+    """Load reusable explainer blurbs from static JSON."""
+    global BLURBS
+    path = os.path.join(os.path.dirname(__file__), "static", "blurbs.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            BLURBS = json.load(f)
+    except Exception as e:
+        # Don't crash on missing/invalid file; just log and proceed.
+        app.logger.warning(f"Couldn't load blurbs.json: {e}")
+        BLURBS = {}
+
+load_blurbs()
+
+@app.context_processor
+def inject_blurbs():
+    # Makes `blurbs` available in every Jinja template
+    return dict(blurbs=BLURBS)
+
 # === CONFIG ===
 # Prefer a mounted disk in production: set DB_DIR=/var/data in Render Env.
 # Optional overrides:
@@ -191,4 +212,5 @@ def upload_db():
 # === MAIN (local only; Render uses gunicorn) ===
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
