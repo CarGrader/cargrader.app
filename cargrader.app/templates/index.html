@@ -59,7 +59,7 @@
   </style>
 </head>
 <body>
-  {% from "macros/info_blurb.html" import info_blurb %}
+  {% from "macros/info_blurb.html" import info_blurb with context %}
   <main class="shell">
     <h1>CarGrader</h1>
     <p class="sub">Is it <em>Great</em> or is it <em>Garbage</em>?</p>
@@ -285,5 +285,6 @@ function animateScoreReels(containerEl, value){
   </script>
 </body>
 </html>
+
 
 
