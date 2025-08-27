@@ -6,20 +6,32 @@ api_bp = Blueprint("api", __name__)
 
 @api_bp.get("/health")
 def health():
-    info = {"ok": False, "db_path": None, "tables": [], "years_count": 0}
+    info = {"ok": False}
     try:
+        env_db = os.environ.get("DB_PATH")
+        cfg_db = current_app.config.get("DB_PATH")
+
+        info["env_DB_PATH"] = env_db
+        info["config_DB_PATH"] = cfg_db
+
+        if not cfg_db:
+            info["error"] = "DB_PATH not set in config"
+            return jsonify(info), 500
+
+        import os as _os
+        info["db_exists"] = _os.path.exists(cfg_db)
+        info["db_size_bytes"] = _os.path.getsize(cfg_db) if info["db_exists"] else 0
+
         with get_conn(readonly=True) as con:
-            info["db_path"] = con.execute("PRAGMA database_list;").fetchone().get("file")
-            info["tables"]  = [r["name"] for r in con.execute("""
-                SELECT name FROM sqlite_master WHERE type='table'
-            """).fetchall()]
             y = con.execute("""
-                SELECT COUNT(DISTINCT ModelYear) AS c FROM AllCars WHERE ModelYear IS NOT NULL
+                SELECT COUNT(DISTINCT ModelYear) AS c
+                FROM AllCars WHERE ModelYear IS NOT NULL
             """).fetchone()
             info["years_count"] = y["c"] if y else 0
             info["ok"] = True
     except Exception as e:
-        return jsonify(error=f"health failed: {e}", **info), 500
+        info["error"] = f"health failed: {e}"
+        return jsonify(info), 500
     return jsonify(info)
 
 @api_bp.get("/years")
@@ -82,3 +94,4 @@ def score():
         })
     except Exception as e:
         return jsonify(error=f"/api/score failed: {e}"), 500
+
