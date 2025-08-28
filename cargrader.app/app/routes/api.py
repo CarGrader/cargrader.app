@@ -116,5 +116,50 @@ def score():
     except Exception as e:
         return jsonify(error=f"/api/score failed: {e}"), 500
 
+@api_bp.get("/details")
+def details():
+    try:
+        year  = request.args.get("year", type=int)
+        make  = request.args.get("make", type=str)
+        model = request.args.get("model", type=str)
+
+        if not (year and make and model):
+            return jsonify(error="Missing year/make/model"), 400
+
+        with get_conn(readonly=True) as con:
+            row = con.execute(queries.DETAILS_SQL, {
+                "year": year, "make": make, "model": model
+            }).fetchone()
+
+        if not row:
+            return jsonify(error="Not found"), 404
+
+        # Compute the Y value and direction wording here to keep the front-end simple
+        rel = row.get("RelRatio")
+        # Guard against null or zero
+        if rel is None or rel <= 0:
+            y_value = None
+            direction = None
+        else:
+            if rel >= 1:
+                y_value = rel
+                direction = "less"
+            else:
+                y_value = 1.0 / rel
+                direction = "more"
+
+        return jsonify({
+            "year": row.get("ModelYear"),
+            "make": row.get("Make"),
+            "model": row.get("Model"),
+            "group_id": row.get("GroupID"),
+            "complaint_count": row.get("ComplaintCount"),
+            "rel_ratio": rel,
+            "y_value": y_value,
+            "direction": direction
+        })
+    except Exception as e:
+        return jsonify(error=f"/api/details failed: {e}"), 500
+
 
 
