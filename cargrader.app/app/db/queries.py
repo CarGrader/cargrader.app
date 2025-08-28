@@ -26,3 +26,21 @@ WHERE ModelYear = :year AND Make = :make AND Model = :model
 ORDER BY (Score IS NULL), Score DESC
 LIMIT 1
 """
+DETAILS_SQL = """
+SELECT
+  ac.ModelYear      AS ModelYear,
+  ac.Make           AS Make,
+  ac.Model          AS Model,
+  ac.GroupID        AS GroupID,
+  gg.Count          AS ComplaintCount,
+  gg.RelRatio       AS RelRatio
+FROM AllCars ac
+JOIN Grade_GID gg
+  ON gg.GroupID = ac.GroupID
+WHERE ac.ModelYear = :year
+  AND ac.Make      = :make
+  AND ac.Model     = :model
+ORDER BY (ac.Score IS NULL), ac.Score DESC
+LIMIT 1
+"""
+
