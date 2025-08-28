@@ -55,7 +55,20 @@
     .score-value{font-size:72px;font-weight:900;line-height:1;letter-spacing:.5px}
     .score-footnote{margin-top:8px;color:var(--muted);font-size:14px}
     .muted{color:var(--muted);font-size:13px;margin-top:12px}
-    .error{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:8px 12px;margin:10px auto;max-width:560px;display:none}
+    .error{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:8px 12px;margin:10px auto;max-width:560px;display:none
+    }
+    .details-wrap { margin-top: 12px; }
+    .details-wrap button { margin-right: 8px; }
+    .details-panel {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      line-height: 1.5;}
+    .details-panel p { margin: 0 0 8px; 
+    }
+
   </style>
 </head>
 <body>
@@ -96,6 +109,11 @@
             {{ info_blurb('certainty', 'What is this?') }}
           </div>
         </div>
+        <div class="details-wrap">
+    <button id="detailsBtn" type="button" disabled>Details</button>
+    <div id="detailsPanel" class="details-panel" hidden></div>
+  </div>
+
       </section>
   </main>
 
@@ -111,6 +129,16 @@
     const scoreEl  = $('#scoreVal');
     const certEl   = $('#certVal');
     const errEl    = $('#err');
+    const detailsBtn   = $('#detailsBtn');
+    const detailsPanel = $('#detailsPanel');
+    const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
+    const nf1 = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+
+    async function fetchDetails(year, make, model){
+    const qs = new URLSearchParams({ year, make, model }).toString();
+    return fetchJSON(`/api/details?${qs}`);
+    }
 
     function showError(msg){ errEl.textContent = msg; errEl.style.display = 'block'; }
     function clearError(){ errEl.textContent = ''; errEl.style.display = 'none'; }
@@ -274,6 +302,11 @@ function animateScoreReels(containerEl, value){
           animateScoreReels(scoreEl, data?.score);
           certEl.textContent = percentify(data?.certainty);
           resultEl.style.display = 'block';
+       // Enable details button and reset panel
+          detailsBtn.disabled = false;
+          detailsPanel.hidden = true;
+          detailsPanel.innerHTML = '';
+
         }catch(e){
           console.error('get results failed', e);
           showError('Failed to get results.');
@@ -281,10 +314,61 @@ function animateScoreReels(containerEl, value){
           btn.disabled = false;
         }
       });
-    });
+      detailsBtn.addEventListener('click', async () => {
+        try {
+          // If already open, toggle closed
+          if (!detailsPanel.hidden && detailsPanel.innerHTML.trim()) {
+            detailsPanel.hidden = true;
+            return;
+          }
+      
+          clearError();
+      
+          const year  = yearSel.value;
+          const make  = makeSel.value;
+          const model = modelSel.value;
+          if (!year || !make || !model) return; // guard
+      
+          detailsBtn.disabled = true;
+          const data = await fetchDetails(year, make, model);
+      
+          if (data.error) {
+            showError(data.error);
+            return;
+          }
+      
+          const y   = data.y_value;
+          const dir = data.direction; // 'more' | 'less' | null
+          const complaints = data.complaint_count;
+      
+          const yText = (y && isFinite(y)) ? nf1.format(y) : '—';
+          const cText = (complaints != null) ? nf0.format(complaints) : '—';
+      
+          const line1 = `The ${data.year} ${data.make} ${data.model} has received ${cText} complaints.`;
+          let line2 = `According to our data, we don’t have enough information to compare this to typical expectations.`;
+          if (dir === 'less') {
+            line2 = `According to our data, that is ${yText} times less than what is typically expected for a vehicle of this age and sales volume.`;
+          } else if (dir === 'more') {
+            line2 = `According to our data, that is ${yText} times more than what is typically expected for a vehicle of this age and sales volume.`;
+          }
+      
+          detailsPanel.innerHTML = `
+            <p>${line1}</p>
+            <p>${line2}</p>
+          `;
+          detailsPanel.hidden = false;
+        } catch (e) {
+          console.error('details failed', e);
+          showError('Failed to load details.');
+        } finally {
+          detailsBtn.disabled = false;
+        }
+      });
+    });   
   </script>
 </body>
 </html>
+
 
 
 
