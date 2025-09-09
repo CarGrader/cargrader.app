@@ -162,11 +162,10 @@ def details():
         return jsonify(error=f"/api/details failed: {e}"), 500
 
 
+
 @api_bp.get("/top-complaints")
 def top_complaints():
     # Return top 3 complaint components and summaries for a given Y/M/M.
-    # Query params: year, make, model
-    # Response: { ok, group_id, items: [{component, percent, summary}] }
     try:
         year = request.args.get("year")
         make = request.args.get("make")
@@ -199,23 +198,13 @@ def top_complaints():
 
         # Pull top3 CSV from R2
         from ..services.r2 import get_bytes, get_text, R2Error
-        import csv
-        import io
+        import csv, io
 
         key_top3 = f"ResourceFiles/{group_id}/{group_id}_top3.csv"
-try:
-    raw = get_bytes(key_top3)
-except R2Error as e:
-    # No _top3 file -> nothing to return (treat as empty, not a failure)
-    return jsonify(ok=True, group_id=group_id, items=[], note=str(e))
-except botocore.exceptions.ClientError as e:
-    code = (e.response or {}).get("Error", {}).get("Code")
-    msg  = (e.response or {}).get("Error", {}).get("Message")
-    status = 403 if code in ("AccessDenied", "403") else 500
-    return jsonify(ok=False, error=f"R2 get_object {code}: {msg}", where="top3", key=key_top3), status
-except Exception as e:
-    return jsonify(ok=False, error=f"Unexpected error reading top3: {e}", where="top3", key=key_top3), 500
-
+        try:
+            raw = get_bytes(key_top3)
+        except R2Error:
+            return jsonify(ok=True, group_id=group_id, items=[])
 
         buf = io.StringIO(raw.decode("utf-8", errors="replace"))
         reader = csv.DictReader(buf)
@@ -240,11 +229,8 @@ except Exception as e:
             items.append({ "component": comp, "percent": pct, "summary": summary })
 
         return jsonify(ok=True, group_id=group_id, items=items)
-
     except Exception as e:
         return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
-
-
 
 @api_bp.get("/r2-check")
 def r2_check():
