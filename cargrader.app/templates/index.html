@@ -69,7 +69,13 @@
     .details-panel p { margin: 0 0 8px; 
     }
 
-  </style>
+  
+        .top-complaints { text-align: left; }
+        .tc-item { margin: 10px 0 16px; }
+        .tc-title { font-size: 18px; font-weight: 700; }
+        .tc-percent { font-size: 16px; opacity: .85; margin-left: 8px; }
+        .tc-summary { font-size: 14px; opacity: .9; margin-top: 6px; white-space: pre-wrap; }
+        </style>
 </head>
 <body>
   {% from "macros/info_blurb.html" import info_blurb with context %}
@@ -112,6 +118,8 @@
         <div class="details-wrap">
     <button id="detailsBtn" type="button" disabled>Details</button>
     <div id="detailsPanel" class="details-panel" hidden></div>
+    <button id="topComplaintsBtn" type="button" disabled>Top Complaints</button>
+    <div id="topComplaintsPanel" class="details-panel top-complaints" hidden></div>
   </div>
 
       </section>
@@ -131,6 +139,8 @@
     const errEl    = $('#err');
     const detailsBtn   = $('#detailsBtn');
     const detailsPanel = $('#detailsPanel');
+    const topBtn      = $('#topComplaintsBtn');
+    const topPanel    = $('#topComplaintsPanel');
     const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
     const nf1 = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
@@ -305,6 +315,7 @@ function animateScoreReels(containerEl, value){
        // Enable details button and reset panel
           detailsBtn.disabled = false;
           detailsPanel.hidden = true;
+          if (topBtn) { topBtn.disabled = false; topPanel.hidden = true; topPanel.innerHTML=''; }
           detailsPanel.innerHTML = '';
 
         }catch(e){
@@ -365,6 +376,59 @@ function animateScoreReels(containerEl, value){
         }
       });
     });   
+  
+      // Top Complaints
+      if (topBtn) {
+        topBtn.addEventListener('click', async () => {
+          try{
+            if (!topPanel.hidden && topPanel.innerHTML.trim()) { topPanel.hidden = true; return; }
+            const year  = yearSel.value;
+            const make  = makeSel.value;
+            const model = modelSel.value;
+            if (!year || !make || !model) return;
+            topBtn.disabled = true;
+            topPanel.innerHTML = '';
+            const qs = new URLSearchParams({year, make, model}).toString();
+            const data = await fetchJSON(`/api/top-complaints?${qs}`);
+            if (!data?.ok) throw new Error(data?.error || 'Request failed');
+
+            const items = Array.isArray(data.items) ? data.items : [];
+            if (items.length === 0){
+              topPanel.innerHTML = '<p>No complaint summary data available.</p>';
+              topPanel.hidden = false;
+              return;
+            }
+            const frag = document.createDocumentFragment();
+            items.forEach(it => {
+              const wrap = document.createElement('div');
+              wrap.className = 'tc-item';
+              const title = document.createElement('div');
+              title.className = 'tc-title';
+              const pct = (typeof it.percent === 'number') ? `${Math.round(it.percent)}%` : '—';
+              title.textContent = it.component || '—';
+              const pctEl = document.createElement('span');
+              pctEl.className = 'tc-percent'; pctEl.textContent = pct;
+              title.appendChild(pctEl);
+              wrap.appendChild(title);
+
+              if (it.summary){
+                const sum = document.createElement('div');
+                sum.className = 'tc-summary';
+                sum.textContent = it.summary.trim();
+                wrap.appendChild(sum);
+              }
+              frag.appendChild(wrap);
+            });
+            topPanel.appendChild(frag);
+            topPanel.hidden = false;
+          } catch(e){
+            console.error('top-complaints failed', e);
+            showError('Failed to load top complaints.');
+          } finally {
+            topBtn.disabled = false;
+          }
+        });
+      }
   </script>
 </body>
 </html>
