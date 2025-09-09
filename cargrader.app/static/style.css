@@ -22,3 +22,9 @@
   line-height: 1.35rem;
   opacity: 0.95;
 }
+
+
+/* Trims table */
+.trims-table{width:100%;border-collapse:collapse;margin-top:8px}
+.trims-table th,.trims-table td{border-bottom:1px solid var(--border);text-align:left;padding:8px 10px}
+.trims-table th{font-weight:700}
