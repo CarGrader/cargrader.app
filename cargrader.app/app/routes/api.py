@@ -198,16 +198,24 @@ def top_complaints():
             return jsonify(ok=False, error="GroupID not found for selection"), 404
 
         # Pull top3 CSV from R2
-        from app.services.r2 import get_bytes, get_text, R2Error
+        from ..services.r2 import get_bytes, get_text, R2Error
         import csv
         import io
 
         key_top3 = f"ResourceFiles/{group_id}/{group_id}_top3.csv"
-        try:
-            raw = get_bytes(key_top3)
-        except R2Error:
-            # No _top3 file -> nothing to return
-            return jsonify(ok=True, group_id=group_id, items=[])
+try:
+    raw = get_bytes(key_top3)
+except R2Error as e:
+    # No _top3 file -> nothing to return (treat as empty, not a failure)
+    return jsonify(ok=True, group_id=group_id, items=[], note=str(e))
+except botocore.exceptions.ClientError as e:
+    code = (e.response or {}).get("Error", {}).get("Code")
+    msg  = (e.response or {}).get("Error", {}).get("Message")
+    status = 403 if code in ("AccessDenied", "403") else 500
+    return jsonify(ok=False, error=f"R2 get_object {code}: {msg}", where="top3", key=key_top3), status
+except Exception as e:
+    return jsonify(ok=False, error=f"Unexpected error reading top3: {e}", where="top3", key=key_top3), 500
+
 
         buf = io.StringIO(raw.decode("utf-8", errors="replace"))
         reader = csv.DictReader(buf)
@@ -236,3 +244,19 @@ def top_complaints():
     except Exception as e:
         return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
 
+
+
+@api_bp.get("/r2-check")
+def r2_check():
+    """Diagnostic: read a specific R2 key and return its size and first bytes."""
+    try:
+        key = request.args.get("key")
+        if not key:
+            return jsonify(ok=False, error="Missing key param"), 400
+        from ..services.r2 import get_bytes, R2Error
+        import binascii
+        data = get_bytes(key)
+        head = binascii.hexlify(data[:16]).decode("ascii")
+        return jsonify(ok=True, key=key, size=len(data), head_hex=head)
+    except Exception as e:
+        return jsonify(ok=False, error=f"/api/r2-check failed: {e}")
