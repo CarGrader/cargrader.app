@@ -236,6 +236,78 @@ def top_complaints():
     except Exception as e:
         return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
 
+
+@api_bp.get("/trims")
+def trims():
+    """Return trim/series complaint counts & percentages for a given Y/M/M.
+
+    Reads CSV from R2 at: ResourceFiles/{GroupID}/{GroupID}_ymmtscount.csv
+    and returns an array of { name, count, percentage }.
+    """
+    try:
+        year = request.args.get("year")
+        make = request.args.get("make")
+        model = request.args.get("model")
+        if not (year and make and model):
+            return jsonify(ok=False, error="Missing year/make/model"), 400
+
+        # Resolve GroupID from DB (same approach as /top-complaints)
+        from app.db.connection import get_conn
+        group_id = None
+        with get_conn(readonly=True) as con:
+            cur = con.execute(
+                """
+                SELECT GroupID
+                FROM AllCars
+                WHERE ModelYear = ? AND Make = ? AND Model = ?
+                LIMIT 1
+                """,
+                (year, make, model),
+            )
+            row = cur.fetchone()
+            if row:
+                group_id = row[0]
+        if not group_id:
+            return jsonify(ok=True, items=[])
+
+        # Read CSV from R2
+        from ..services.r2 import get_bytes, R2Error
+        import csv, io
+
+        key = f"ResourceFiles/{group_id}/{group_id}_ymmtscount.csv"
+        try:
+            raw = get_bytes(key)
+        except R2Error as e:
+            # Not found -> empty result is OK
+            return jsonify(ok=True, group_id=group_id, items=[])
+
+        f = io.StringIO(raw.decode("utf-8", errors="replace"))
+        reader = csv.DictReader(f)
+        items = []
+        for row in reader:
+            name = row.get("Name") or ""
+            # normalize field names as expected by UI
+            try:
+                count = int(float(row.get("Count", 0)))
+            except Exception:
+                count = 0
+            try:
+                pct = float(row.get("Percentage", 0))
+            except Exception:
+                pct = 0.0
+            items.append({
+                "name": name.strip(),
+                "count": count,
+                "percentage": pct,
+            })
+
+        # Sort by count desc as a default
+        items.sort(key=lambda x: x["count"], reverse=True)
+        return jsonify(ok=True, group_id=group_id, items=items)
+    except Exception as e:
+        return jsonify(ok=False, error=f"/api/trims failed: {e}"), 500
+
+
 @api_bp.get("/r2-check")
 def r2_check():
     """Diagnostic: read a specific R2 key and return its size and first bytes."""
