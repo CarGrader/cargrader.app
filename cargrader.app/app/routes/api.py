@@ -237,13 +237,12 @@ def top_complaints():
         return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
 
 
+@api_bp.get("/history")
+def history():
+    """Return complaint count by year (actual vs expected) for a given Y/M/M.
 
-@api_bp.get("/trims")
-def trims():
-    """Return trim/series complaint counts & percentages for a given Y/M/M.
-
-    Reads CSV from R2 at: ResourceFiles/{GroupID}/{GroupID}_ymmtscount.csv
-    and returns an array of { name, count, percentage }.
+    Reads CSV from R2 at: ResourceFiles/{GroupID}/{GroupID}_cby.csv
+    Expected columns (case-insensitive): Year, Actual Count, Expected Count
     """
     try:
         year = request.args.get("year")
@@ -252,7 +251,7 @@ def trims():
         if not (year and make and model):
             return jsonify(ok=False, error="Missing year/make/model"), 400
 
-        # Resolve GroupID from DB (same approach as /top-complaints)
+        # Resolve GroupID
         from app.db.connection import get_conn
         group_id = None
         with get_conn(readonly=True) as con:
@@ -267,7 +266,10 @@ def trims():
             )
             row = cur.fetchone()
             if row:
-                group_id = row['GroupID']
+                try:
+                    group_id = row["GroupID"]
+                except Exception:
+                    group_id = row['GroupID']
 
         if group_id is None:
             return jsonify(ok=True, items=[], note="No GroupID for selection")
@@ -276,41 +278,47 @@ def trims():
         from ..services.r2 import get_bytes, R2Error
         import csv, io, botocore
 
-        key = f"ResourceFiles/{group_id}/{group_id}_ymmtscount.csv"
+        key = f"ResourceFiles/{group_id}/{group_id}_cby.csv"
         try:
             raw = get_bytes(key)
-        except (R2Error, botocore.exceptions.ClientError):
-            # Treat missing or access errors as "no data"
-            return jsonify(ok=True, group_id=group_id, items=[], note=f"Missing R2 object: {key}")
+        except (R2Error, botocore.exceptions.ClientError) as e:
+            return jsonify(ok=True, group_id=group_id, key=key, items=[], note=f"R2 read issue: {repr(e)}")
 
-        try:
-            f = io.StringIO(raw.decode("utf-8", errors="replace"))
-            reader = csv.DictReader(f)
-            items = []
-            for row in reader:
-                name = (row.get("Name") or "").strip()
-                # Normalize "Count" and "Percentage"
-                vcount = row.get("Count", 0)
-                vpct = row.get("Percentage", 0)
+        # Parse CSV defensively (case-insensitive headers)
+        f = io.StringIO(raw.decode("utf-8", errors="replace"))
+        reader = csv.DictReader(f)
+        cols = [c for c in reader.fieldnames] if reader.fieldnames else []
+        cols_lower = {c.lower(): c for c in cols}
+        col_year = cols_lower.get("year")
+        possible_actual = [k for k in cols_lower if "actual" in k and "count" in k] or ["actual count"]
+        possible_expected = [k for k in cols_lower if "expected" in k and "count" in k] or ["expected count"]
+        col_actual = cols_lower.get(possible_actual[0])
+        col_expected = cols_lower.get(possible_expected[0])
+
+        if not (col_year and col_actual and col_expected):
+            return jsonify(ok=True, group_id=group_id, key=key, items=[], note="Missing expected headers (Year, Actual Count, Expected Count)")
+
+        items = []
+        for r in reader:
+            try:
+                y = int(float(r.get(col_year, 0)))
+            except Exception:
+                continue
+            def to_num(v):
                 try:
-                    count = int(float(vcount))
+                    return float(v)
                 except Exception:
-                    count = 0
-                try:
-                    pct = float(vpct)
-                except Exception:
-                    pct = 0.0
-                items.append({"name": name, "count": count, "percentage": pct})
+                    return 0.0
+            a = to_num(r.get(col_actual, 0))
+            e = to_num(r.get(col_expected, 0))
+            items.append({"year": y, "actual": a, "expected": e})
 
-            items.sort(key=lambda x: x["count"], reverse=True)
-            return jsonify(ok=True, group_id=group_id, key=key, items=items)
-        except Exception as parse_err:
-            # CSV parse issues -> return empty but with note
-            return jsonify(ok=True, group_id=group_id, key=key, items=[], note=f"CSV parse error: {parse_err}"), 200
-
+        items.sort(key=lambda x: x["year"])
+        return jsonify(ok=True, group_id=group_id, key=key, items=items)
     except Exception as e:
-        # Return a more descriptive error (stringify fully)
-        return jsonify(ok=False, error=f"/api/trims failed: {repr(e)}"), 500
+        return jsonify(ok=False, error=f"/api/history failed: {repr(e)}"), 500
+
+
 @api_bp.get("/r2-check")
 def r2_check():
     """Diagnostic: read a specific R2 key and return its size and first bytes."""
