@@ -267,7 +267,7 @@ def trims():
             )
             row = cur.fetchone()
             if row:
-                group_id = row[0]
+                group_id = row['GroupID']
 
         if group_id is None:
             return jsonify(ok=True, items=[], note="No GroupID for selection")
