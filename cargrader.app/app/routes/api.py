@@ -162,4 +162,77 @@ def details():
         return jsonify(error=f"/api/details failed: {e}"), 500
 
 
+@api_bp.get("/top-complaints")
+def top_complaints():
+    # Return top 3 complaint components and summaries for a given Y/M/M.
+    # Query params: year, make, model
+    # Response: { ok, group_id, items: [{component, percent, summary}] }
+    try:
+        year = request.args.get("year")
+        make = request.args.get("make")
+        model = request.args.get("model")
+        if not (year and make and model):
+            return jsonify(ok=False, error="Missing year/make/model"), 400
+
+        # Resolve GroupID
+        from app.db.connection import get_conn
+        group_id = None
+        with get_conn(readonly=True) as con:
+            cur = con.execute(
+                """
+                SELECT ac.GroupID
+                FROM AllCars ac
+                WHERE ac.ModelYear = :year
+                  AND ac.Make      = :make
+                  AND ac.Model     = :model
+                ORDER BY (ac.Score IS NULL), ac.Score DESC
+                LIMIT 1
+                """,
+                { "year": year, "make": make, "model": model }
+            )
+            row = cur.fetchone()
+            if row:
+                group_id = row.get("GroupID")
+
+        if not group_id:
+            return jsonify(ok=False, error="GroupID not found for selection"), 404
+
+        # Pull top3 CSV from R2
+        from app.services.r2 import get_bytes, get_text, R2Error
+        import csv
+        import io
+
+        key_top3 = f"ResourceFiles/{group_id}/{group_id}_top3.csv"
+        try:
+            raw = get_bytes(key_top3)
+        except R2Error:
+            # No _top3 file -> nothing to return
+            return jsonify(ok=True, group_id=group_id, items=[])
+
+        buf = io.StringIO(raw.decode("utf-8", errors="replace"))
+        reader = csv.DictReader(buf)
+        items = []
+        for r in reader:
+            comp = (r.get("Component") or "").strip()
+            pct  = r.get("Percentage")
+            try:
+                pct = float(pct)
+            except Exception:
+                pct = None
+
+            summary = None
+            if comp:
+                # Try component-specific llamasum; ignore global cmpl_summary_llamasum
+                key_sum = f"ResourceFiles/{group_id}/{comp.upper()}_llamasum.txt"
+                try:
+                    summary = get_text(key_sum)
+                except R2Error:
+                    summary = None
+
+            items.append({ "component": comp, "percent": pct, "summary": summary })
+
+        return jsonify(ok=True, group_id=group_id, items=items)
+
+    except Exception as e:
+        return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
 
