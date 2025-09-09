@@ -222,7 +222,10 @@ def top_complaints():
                 # Try component-specific llamasum; ignore global cmpl_summary_llamasum
                 key_sum = f"ResourceFiles/{group_id}/{comp.upper()}_llamasum.txt"
                 try:
-                    summary = get_text(key_sum)
+                    summary = get_text(key_sum).strip()
+                    prefix = "Here is a two-sentence summary of the data:"
+                    if summary.startswith(prefix):
+                        summary = summary[len(prefix):].lstrip()
                 except R2Error:
                     summary = None
 
@@ -246,3 +249,4 @@ def r2_check():
         return jsonify(ok=True, key=key, size=len(data), head_hex=head)
     except Exception as e:
         return jsonify(ok=False, error=f"/api/r2-check failed: {e}")
+
