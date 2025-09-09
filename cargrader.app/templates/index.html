@@ -121,6 +121,8 @@
     <div id="detailsPanel" class="details-panel" hidden></div>
     <button id="topComplaintsBtn" type="button" disabled>Top Complaints</button>
     <div id="topComplaintsPanel" class="details-panel top-complaints" hidden></div>
+    <button id="trimsBtn" type="button" disabled>Trims</button>
+    <div id="trimsPanel" class="details-panel trims" hidden></div>
   </div>
 
       </section>
@@ -141,6 +143,8 @@
     const detailsBtn   = $('#detailsBtn');
     const detailsPanel = $('#detailsPanel');
     const topBtn      = $('#topComplaintsBtn');
+    const trimsBtn    = $('#trimsBtn');
+    const trimsPanel  = $('#trimsPanel');
     const topPanel    = $('#topComplaintsPanel');
     const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
     const nf1 = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -317,6 +321,7 @@ function animateScoreReels(containerEl, value){
           detailsBtn.disabled = false;
           detailsPanel.hidden = true;
           if (topBtn) { topBtn.disabled = false; topPanel.hidden = true; topPanel.innerHTML=''; }
+          if (trimsBtn) { trimsBtn.disabled = false; trimsPanel.hidden = true; trimsPanel.innerHTML=''; }
           detailsPanel.innerHTML = '';
 
         }catch(e){
@@ -379,6 +384,57 @@ function animateScoreReels(containerEl, value){
     });   
   
       // Top Complaints
+      // Trims list
+      if (trimsBtn) {
+        trimsBtn.addEventListener('click', async () => {
+          try{
+            if (!trimsPanel.hidden && trimsPanel.innerHTML.trim()) { trimsPanel.hidden = true; return; }
+            const year  = yearSel.value;
+            const make  = makeSel.value;
+            const model = modelSel.value;
+            if (!year || !make || !model) return;
+            trimsBtn.disabled = true;
+            trimsPanel.innerHTML = '';
+            const qs = new URLSearchParams({year, make, model}).toString();
+            const data = await fetchJSON(`/api/trims?${qs}`);
+            if (!data?.ok) throw new Error(data?.error || 'Request failed');
+
+            const list = Array.isArray(data.items) ? data.items : [];
+            if (!list.length){
+              trimsPanel.innerHTML = '<p>No trim data available.</p>';
+              trimsPanel.hidden = false;
+              return;
+            }
+
+            // Build a simple table
+            const table = document.createElement('table');
+            table.className = 'trims-table';
+            const thead = document.createElement('thead');
+            thead.innerHTML = '<tr><th>Trim/Series</th><th>Count</th><th>% of total</th></tr>';
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            list.forEach(it => {
+              const tr = document.createElement('tr');
+              const name = (it.name || '').trim();
+              const count = (typeof it.count === 'number') ? it.count : parseInt(it.count||0,10);
+              const pct = (typeof it.percentage === 'number') ? it.percentage : parseFloat(it.percentage||0);
+              const pctTxt = isFinite(pct) ? (pct.toFixed(2) + '%') : '—';
+              tr.innerHTML = `<td>${name}</td><td>${count.toLocaleString()}</td><td>${pctTxt}</td>`;
+              tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            trimsPanel.appendChild(table);
+            trimsPanel.hidden = false;
+          } catch(e){
+            console.error('trims failed', e);
+            showError('Failed to load trims.');
+          } finally {
+            trimsBtn.disabled = false;
+          }
+        });
+      }
+    
       if (topBtn) {
         topBtn.addEventListener('click', async () => {
           try{
