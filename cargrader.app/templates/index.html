@@ -145,13 +145,15 @@
             legend: { position: 'top' },
             tooltip: { enabled: true }
           },
-          animation: {
-            duration: 1200,
-            easing: 'easeOutCubic'
-          },
+          animation: false,
           animations: {
-            y: { from: 0 }
-          }
+              x: { duration: 0 },
+              y: {
+                from: (ctx) => ctx.chart.scales.y.getPixelForValue(0),
+                duration: 1200,
+                easing: 'easeOutCubic'
+              }
+            },}
         }
       });
     }
@@ -672,13 +674,15 @@ function animateScoreReels(containerEl, value){
             legend: { position: 'top' },
             tooltip: { enabled: true }
           },
-          animation: {
-            duration: 1200,
-            easing: 'easeOutCubic'
-          },
+          animation: false,
           animations: {
-            y: { from: 0 }
-          }
+              x: { duration: 0 },
+              y: {
+                from: (ctx) => ctx.chart.scales.y.getPixelForValue(0),
+                duration: 1200,
+                easing: 'easeOutCubic'
+              }
+            },}
         }
       });
     }
