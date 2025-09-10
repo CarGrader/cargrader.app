@@ -37,6 +37,7 @@ async function loadYears(){
 }
 document.addEventListener('DOMContentLoaded', loadYears);
 
+// MAKES
 yearSel.addEventListener('change', async () => {
   try{
     clearError();
@@ -44,22 +45,37 @@ yearSel.addEventListener('change', async () => {
     makeSel.innerHTML = '<option value="">Select...</option>';
     modelSel.innerHTML = '<option value="">Select...</option>';
     if(!yearSel.value) return;
-    const makes = await getJSON(`/api/makes?year=${yearSel.value}`);
+
+    const resp = await getJSON(`/api/makes?year=${yearSel.value}`);
+    const makes = Array.isArray(resp) ? resp : (resp.makes || []);
+    if (!makes.length) throw new Error('No makes');
     makeSel.insertAdjacentHTML('beforeend', makes.map(m=>`<option value="${m}">${m}</option>`).join(''));
     makeSel.disabled = false;
-  }catch(e){ showError('Failed to load makes.'); }
+  }catch(e){
+    console.error('load makes error:', e);
+    showError('Failed to load makes.');
+  }
 });
 
+// MODELS
 makeSel.addEventListener('change', async () => {
   try{
     clearError();
     modelSel.disabled = true; btn.disabled = true;
     modelSel.innerHTML = '<option value="">Select...</option>';
     if(!makeSel.value) return;
-    const models = await getJSON(`/api/models?year=${yearSel.value}&make=${encodeURIComponent(makeSel.value)}`);
+
+    const resp = await getJSON(
+      `/api/models?year=${yearSel.value}&make=${encodeURIComponent(makeSel.value)}`
+    );
+    const models = Array.isArray(resp) ? resp : (resp.models || []);
+    if (!models.length) throw new Error('No models');
     modelSel.insertAdjacentHTML('beforeend', models.map(m=>`<option value="${m}">${m}</option>`).join(''));
     modelSel.disabled = false;
-  }catch(e){ showError('Failed to load models.'); }
+  }catch(e){
+    console.error('load models error:', e);
+    showError('Failed to load models.');
+  }
 });
 
 modelSel.addEventListener('change', () => { btn.disabled = !(yearSel.value && makeSel.value && modelSel.value); });
