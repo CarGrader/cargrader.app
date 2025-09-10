@@ -36,6 +36,64 @@
   --radius: 16px;
 }
 
+/* ===== Full-bleed Hero ===== */
+.hero{
+  position:relative;
+  width:100vw;
+  height:360px;                /* adjust to match your PNG’s proportions */
+  left:50%;
+  right:50%;
+  margin-left:-50vw;           /* full-bleed outside .container */
+  margin-right:-50vw;
+  background:url('../img/banner.png') center/cover no-repeat;
+  border-bottom:1px solid var(--border);
+  box-shadow: 0 12px 36px rgba(0,0,0,.45);
+}
+@media (min-width: 1200px){
+  .hero{ height:400px; }       /* optional: a bit taller on big screens */
+}
+
+.hero__overlay{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 65%, rgba(0,0,0,.55) 100%);
+}
+
+.hero__inner{
+  position:relative;
+  height:100%;
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px;
+  display:flex;
+  align-items:flex-end;        /* title near bottom like your mock */
+}
+
+.hero__brand{
+  margin:0;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:56px;              /* tweak as needed to pixel-match the PNG */
+  letter-spacing:.5px;
+  color:#fff;
+  text-shadow: 0 4px 18px rgba(0,0,0,.45);
+}
+@media (max-width: 600px){
+  .hero__brand{ font-size:38px; }
+}
+
+.hero__auth{
+  position:absolute;
+  top:16px; right:24px;
+  z-index:2;
+  border:1px solid var(--accent);
+  background:rgba(0,0,0,.25);
+  color:#fff;
+  backdrop-filter: blur(3px);
+}
+.hero__auth:hover{
+  background:rgba(0,0,0,.4);
+}
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
