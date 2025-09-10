@@ -40,7 +40,7 @@
 .hero{
   position:relative;
   width:100vw;
-  height:360px;                /* adjust to match your PNG’s proportions */
+  height:520px;                /* adjust to match your PNG’s proportions */
   left:50%;
   right:50%;
   margin-left:-50vw;           /* full-bleed outside .container */
@@ -50,7 +50,7 @@
   box-shadow: 0 12px 36px rgba(0,0,0,.45);
 }
 @media (min-width: 1200px){
-  .hero{ height:400px; }       /* optional: a bit taller on big screens */
+  .hero{ height:600px; }       /* optional: a bit taller on big screens */
 }
 
 .hero__overlay{
