@@ -24,20 +24,7 @@
 }
 
 
-/* --- Trims table --- */
+/* Trims table */
 .trims-table{width:100%;border-collapse:collapse;margin-top:8px}
 .trims-table th,.trims-table td{border-bottom:1px solid var(--border);text-align:left;padding:8px 10px}
 .trims-table th{font-weight:700}
-
-/* --- History chart --- */
-.history-wrap{margin-top:8px}
-.history-chart{width:100%;height:auto;display:block}
-.axis line{stroke:var(--border)}
-.tick{fill:var(--muted);font-size:12px}
-.grid{stroke:var(--border);stroke-dasharray:2 4}
-.line-actual{fill:none;stroke:var(--primary);stroke-width:2.5}
-.line-expected{fill:none;stroke:#16a34a;stroke-width:2.5}
-.legend{margin-bottom:6px;color:var(--muted);font-size:13px;display:flex;gap:16px;align-items:center}
-.legend .lg{display:inline-block;width:18px;height:3px;vertical-align:middle}
-.legend .lg-actual{background:var(--primary)}
-.legend .lg-expected{background:#16a34a}
