@@ -237,6 +237,7 @@ def top_complaints():
         return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
 
 
+
 @api_bp.get("/trims")
 def trims():
     """Return trim/series complaint counts & percentages for a given Y/M/M.
@@ -261,53 +262,55 @@ def trims():
                 FROM AllCars
                 WHERE ModelYear = ? AND Make = ? AND Model = ?
                 LIMIT 1
-                """,
-                (year, make, model),
+                """
+                , (year, make, model)
             )
             row = cur.fetchone()
             if row:
-                group_id = row[0]
-        if not group_id:
-            return jsonify(ok=True, items=[])
+                group_id = row['GroupID']
+
+        if group_id is None:
+            return jsonify(ok=True, items=[], note="No GroupID for selection")
 
         # Read CSV from R2
         from ..services.r2 import get_bytes, R2Error
-        import csv, io
+        import csv, io, botocore
 
         key = f"ResourceFiles/{group_id}/{group_id}_ymmtscount.csv"
         try:
             raw = get_bytes(key)
-        except R2Error as e:
-            # Not found -> empty result is OK
-            return jsonify(ok=True, group_id=group_id, items=[])
+        except (R2Error, botocore.exceptions.ClientError):
+            # Treat missing or access errors as "no data"
+            return jsonify(ok=True, group_id=group_id, items=[], note=f"Missing R2 object: {key}")
 
-        f = io.StringIO(raw.decode("utf-8", errors="replace"))
-        reader = csv.DictReader(f)
-        items = []
-        for row in reader:
-            name = row.get("Name") or ""
-            # normalize field names as expected by UI
-            try:
-                count = int(float(row.get("Count", 0)))
-            except Exception:
-                count = 0
-            try:
-                pct = float(row.get("Percentage", 0))
-            except Exception:
-                pct = 0.0
-            items.append({
-                "name": name.strip(),
-                "count": count,
-                "percentage": pct,
-            })
+        try:
+            f = io.StringIO(raw.decode("utf-8", errors="replace"))
+            reader = csv.DictReader(f)
+            items = []
+            for row in reader:
+                name = (row.get("Name") or "").strip()
+                # Normalize "Count" and "Percentage"
+                vcount = row.get("Count", 0)
+                vpct = row.get("Percentage", 0)
+                try:
+                    count = int(float(vcount))
+                except Exception:
+                    count = 0
+                try:
+                    pct = float(vpct)
+                except Exception:
+                    pct = 0.0
+                items.append({"name": name, "count": count, "percentage": pct})
 
-        # Sort by count desc as a default
-        items.sort(key=lambda x: x["count"], reverse=True)
-        return jsonify(ok=True, group_id=group_id, items=items)
+            items.sort(key=lambda x: x["count"], reverse=True)
+            return jsonify(ok=True, group_id=group_id, key=key, items=items)
+        except Exception as parse_err:
+            # CSV parse issues -> return empty but with note
+            return jsonify(ok=True, group_id=group_id, key=key, items=[], note=f"CSV parse error: {parse_err}"), 200
+
     except Exception as e:
-        return jsonify(ok=False, error=f"/api/trims failed: {e}"), 500
-
-
+        # Return a more descriptive error (stringify fully)
+        return jsonify(ok=False, error=f"/api/trims failed: {repr(e)}"), 500
 @api_bp.get("/r2-check")
 def r2_check():
     """Diagnostic: read a specific R2 key and return its size and first bytes."""
