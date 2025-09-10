@@ -60,6 +60,7 @@
     .details-wrap { margin-top: 12px; }
     .details-wrap button { margin-right: 8px; }
     .details-panel {
+    /* shared panel styles */
       margin-top: 10px;
       padding: 12px;
       border: 1px solid var(--border);
@@ -68,6 +69,7 @@
       line-height: 1.5;}
     .details-panel p { margin: 0 0 8px; }
     .details-panel {
+    /* shared panel styles */
         text-align: left;
       }
 
@@ -77,7 +79,124 @@
         .tc-title { font-size: 18px; font-weight: 700; }
         .tc-percent { font-size: 16px; opacity: .85; margin-left: 8px; }
         .tc-summary { font-size: 14px; opacity: .9; margin-top: 6px; white-space: pre-wrap; }
-        </style>
+        
+    /* History panel specific */
+    .details-panel.history { padding: 16px; }
+    .history-inner { width: 100%; max-width: 820px; margin: 0 auto; }
+    canvas#historyChart { display:block; width:100%; height:320px; }
+
+  </style>
+        
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    // ----- History (Complaints by Year) -----
+    let historyChart = null;
+    async function fetchHistory(year, make, model){
+      const url = `/api/history?year=${encodeURIComponent(year)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
+      const r = await fetch(url);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }
+
+    function renderHistoryChart(items){
+      const ctx = document.getElementById('historyChart').getContext('2d');
+      const labels = items.map(it => it.year);
+      const actual = items.map(it => it.actual ?? null);
+      const expected = items.map(it => it.expected ?? null);
+
+      if(historyChart){
+        historyChart.destroy();
+      }
+      historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Actual Complaints',
+              data: actual,
+              borderWidth: 2,
+              fill: false,
+              tension: 0.2,
+              pointRadius: 2
+            },
+            {
+              label: 'Expected Complaints',
+              data: expected,
+              borderWidth: 2,
+              borderDash: [6, 4],
+              fill: false,
+              tension: 0.2,
+              pointRadius: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMin: 0,
+              ticks: { precision: 0 }
+            }
+          },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: { enabled: true }
+          },
+          animation: {
+            duration: 1200,
+            easing: 'easeOutCubic'
+          },
+          animations: {
+            y: { from: 0 }
+          }
+        }
+      });
+    }
+
+    if(historyBtn){
+      historyBtn.addEventListener('click', async () => {
+        try{
+          // toggle close behavior
+          if (!historyPanel.hidden && historyPanel.innerHTML.trim()) {
+            historyPanel.hidden = true;
+            return;
+          }
+          clearError();
+          historyBtn.disabled = true;
+
+          const y = yearSel.value, m = makeSel.value, mo = modelSel.value;
+          if(!y || !m || !mo){ return; }
+
+          // Ensure canvas exists (panel content may have been toggled away)
+          if(!document.getElementById('historyChart')){
+            historyPanel.innerHTML = '<div class="history-inner"><canvas id="historyChart" width="600" height="320"></canvas></div>';
+          }
+
+          const data = await fetchHistory(y, m, mo);
+          if(!data.ok){
+            showError(data.error || 'Failed to load history.');
+            return;
+          }
+          const items = data.items || [];
+          if(items.length === 0){
+            historyPanel.innerHTML = '<p class="muted">No history available for this selection.</p>';
+          }else{
+            renderHistoryChart(items);
+          }
+          historyPanel.hidden = false;
+        }catch(e){
+          console.error('history failed', e);
+          showError('Failed to load history.');
+        }finally{
+          historyBtn.disabled = false;
+        }
+      });
+    }
+
+  </script>
 </head>
 <body>
   {% from "macros/info_blurb.html" import info_blurb with context %}
@@ -123,6 +242,12 @@
     <div id="topComplaintsPanel" class="details-panel top-complaints" hidden></div>
     <button id="trimsBtn" type="button" disabled>Trims</button>
     <div id="trimsPanel" class="details-panel trims" hidden></div>
+    <button id="historyBtn" type="button" disabled>History</button>
+    <div id="historyPanel" class="details-panel history" hidden>
+      <div class="history-inner">
+        <canvas id="historyChart" width="600" height="320"></canvas>
+      </div>
+    </div>
   </div>
 
       </section>
@@ -144,6 +269,8 @@
     const detailsPanel = $('#detailsPanel');
     const topBtn      = $('#topComplaintsBtn');
     const trimsBtn    = $('#trimsBtn');
+    const historyBtn  = $('#historyBtn');
+    const historyPanel= $('#historyPanel');
     const trimsPanel  = $('#trimsPanel');
     const topPanel    = $('#topComplaintsPanel');
     const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
@@ -322,6 +449,7 @@ function animateScoreReels(containerEl, value){
           detailsPanel.hidden = true;
           if (topBtn) { topBtn.disabled = false; topPanel.hidden = true; topPanel.innerHTML=''; }
           if (trimsBtn) { trimsBtn.disabled = false; trimsPanel.hidden = true; trimsPanel.innerHTML=''; }
+          if (historyBtn) { historyBtn.disabled = false; historyPanel.hidden = true; historyPanel.innerHTML=''; }
           detailsPanel.innerHTML = '';
 
         }catch(e){
@@ -486,6 +614,115 @@ function animateScoreReels(containerEl, value){
           }
         });
       }
+  
+    // ----- History (Complaints by Year) -----
+    let historyChart = null;
+    async function fetchHistory(year, make, model){
+      const url = `/api/history?year=${encodeURIComponent(year)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
+      const r = await fetch(url);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }
+
+    function renderHistoryChart(items){
+      const ctx = document.getElementById('historyChart').getContext('2d');
+      const labels = items.map(it => it.year);
+      const actual = items.map(it => it.actual ?? null);
+      const expected = items.map(it => it.expected ?? null);
+
+      if(historyChart){
+        historyChart.destroy();
+      }
+      historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Actual Complaints',
+              data: actual,
+              borderWidth: 2,
+              fill: false,
+              tension: 0.2,
+              pointRadius: 2
+            },
+            {
+              label: 'Expected Complaints',
+              data: expected,
+              borderWidth: 2,
+              borderDash: [6, 4],
+              fill: false,
+              tension: 0.2,
+              pointRadius: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMin: 0,
+              ticks: { precision: 0 }
+            }
+          },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: { enabled: true }
+          },
+          animation: {
+            duration: 1200,
+            easing: 'easeOutCubic'
+          },
+          animations: {
+            y: { from: 0 }
+          }
+        }
+      });
+    }
+
+    if(historyBtn){
+      historyBtn.addEventListener('click', async () => {
+        try{
+          // toggle close behavior
+          if (!historyPanel.hidden && historyPanel.innerHTML.trim()) {
+            historyPanel.hidden = true;
+            return;
+          }
+          clearError();
+          historyBtn.disabled = true;
+
+          const y = yearSel.value, m = makeSel.value, mo = modelSel.value;
+          if(!y || !m || !mo){ return; }
+
+          // Ensure canvas exists (panel content may have been toggled away)
+          if(!document.getElementById('historyChart')){
+            historyPanel.innerHTML = '<div class="history-inner"><canvas id="historyChart" width="600" height="320"></canvas></div>';
+          }
+
+          const data = await fetchHistory(y, m, mo);
+          if(!data.ok){
+            showError(data.error || 'Failed to load history.');
+            return;
+          }
+          const items = data.items || [];
+          if(items.length === 0){
+            historyPanel.innerHTML = '<p class="muted">No history available for this selection.</p>';
+          }else{
+            renderHistoryChart(items);
+          }
+          historyPanel.hidden = false;
+        }catch(e){
+          console.error('history failed', e);
+          showError('Failed to load history.');
+        }finally{
+          historyBtn.disabled = false;
+        }
+      });
+    }
+
   </script>
 </body>
 </html>
