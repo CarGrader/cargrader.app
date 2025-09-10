@@ -121,6 +121,8 @@
     <div id="detailsPanel" class="details-panel" hidden></div>
     <button id="topComplaintsBtn" type="button" disabled>Top Complaints</button>
     <div id="topComplaintsPanel" class="details-panel top-complaints" hidden></div>
+    <button id="historyBtn" type="button" disabled>History</button>
+    <div id="historyPanel" class="details-panel history" hidden></div>
   </div>
 
       </section>
@@ -138,37 +140,13 @@
     const scoreEl  = $('#scoreVal');
     const certEl   = $('#certVal');
     const errEl    = $('#err');
-
-    function maybeEnableSecondaryButtons(){
-      const y  = document.querySelector('#year');
-      const m  = document.querySelector('#make');
-      const mo = document.querySelector('#model');
-      const hb = document.querySelector('#historyBtn');
-      const hp = document.querySelector('#historyPanel');
-      const tb = document.querySelector('#trimsBtn');
-      const tp = document.querySelector('#trimsPanel');
-      const ok = !!(y?.value && m?.value && mo?.value);
-      if (hb) { hb.disabled = !ok; if (!ok && hp){ hp.hidden = true; hp.innerHTML=''; } }
-      if (tb) { tb.disabled = !ok; if (!ok && tp){ tp.hidden = true; tp.innerHTML=''; } }
-    }
-    
     const detailsBtn   = $('#detailsBtn');
     const detailsPanel = $('#detailsPanel');
     const topBtn      = $('#topComplaintsBtn');
-    const trimsBtn    = $('#trimsBtn');
-    const trimsPanel  = $('#trimsPanel');
-    const historyBtn  = $('#historyBtn');
-    const historyPanel= $('#historyPanel');
     const topPanel    = $('#topComplaintsPanel');
     const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
     const nf1 = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
-
-    yearSel.addEventListener('change', maybeEnableSecondaryButtons);
-    makeSel.addEventListener('change', maybeEnableSecondaryButtons);
-    modelSel.addEventListener('change', maybeEnableSecondaryButtons);
-
-    maybeEnableSecondaryButtons();
 
     async function fetchDetails(year, make, model){
     const qs = new URLSearchParams({ year, make, model }).toString();
@@ -403,6 +381,141 @@ function animateScoreReels(containerEl, value){
     });   
   
       // Top Complaints
+      // History chart
+      if (historyBtn) {
+        historyBtn.addEventListener('click', async () => {
+          try {
+            if (!historyPanel.hidden && historyPanel.innerHTML.trim()) { historyPanel.hidden = true; return; }
+            const year  = yearSel.value;
+            const make  = makeSel.value;
+            const model = modelSel.value;
+            if (!year || !make || !model) return;
+
+            historyBtn.disabled = true;
+            historyPanel.innerHTML = '';
+
+            const qs = new URLSearchParams({year, make, model}).toString();
+            const data = await fetchJSON(`/api/history?${qs}`);
+            if (!data?.ok) throw new Error(data?.error || 'Request failed');
+
+            const items = Array.isArray(data.items) ? data.items : [];
+            if (!items.length){
+              historyPanel.innerHTML = '<p>No history data available.</p>';
+              historyPanel.hidden = false;
+              return;
+            }
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const W = 720, H = 280, m = {t:20,r:20,b:36,l:46};
+
+            const wrap = document.createElement('div');
+            wrap.className = 'history-wrap';
+            const legend = document.createElement('div');
+            legend.className = 'legend';
+            legend.innerHTML = '<span class="lg lg-actual"></span> Actual &nbsp;&nbsp; <span class="lg lg-expected"></span> Expected';
+            wrap.appendChild(legend);
+
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            svg.setAttribute('class', 'history-chart');
+
+            const years    = items.map(d => d.year);
+            const actuals  = items.map(d => Number(d.actual) || 0);
+            const expected = items.map(d => Number(d.expected) || 0);
+            const n = items.length;
+
+            const xMin = 0, xMax = Math.max(1, n-1);
+            const yMax = Math.max(1, ...actuals, ...expected);
+
+            const x = (i) => m.l + (i - xMin) / (xMax - xMin) * (W - m.l - m.r);
+            const y = (v) => m.t + (1 - (v / yMax)) * (H - m.t - m.b);
+            const y0 = y(0);
+
+            const axis = document.createElementNS(svgNS, 'g');
+            axis.setAttribute('class', 'axis');
+
+            const yAxis = document.createElementNS(svgNS, 'line');
+            yAxis.setAttribute('x1', m.l); yAxis.setAttribute('x2', m.l);
+            yAxis.setAttribute('y1', m.t); yAxis.setAttribute('y2', H - m.b);
+            axis.appendChild(yAxis);
+
+            const xAxis = document.createElementNS(svgNS, 'line');
+            xAxis.setAttribute('x1', m.l); xAxis.setAttribute('x2', W - m.r);
+            xAxis.setAttribute('y1', H - m.b); xAxis.setAttribute('y2', H - m.b);
+            axis.appendChild(xAxis);
+
+            years.forEach((yr, i) => {
+              const tx = document.createElementNS(svgNS, 'text');
+              tx.setAttribute('x', x(i));
+              tx.setAttribute('y', H - m.b + 18);
+              tx.setAttribute('text-anchor', 'middle');
+              tx.setAttribute('class', 'tick');
+              tx.textContent = String(yr);
+              axis.appendChild(tx);
+            });
+
+            [0,0.25,0.5,0.75,1].forEach(fr => {
+              const val = Math.round(yMax * fr);
+              const ty = y(val);
+              const tx = document.createElementNS(svgNS, 'text');
+              tx.setAttribute('x', m.l - 8);
+              tx.setAttribute('y', ty + 4);
+              tx.setAttribute('text-anchor', 'end');
+              tx.setAttribute('class', 'tick');
+              tx.textContent = val.toLocaleString();
+              axis.appendChild(tx);
+
+              const gl = document.createElementNS(svgNS, 'line');
+              gl.setAttribute('x1', m.l);
+              gl.setAttribute('x2', W - m.r);
+              gl.setAttribute('y1', ty);
+              gl.setAttribute('y2', ty);
+              gl.setAttribute('class','grid');
+              axis.appendChild(gl);
+            });
+
+            svg.appendChild(axis);
+
+            const pathActual   = document.createElementNS(svgNS, 'path');
+            const pathExpected = document.createElementNS(svgNS, 'path');
+            pathActual.setAttribute('class','line-actual');
+            pathExpected.setAttribute('class','line-expected');
+            svg.appendChild(pathExpected);
+            svg.appendChild(pathActual);
+
+            wrap.appendChild(svg);
+            historyPanel.appendChild(wrap);
+            historyPanel.hidden = false;
+
+            const duration = 900;
+            const t0 = performance.now();
+
+            function pathD(series, t){
+              let d = '';
+              for (let i=0;i<n;i++){
+                const xv = x(i);
+                const vy = y((series[i] || 0) * t);
+                d += (i===0 ? `M ${xv} ${y0}` : '') + ` L ${xv} ${vy}`;
+              }
+              return d;
+            }
+            function step(now){
+              const t = Math.min(1, (now - t0) / duration);
+              pathActual.setAttribute('d', pathD(actuals, t));
+              pathExpected.setAttribute('d', pathD(expected, t));
+              if (t < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+
+          } catch(e){
+            console.error('history failed', e);
+            showError('Failed to load history.');
+          } finally {
+            historyBtn.disabled = false;
+          }
+        });
+      }
+    
       if (topBtn) {
         topBtn.addEventListener('click', async () => {
           try{
