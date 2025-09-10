@@ -1,4 +1,3 @@
-
 /* CarGrader Redesign — 2025-09-10 */
 @font-face{
   font-family:'Fredoka';
@@ -22,22 +21,42 @@
 }
 
 :root{
-  --bg: #0f0b17;           /* deep purple-black from design */
-  --surface: #171228;      /* card background */
+  --bg: #0f0b17;
+  --surface: #171228;
   --text: #f5f8ff;
   --muted: #c9c7d9;
-  --primary: #3b1e6d;      /* purple */
+  --primary: #3b1e6d;
   --primary-600: #522e93;
-  --accent: #efc362;       /* yellow from banner */
+  --accent: #efc362;
   --accent-600: #d7ae52;
   --ring: rgba(239,195,98,.25);
   --border: #2a2046;
-  --gap: 16px;             /* uniform gap between boxes */
+  --gap: 16px;
   --radius: 16px;
 }
-/* === HERO OVERRIDES (title top-center, compact purple button underneath) === */
 
-/* Stack the hero content vertically and center it at the top */
+/* ===== Full-bleed Hero ===== */
+.hero{
+  position:relative;
+  width:100vw;
+  height:520px;
+  left:50%;
+  right:50%;
+  margin-left:-50vw;
+  margin-right:-50vw;
+  background:url('../img/banner.png') center/cover no-repeat;
+  border-bottom:1px solid var(--border);
+  box-shadow: 0 12px 36px rgba(0,0,0,.45);
+}
+@media (min-width: 1200px){
+  .hero{ height:600px; }
+}
+
+.hero__overlay{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 65%, rgba(0,0,0,.55) 100%);
+}
+
 .hero__inner{
   position:relative;
   height:100%;
@@ -46,23 +65,18 @@
   padding:24px;
   display:flex;
   flex-direction:column;
-  align-items:center;     /* center horizontally */
+  align-items:center;
   justify-content:flex-start;
-  gap:14px;               /* space between title and button */
+  gap:14px;
 }
 
-/* Big centered "CarGrader" at the very top */
+/* Big centered "CarGrader" at the top */
 .hero__brand{
-  /* reset earlier absolute placement */
-  position:static;
-  top:auto; left:auto; transform:none;
-
   margin:24px 0 0 0;
   text-align:center;
-
   font-family:'Fredoka', sans-serif;
   font-weight:700;
-  font-size:120px;        /* 2–3× bigger */
+  font-size:120px;
   letter-spacing:1px;
   color:#fff;
   text-shadow: 0 6px 24px rgba(0,0,0,.5);
@@ -74,93 +88,17 @@
   .hero__brand{ font-size:48px; }
 }
 
-/* Neutralize the old yellow/transparent style scoped to the hero */
-.hero .auth-btn{
-  border:1px solid transparent;
-  background:transparent;
-  color:inherit;
-  padding:8px 14px;
-  border-radius:999px;
-  font-weight:700;
-}
-
-/* Compact purple pill, centered directly under the title */
+/* Purple pill button just below the title */
 .hero__auth{
-  position:static;        /* flows below the title */
-  margin:0;
-
   background:var(--primary-600);
-  border-color:var(--primary-600);
+  border:1px solid var(--primary-600);
   color:#fff;
-
-  padding:8px 14px;       /* tight so it isn’t larger than the text */
+  padding:8px 18px;
+  font-weight:700;
   font-size:18px;
   border-radius:999px;
   box-shadow:0 6px 16px rgba(0,0,0,.28);
-}
-.hero__auth:hover{
-  background:var(--primary);
-  border-color:var(--primary);
-}
-
-
-/* ===== Full-bleed Hero ===== */
-.hero{
-  position:relative;
-  width:100vw;
-  height:520px;                /* adjust to match your PNG’s proportions */
-  left:50%;
-  right:50%;
-  margin-left:-50vw;           /* full-bleed outside .container */
-  margin-right:-50vw;
-  background:url('../img/banner.png') center/cover no-repeat;
-  border-bottom:1px solid var(--border);
-  box-shadow: 0 12px 36px rgba(0,0,0,.45);
-}
-@media (min-width: 1200px){
-  .hero{ height:600px; }       /* optional: a bit taller on big screens */
-}
-
-.hero__overlay{
-  position:absolute; inset:0;
-  background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 65%, rgba(0,0,0,.55) 100%);
-}
-
-.hero__brand{
-  position:absolute;
-  top:24px;                   /* near the top */
-  left:50%;                   /* center horizontally */
-  transform:translateX(-50%); /* true centering */
-  margin:0;
-  font-family:'Fredoka', sans-serif;
-  font-weight:700;
-  font-size:120px;            /* ~2–3x bigger than before */
-  letter-spacing:1px;
-  color:#fff;
-  text-shadow: 0 6px 24px rgba(0,0,0,.5);
-  text-align:center;
-}
-@media (max-width: 800px){
-  .hero__brand{ font-size:72px; }
-}
-@media (max-width: 500px){
-  .hero__brand{ font-size:48px; }
-}
-
-/* Sign Up/Login button bottom-left in purple */
-.hero__auth{
-  position:absolute;
-  bottom:24px; left:24px;
-  z-index:2;
-  border:1px solid var(--primary-600);
-  background:var(--primary-600);
-  color:#fff;
-  padding:12px 20px;
-  font-weight:700;
-  font-size:18px;
-  border-radius:12px;
-  backdrop-filter:none;       /* remove blur from old style */
-  box-shadow:0 6px 20px rgba(0,0,0,.35);
+  cursor:pointer;
 }
 .hero__auth:hover{
   background:var(--primary);
@@ -177,31 +115,6 @@ body{
 
 .container{
   max-width:1100px; margin:0 auto; padding:16px;
-}
-
-.topbar{
-  display:flex; justify-content:space-between; align-items:center;
-  padding: 8px 0 12px 0;
-}
-.brand{
-  display:flex; align-items:center; gap:12px;
-}
-.brand img{ width:52px; height:52px; border-radius:12px; object-fit:cover; }
-.brand h1{
-  margin:0; font-family:'Fredoka', sans-serif; font-weight:700; letter-spacing:.5px; font-size:28px;
-}
-
-.auth-btn{
-  border:1px solid var(--accent); background:transparent; color:var(--accent);
-  padding:10px 14px; border-radius:999px; font-weight:600; cursor:pointer;
-}
-.auth-btn:hover{ background:rgba(239,195,98,.1); }
-
-.banner{
-  width:100%; height:220px; border-radius:var(--radius);
-  background:url('../img/banner.png') center/cover no-repeat;
-  border:1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
 
 .panel{
