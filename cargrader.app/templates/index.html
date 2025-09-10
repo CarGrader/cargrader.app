@@ -97,68 +97,8 @@
       return r.json();
     }
 
-    function renderHistoryChart(items){
-      const ctx = document.getElementById('historyChart').getContext('2d');
-      const labels = items.map(it => it.year);
-      const actual = items.map(it => it.actual ?? null);
-      const expected = items.map(it => it.expected ?? null);
-
-      if(historyChart){
-        historyChart.destroy();
-      }
-      historyChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Actual Complaints',
-              data: actual,
-              borderWidth: 2,
-              fill: false,
-              tension: 0.2,
-              pointRadius: 2
-            },
-            {
-              label: 'Expected Complaints',
-              data: expected,
-              borderWidth: 2,
-              borderDash: [6, 4],
-              fill: false,
-              tension: 0.2,
-              pointRadius: 2
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              suggestedMin: 0,
-              ticks: { precision: 0 }
-            }
-          },
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { position: 'top' },
-            tooltip: { enabled: true }
-          },
-          animation: false,
-          animations: {
-              x: { duration: 0 },
-              y: {
-                from: (ctx) => ctx.chart.scales.y.getPixelForValue(0),
-                duration: 1200,
-                easing: 'easeOutCubic'
-              }
-            },}
-        }
-      });
-    }
-
-    if(historyBtn){
+    
+if(historyBtn){
       historyBtn.addEventListener('click', async () => {
         try{
           // toggle close behavior
@@ -617,8 +557,10 @@ function animateScoreReels(containerEl, value){
         });
       }
   
+    
     // ----- History (Complaints by Year) -----
     let historyChart = null;
+
     async function fetchHistory(year, make, model){
       const url = `/api/history?year=${encodeURIComponent(year)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
       const r = await fetch(url);
@@ -676,13 +618,13 @@ function animateScoreReels(containerEl, value){
           },
           animation: false,
           animations: {
-              x: { duration: 0 },
-              y: {
-                from: (ctx) => ctx.chart.scales.y.getPixelForValue(0),
-                duration: 1200,
-                easing: 'easeOutCubic'
-              }
-            },}
+            x: { duration: 0 },
+            y: {
+              from: (ctx) => ctx.chart.scales.y.getPixelForValue(0),
+              duration: 1200,
+              easing: 'easeOutCubic'
+            }
+          }
         }
       });
     }
@@ -690,7 +632,7 @@ function animateScoreReels(containerEl, value){
     if(historyBtn){
       historyBtn.addEventListener('click', async () => {
         try{
-          // toggle close behavior
+          // If already open, toggle closed
           if (!historyPanel.hidden && historyPanel.innerHTML.trim()) {
             historyPanel.hidden = true;
             return;
@@ -726,8 +668,7 @@ function animateScoreReels(containerEl, value){
         }
       });
     }
-
-  </script>
+</script>
 </body>
 </html>
 
