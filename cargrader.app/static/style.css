@@ -24,7 +24,12 @@
 }
 
 
-/* History chart */
+/* --- Trims table --- */
+.trims-table{width:100%;border-collapse:collapse;margin-top:8px}
+.trims-table th,.trims-table td{border-bottom:1px solid var(--border);text-align:left;padding:8px 10px}
+.trims-table th{font-weight:700}
+
+/* --- History chart --- */
 .history-wrap{margin-top:8px}
 .history-chart{width:100%;height:auto;display:block}
 .axis line{stroke:var(--border)}
