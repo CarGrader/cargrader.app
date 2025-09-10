@@ -23,9 +23,17 @@ const complaintsVal = document.getElementById('complaintsVal');
 
 async function loadYears(){
   try{
-    const years = await getJSON('/api/years');
-    yearSel.insertAdjacentHTML('beforeend', years.map(y=>`<option value="${y}">${y}</option>`).join(''));
-  }catch(e){ showError('Failed to load years.'); }
+    const resp = await getJSON('/api/years');     // resp is an object
+    const years = Array.isArray(resp) ? resp : (resp.years || []);
+    if (!years.length) throw new Error('No years');
+    yearSel.insertAdjacentHTML(
+      'beforeend',
+      years.map(y => `<option value="${y}">${y}</option>`).join('')
+    );
+  } catch (e) {
+    console.error('loadYears error:', e);
+    showError('Failed to load years.');
+  }
 }
 document.addEventListener('DOMContentLoaded', loadYears);
 
@@ -134,7 +142,7 @@ btn.addEventListener('click', async () => {
 
   // Top complaints
   try{
-    const top = await getJSON(`/api/top?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+    const top = await getJSON(`/api/top-complaints?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
     const items = (top.items||[]).slice(0,8);
     document.getElementById('topList').innerHTML = items.map(it => `<li>${it.component||it.name||'Unknown'} — ${it.count ?? ''}</li>`).join('');
   }catch(e){ document.getElementById('topList').innerHTML = '<li>No data.</li>'; }
