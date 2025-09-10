@@ -58,40 +58,45 @@
   background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 65%, rgba(0,0,0,.55) 100%);
 }
 
-.hero__inner{
-  position:relative;
-  height:100%;
-  max-width:1100px;
-  margin:0 auto;
-  padding:24px;
-  display:flex;
-  align-items:flex-end;        /* title near bottom like your mock */
-}
-
 .hero__brand{
+  position:absolute;
+  top:24px;                   /* near the top */
+  left:50%;                   /* center horizontally */
+  transform:translateX(-50%); /* true centering */
   margin:0;
   font-family:'Fredoka', sans-serif;
   font-weight:700;
-  font-size:56px;              /* tweak as needed to pixel-match the PNG */
-  letter-spacing:.5px;
+  font-size:120px;            /* ~2–3x bigger than before */
+  letter-spacing:1px;
   color:#fff;
-  text-shadow: 0 4px 18px rgba(0,0,0,.45);
+  text-shadow: 0 6px 24px rgba(0,0,0,.5);
+  text-align:center;
 }
-@media (max-width: 600px){
-  .hero__brand{ font-size:38px; }
+@media (max-width: 800px){
+  .hero__brand{ font-size:72px; }
+}
+@media (max-width: 500px){
+  .hero__brand{ font-size:48px; }
 }
 
+/* Sign Up/Login button bottom-left in purple */
 .hero__auth{
   position:absolute;
-  top:16px; right:24px;
+  bottom:24px; left:24px;
   z-index:2;
-  border:1px solid var(--accent);
-  background:rgba(0,0,0,.25);
+  border:1px solid var(--primary-600);
+  background:var(--primary-600);
   color:#fff;
-  backdrop-filter: blur(3px);
+  padding:12px 20px;
+  font-weight:700;
+  font-size:18px;
+  border-radius:12px;
+  backdrop-filter:none;       /* remove blur from old style */
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
 }
 .hero__auth:hover{
-  background:rgba(0,0,0,.4);
+  background:var(--primary);
+  border-color:var(--primary);
 }
 
 *{box-sizing:border-box}
