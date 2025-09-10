@@ -139,31 +139,35 @@
     const certEl   = $('#certVal');
     const errEl    = $('#err');
 
-    // init secondary buttons
-    maybeEnableSecondaryButtons();
-    
-
     function maybeEnableSecondaryButtons(){
+      const yearSel  = document.querySelector('#year');
+      const makeSel  = document.querySelector('#make');
+      const modelSel = document.querySelector('#model');
+      const hb = document.querySelector('#historyBtn');
+      const hp = document.querySelector('#historyPanel');
       const ok = !!(yearSel?.value && makeSel?.value && modelSel?.value);
-      if (historyBtn) {
-        historyBtn.disabled = !ok;
-        if (!ok) { historyPanel.hidden = true; historyPanel.innerHTML=''; }
+      if (hb) {
+        hb.disabled = !ok;
+        if (!ok && hp){ hp.hidden = true; hp.innerHTML=''; }
       }
     }
-    
+
     const detailsBtn   = $('#detailsBtn');
     const detailsPanel = $('#detailsPanel');
     const topBtn      = $('#topComplaintsBtn');
+    const historyBtn  = $('#historyBtn');
+    const historyPanel= $('#historyPanel');
     const topPanel    = $('#topComplaintsPanel');
     const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
     const nf1 = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 
-    
+    maybeEnableSecondaryButtons();
+
     yearSel.addEventListener('change', maybeEnableSecondaryButtons);
     makeSel.addEventListener('change', maybeEnableSecondaryButtons);
     modelSel.addEventListener('change', maybeEnableSecondaryButtons);
-    
+
     async function fetchDetails(year, make, model){
     const qs = new URLSearchParams({ year, make, model }).toString();
     return fetchJSON(`/api/details?${qs}`);
