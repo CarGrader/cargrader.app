@@ -1,23 +1,24 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, send_from_directory, current_app
+from pathlib import Path
 
 public_bp = Blueprint("public", __name__)
 
-@public_bp.get("/")
+@public_bp.route("/")
 def home():
-    # Your existing landing page (if you had index.html in project root, move it into templates/)
+    """Render the homepage."""
     return render_template("index.html")
 
-from flask import Blueprint, render_template, current_app, send_from_directory
-import os
-
-public_bp = Blueprint("public", __name__)
-
-@public_bp.get("/")
-def home():
-    return render_template("index.html")
-
-@public_bp.get("/favicon.ico")
+@public_bp.get("/favicon.ico", endpoint="favicon")
 def favicon():
-    static_dir = os.path.join(os.path.dirname(current_app.root_path), "static")
-    return send_from_directory(static_dir, "favicon.ico", mimetype="image/vnd.microsoft.icon")
-
+    """
+    Serve favicon for browsers.
+    Looks in static/img/ for favicon.png or favicon.ico.
+    """
+    static_img = Path(current_app.static_folder) / "img"
+    # Prefer .png, fallback to .ico
+    for name, mime in [("favicon.png", "image/png"), ("favicon.ico", "image/x-icon")]:
+        fpath = static_img / name
+        if fpath.exists():
+            return send_from_directory(static_img, name, mimetype=mime)
+    # No favicon found → return 404
+    return ("", 404)
