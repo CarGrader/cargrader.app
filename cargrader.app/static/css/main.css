@@ -99,6 +99,9 @@
   border-radius:999px;
   box-shadow:0 6px 16px rgba(0,0,0,.28);
   cursor:pointer;
+
+  width:auto;            /* shrink-wrap to text */
+  display:inline-block;  /* no full-width flex growth */
 }
 .hero__auth:hover{
   background:var(--primary);
