@@ -229,4 +229,4 @@ btn.addEventListener('click', async () => {
     const ctx = cv.getContext('2d');
     drawHistoryChart(ctx, items);
   }catch(e){ /* no-op */ }
-}););
+});
