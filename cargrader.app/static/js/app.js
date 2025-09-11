@@ -255,19 +255,16 @@ btn.addEventListener('click', async () => {
     let line2 = '';
     if (rel != null && Number(rel) > 0) {
       const r = Number(rel);
-      if (r < 1) {
+      // Treat ratios within ±5% of 1.0 as "typical"
+      if (r >= 0.95 && r <= 1.05) {
+        line2 = `According to our data this is very typical for this car's age and sales volume`;
+      } else if (r < 1) {
         const x = (1 / r).toFixed(1);
         line2 = `According to our data that is ${x} times more than what is expected for this car's age and sales volume`;
-      } else if (r > 1) {
+      } else { // r > 1
         const x = r.toFixed(1);
         line2 = `According to our data that is ${x} times less than what is expected for this car's age and sales volume`;
-      } else {
-        // r === 1 → exactly expected
-        line2 = `According to our data that is 1.0 times what is expected for this car's age and sales volume`;
       }
-    } else {
-      line2 = `According to our data we don't have enough information to compare this car to what is expected for its age and sales volume`;
-    }
   
     // Write both lines into the Details panel.
     // Prefer a dedicated container if you have one; otherwise use #detailsText.
