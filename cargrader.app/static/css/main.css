@@ -273,3 +273,73 @@ ul.simple{ margin:0; padding-left:18px; }
 .controls select option[value=""]{
   color: rgba(255,255,255,.7);
 }
+/* === Results (Score area) === */
+.results.hero-centered{
+  max-width: 900px;
+  margin: 48px auto 0;
+  text-align: center;
+}
+
+.results__title{
+  color:#fff;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size: clamp(32px, 5vw, 56px); /* big, responsive */
+  margin: 36px 0 12px 0;
+  letter-spacing:.2px;
+}
+
+.results__label{
+  color: var(--primary-600);
+  font-weight:800;
+  font-size: clamp(16px, 2vw, 24px); /* matches Canva “Score” / “Out of 100” size */
+  margin: 8px 0;
+}
+
+.results__value{
+  color:#fff;
+  font-family:'Fredoka', sans-serif;
+  font-weight:800;
+  font-size: clamp(72px, 12vw, 160px); /* very large white number */
+  line-height: 1.05;
+  margin: 6px 0 6px 0;
+  text-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
+
+.results__certainty{
+  display:inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.results__certainty-btn{
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary-600);  /* purple word */
+  font-weight: 800;
+  font-size: clamp(18px, 2vw, 28px);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.results__certainty-btn:hover{
+  color: var(--primary);
+}
+
+.results__certainty-pct{
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(18px, 2vw, 28px);
+}
+
+.results__blurb{
+  margin: 14px auto 0;
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+}
