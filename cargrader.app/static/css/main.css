@@ -131,7 +131,11 @@ body{
 }
 
 .controls{
-  display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;
+  display:grid;
+  grid-template-columns: 1fr;     /* stack vertically */
+  gap: 18px;
+  max-width: 560px;               /* comfortable width like your mock */
+  margin: 24px auto 0;            /* center the whole block */
 }
 label{ font-weight:600; font-size:14px; color:var(--muted); display:block; margin:0 0 6px; }
 select, button, input{
@@ -180,4 +184,64 @@ ul.simple{ margin:0; padding-left:18px; }
 .badge{
   display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid var(--border);
   color:var(--muted); font-size:12px;
+}
+/* Purple-outlined selects on black */
+.controls select{
+  width: 100%;
+  background: transparent;            /* black background shows through */
+  color: #fff;
+  border: 2px solid var(--primary-600); /* solid purple outline */
+  border-radius: 10px;
+  padding: 12px 14px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Focus glow in your purple family */
+.controls select:focus{
+  box-shadow: 0 0 0 3px rgba(82, 46, 147, 0.35);
+  border-color: var(--primary-600);
+}
+
+/* Label above-left, slightly bolder */
+.controls label{
+  display:block;
+  color:#fff;
+  font-weight:700;
+  font-size:16px;
+  margin-bottom:6px;
+}
+.btn-get{
+  display:block;
+  margin: 6px auto 0;              /* centers horizontally */
+  background: var(--primary-600);
+  border: 1px solid var(--primary-600);
+  color:#fff;
+  font-weight:800;
+  font-size:18px;                  /* a bit larger */
+  padding:12px 22px;               /* taller/wider */
+  border-radius:999px;             /* pill */
+  box-shadow:0 6px 16px rgba(0,0,0,.28);
+  cursor:pointer;
+  width: fit-content;              /* prevents the “super wide” button */
+}
+.btn-get:hover{
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.btn-get:active{ transform: translateY(1px); }
+
+/* Keep placeholder/disabled states readable */
+.controls select:disabled{
+  border-color: var(--border);
+  color: rgba(255,255,255,.7);
+  cursor: not-allowed;
+}
+
+/* If your first option is a placeholder, dim it */
+.controls select option[disabled],
+.controls select option[value=""]{
+  color: rgba(255,255,255,.7);
 }
