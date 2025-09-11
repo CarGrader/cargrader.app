@@ -21,6 +21,14 @@ const scoreVal = document.getElementById('scoreVal');
 const certVal = document.getElementById('certVal');
 const complaintsVal = document.getElementById('complaintsVal');
 
+let __blurbsCache = null;
+async function loadBlurbs(){
+  if (__blurbsCache) return __blurbsCache;
+  const r = await fetch('/static/blurbs.json');
+  __blurbsCache = r.ok ? await r.json() : {};
+  return __blurbsCache;
+}
+
 async function loadYears(){
   try{
     const resp = await getJSON('/api/years');     // resp is an object
@@ -180,6 +188,27 @@ btn.addEventListener('click', async () => {
     }
 
     if (resultsSection) resultsSection.hidden = false;
+    // === Certainty blurb toggle (inside try) ===
+    const certaintyBtn   = document.getElementById('certaintyToggle');
+    const certaintyBlurb = document.getElementById('certaintyBlurb');
+    
+    if (certaintyBtn && certaintyBlurb){
+      certaintyBtn.onclick = async () => {
+        const blurbs = await loadBlurbs();
+        const text =
+          blurbs?.certainty ??
+          blurbs?.CERTAINTY ??
+          blurbs?.certainty_blurb ??
+          'Info coming soon.';
+        if (certaintyBlurb.hidden){
+          certaintyBlurb.textContent = text;
+          certaintyBlurb.hidden = false;
+        } else {
+          certaintyBlurb.hidden = true;
+        }
+      };
+    }
+
   } catch (_) {
     /* no-op for UI update */
   }
