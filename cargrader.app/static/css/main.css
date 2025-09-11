@@ -122,8 +122,11 @@ body{
 }
 
 .panel{
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:18px; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  background: transparent; 
+  border: 2px solid var(--primary-600); /* thin purple outline */
+  border-radius: var(--radius);
+  padding:18px;
+  box-shadow: none;  /* remove heavy shadow */
 }
 .grid{ display:grid; grid-template-columns: 1fr; gap: var(--gap); }
 @media (min-width: 980px){
@@ -161,8 +164,8 @@ select:focus, input:focus{ box-shadow:0 0 0 6px var(--ring); border-color:var(--
 .box{
   border-radius: var(--radius);
   overflow: clip;
-  border:1px solid var(--border);
-  background:var(--surface);
+  background: transparent;
+  border: 2px solid var(--primary-600); /* same purple outline as selects */
 }
 .box + .box{ margin-top: var(--gap); }
 .box__header{
