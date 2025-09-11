@@ -179,7 +179,7 @@ select:focus, input:focus{ box-shadow:0 0 0 6px var(--ring); border-color:var(--
 }
 .box__content{ padding: 16px 18px 20px 18px; display:none; }
 .box.open .box__content{ display:block; }
-.box.open .box__toggle{ color:#000; background:var(--accent); border-color:var(--accent); }
+.box.open .box__toggle{ color:#fff; background:var(--primary-600); border-color:var(--primary-600); }
 
 ul.simple{ margin:0; padding-left:18px; }
 .err{ margin:8px 0 0 0; color:#ffb3b3; display:none; }
