@@ -232,49 +232,47 @@ btn.addEventListener('click', async () => {
 
   // --- 2) Continue loading the other panels using your existing endpoints ---
   // Details (complaints, rel_ratio, etc.) — NOTE: we DO NOT compute score here anymore.
-  try {
-    const d = await getJSON(`/api/details?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+ try {
+  const d = await getJSON(`/api/details?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
 
   // Pull fields (support either camelCase or snake_case)
-    const modelYear = d.ModelYear ?? d.year ?? y;
-    const makeName  = d.Make      ?? d.make ?? make;
-    const modelName = d.Model     ?? d.model ?? model;
-    const count     = d.ComplaintCount ?? d.complaint_count ?? d.Count ?? null;
-    const rel       = d.RelRatio  ?? d.rel_ratio ?? null;
-  
-    // Build the two sentences
-    // Line 1: "The [Year] [Make] [Model] has received [Count] complaints"
-    const line1 = (count != null)
-      ? `The ${modelYear} ${makeName} ${modelName} has received ${count} complaints`
-      : `The ${modelYear} ${makeName} ${modelName} has received — complaints`;
-  
-    // Line 2 uses RelRatio logic:
-    // If RelRatio < 1: X = 1/RelRatio and say 'X times more than ...'
-    // If RelRatio > 1: X = RelRatio and say 'X times less than ...'
-    // One decimal place (e.g., 2.3)
-    let line2 = '';
-    if (rel != null && Number(rel) > 0) {
-      const r = Number(rel);
-      // Treat ratios within ±5% of 1.0 as "typical"
-      if (r >= 0.95 && r <= 1.05) {
-        line2 = `According to our data this is very typical for this car's age and sales volume`;
-      } else if (r < 1) {
-        const x = (1 / r).toFixed(1);
-        line2 = `According to our data that is ${x} times more than what is expected for this car's age and sales volume`;
-      } else { // r > 1
-        const x = r.toFixed(1);
-        line2 = `According to our data that is ${x} times less than what is expected for this car's age and sales volume`;
-      }
-  
-    // Write both lines into the Details panel.
-    // Prefer a dedicated container if you have one; otherwise use #detailsText.
-    const detailsEl = document.getElementById('detailsText') || document.getElementById('detailsPanel');
-    if (detailsEl) {
-      detailsEl.innerHTML = `
-        <p>${line1}</p>
-        <p>${line2}</p>
-      `;
+  const modelYear = d.ModelYear ?? d.year ?? y;
+  const makeName  = d.Make      ?? d.make ?? make;
+  const modelName = d.Model     ?? d.model ?? model;
+  const count     = d.ComplaintCount ?? d.complaint_count ?? d.Count ?? null;
+  const rel       = d.RelRatio  ?? d.rel_ratio ?? null;
+
+  // Line 1
+  const countText = (count != null) ? Number(count).toLocaleString() : '—';
+  const line1 = `The ${modelYear} ${makeName} ${modelName} has received ${countText} complaints`;
+
+  // Line 2
+  let line2 = '';
+  if (rel != null && Number(rel) > 0) {
+    const r = Number(rel);
+    // Treat ratios within ±5% of 1.0 as "typical"
+    if (r >= 0.95 && r <= 1.05) {
+      line2 = `According to our data this is very typical for this car's age and sales volume`;
+    } else if (r < 1) {
+      const x = (1 / r).toFixed(1);
+      line2 = `According to our data that is ${x} times more than what is expected for this car's age and sales volume`;
+    } else { // r > 1
+      const x = r.toFixed(1);
+      line2 = `According to our data that is ${x} times less than what is expected for this car's age and sales volume`;
     }
+  } else {
+    line2 = `According to our data we don't have enough information to compare this car to what is expected for its age and sales volume`;
+  }
+
+  // Write both lines into the Details panel
+  const detailsEl = document.getElementById('detailsText') || document.getElementById('detailsPanel');
+  if (detailsEl) {
+    detailsEl.innerHTML = `
+      <p>${line1}</p>
+      <p>${line2}</p>
+    `;
+  }
+
   } catch (e) {
     // details is optional for the main score UI; do not block other loads
   }
