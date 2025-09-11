@@ -1,114 +1,232 @@
-// ========== CarGrader app.js (focused results + accordion) ==========
 
-// ---- helpers ----
-function pickNumber(obj, keys, fallback = null){
-  for (const k of keys){
-    if (obj && Object.prototype.hasOwnProperty.call(obj, k)){
-      const v = Number(obj[k]);
-      if (!Number.isNaN(v)) return v;
-    }
-  }
-  return fallback;
+async function getJSON(url){
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
 }
 
-async function tryFetchJsonSequential(urls){
-  for (const u of urls){
-    try{
-      const r = await fetch(u);
-      if (r.ok) return await r.json();
-    }catch(_){} // ignore and try next
-  }
-  return null;
+function showError(msg){
+  const el = document.getElementById('err');
+  el.textContent = msg || 'Something went wrong.';
+  el.style.display = 'block';
 }
+function clearError(){ const el = document.getElementById('err'); el.style.display='none'; el.textContent=''; }
 
-function fmtPct(n){
-  if (n == null) return '—';
-  const pct = (n <= 1 ? (n*100) : n);
-  return `${Math.round(pct)}%`;
-}
-
-// ---- dom refs ----
-const yearSel  = document.getElementById('year');
-const makeSel  = document.getElementById('make');
+const yearSel = document.getElementById('year');
+const makeSel = document.getElementById('make');
 const modelSel = document.getElementById('model');
-const checkBtn = document.getElementById('checkBtn');
+const btn = document.getElementById('checkBtn');
+const result = document.getElementById('result');
+const scoreVal = document.getElementById('scoreVal');
+const certVal = document.getElementById('certVal');
+const complaintsVal = document.getElementById('complaintsVal');
 
-const resultsSection = document.getElementById('resultsSection');
-const resultTitle    = document.getElementById('resultTitle');
-const scoreValueEl   = document.getElementById('scoreValue');
-const certaintyPctEl = document.getElementById('certaintyPct');
-const certaintyBtn   = document.getElementById('certaintyToggle');
-const certaintyBlurb = document.getElementById('certaintyBlurb');
-
-let blurbsCache = null;
-async function loadBlurbs(){
-  if (blurbsCache) return blurbsCache;
-  const r = await fetch('/static/blurbs.json');
-  if (r.ok){
-    blurbsCache = await r.json();
-    return blurbsCache;
+async function loadYears(){
+  try{
+    const resp = await getJSON('/api/years');     // resp is an object
+    const years = Array.isArray(resp) ? resp : (resp.years || []);
+    if (!years.length) throw new Error('No years');
+    yearSel.insertAdjacentHTML(
+      'beforeend',
+      years.map(y => `<option value="${y}">${y}</option>`).join('')
+    );
+  } catch (e) {
+    console.error('loadYears error:', e);
+    showError('Failed to load years.');
   }
-  return {};
 }
+document.addEventListener('DOMContentLoaded', loadYears);
 
-// ---- get results ----
-checkBtn?.addEventListener('click', async () => {
-  const year  = yearSel?.value;
-  const make  = makeSel?.value;
-  const model = modelSel?.value;
-  if (!year || !make || !model) return;
+// MAKES
+yearSel.addEventListener('change', async () => {
+  try{
+    clearError();
+    makeSel.disabled = true; modelSel.disabled = true; btn.disabled = true;
+    makeSel.innerHTML = '<option value="">Select...</option>';
+    modelSel.innerHTML = '<option value="">Select...</option>';
+    if(!yearSel.value) return;
 
-  checkBtn.disabled = true;
-
-  const qs = `year=${encodeURIComponent(year)}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
-  const urls = [
-    `/api/details?${qs}`,  // old known-good
-    `/api/score?${qs}`,    // alt route
-    `/api/grade?${qs}`,    // alt route
-  ];
-
-  const data = await tryFetchJsonSequential(urls);
-  checkBtn.disabled = false;
-  if (!data) return;
-
-  const score = pickNumber(
-    data,
-    ['score','Score','sigscore','y_value','grade_numeric'],
-    null
-  );
-  const certainty = pickNumber(
-    data,
-    ['certainty','certainty_pct','certainty_percent','certaintyFactor','certainty_factor'],
-    null
-  );
-
-  resultTitle.textContent = `${year} ${make} ${model}`;
-  scoreValueEl.textContent = (score != null) ? Number(score).toFixed(0) : '00';
-  certaintyPctEl.textContent = fmtPct(certainty);
-
-  if (resultsSection) resultsSection.hidden = false;
-
-  if (certaintyBtn){
-    certaintyBtn.onclick = async () => {
-      const blurbs = await loadBlurbs();
-      const text = blurbs?.certainty || blurbs?.CERTAINTY || 'Info coming soon.';
-      if (certaintyBlurb.hidden){
-        certaintyBlurb.textContent = text;
-        certaintyBlurb.hidden = false;
-      }else{
-        certaintyBlurb.hidden = true;
-      }
-    };
+    const resp = await getJSON(`/api/makes?year=${yearSel.value}`);
+    const makes = Array.isArray(resp) ? resp : (resp.makes || []);
+    if (!makes.length) throw new Error('No makes');
+    makeSel.insertAdjacentHTML('beforeend', makes.map(m=>`<option value="${m}">${m}</option>`).join(''));
+    makeSel.disabled = false;
+  }catch(e){
+    console.error('load makes error:', e);
+    showError('Failed to load makes.');
   }
 });
 
-// ---- accordion for details/top complaints/trims/history ----
-document.querySelectorAll('.box__header').forEach(header => {
-  header.addEventListener('click', () => {
-    const box = header.closest('.box');
-    const toggle = header.querySelector('.box__toggle');
-    const willOpen = !box.classList.contains('open');
-    box.classList.toggle('open', willOpen);
-    if (toggle) toggle.textContent = willOpen ? '−' : '+';
+// MODELS
+makeSel.addEventListener('change', async () => {
+  try{
+    clearError();
+    modelSel.disabled = true; btn.disabled = true;
+    modelSel.innerHTML = '<option value="">Select...</option>';
+    if(!makeSel.value) return;
+
+    const resp = await getJSON(
+      `/api/models?year=${yearSel.value}&make=${encodeURIComponent(makeSel.value)}`
+    );
+    const models = Array.isArray(resp) ? resp : (resp.models || []);
+    if (!models.length) throw new Error('No models');
+    modelSel.insertAdjacentHTML('beforeend', models.map(m=>`<option value="${m}">${m}</option>`).join(''));
+    modelSel.disabled = false;
+  }catch(e){
+    console.error('load models error:', e);
+    showError('Failed to load models.');
+  }
+});
+
+modelSel.addEventListener('change', () => { btn.disabled = !(yearSel.value && makeSel.value && modelSel.value); });
+
+// Collapsible logic (+ / -)
+document.querySelectorAll('.box__header').forEach(h => {
+  h.addEventListener('click', () => {
+    const sel = h.getAttribute('data-toggle');
+    const box = document.querySelector(sel);
+    if(!box) return;
+    const open = box.classList.toggle('open');
+    const t = h.querySelector('.box__toggle');
+    if(t) t.textContent = open ? '-' : '+';
   });
 });
+
+// Minimal history chart using Canvas 2D with rise-from-zero animation
+function drawHistoryChart(ctx, data){
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(!data || data.length===0){ return; }
+  const pad = 24;
+  const xs = data.map(d=>d.year);
+  const ysA = data.map(d=>d.actual||0);
+  const ysE = data.map(d=>d.expected||0);
+  const maxY = Math.max(10, ...ysA, ...ysE);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const x = v => pad + (W-2*pad) * (v-minX)/(maxX-minX || 1);
+  const y = v => H - pad - (H-2*pad)*(v/maxY);
+
+  let t = 0, steps = 45;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    // axes
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#ffffff';
+    ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(W-pad, H-pad); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(pad, pad); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // helper to draw line
+    function path(vals, stroke){
+      ctx.beginPath();
+      vals.forEach((v,i)=>{
+        const xv = x(xs[i]);
+        const yv = y(v * (t/steps));
+        if(i===0) ctx.moveTo(xv, yv); else ctx.lineTo(xv, yv);
+      });
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    path(ysE, '#efc362'); // expected (accent)
+    path(ysA, '#8f78d1'); // actual (purple tint)
+
+    if(t<steps){ t++; requestAnimationFrame(frame); }
+  }
+  frame();
+}
+
+btn.addEventListener('click', async () => {
+  clearError();
+  const y = yearSel.value, make = makeSel.value, model = modelSel.value;
+  if(!(y && make && model)) return;
+
+  // Show centered Canva-style results and fetch correct values from old-good endpoint
+  try{
+    const qs = `year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
+    // Prefer the same endpoint your older code used
+    const d = await getJSON(`/api/details?${qs}`);
+
+    // Normalize score/certainty (preserve old behavior)
+    const score = (d.score != null) ? d.score :
+                  (d.rel_ratio != null ? (100*Math.max(0,1-d.rel_ratio)) : null);
+    const cert  = (d.certainty != null) ? d.certainty :
+                  (d.certainty_pct != null ? d.certainty_pct :
+                  (d.certainty_percent != null ? d.certainty_percent : null));
+
+    // Update new centered UI
+    const resultsSection = document.getElementById('resultsSection');
+    const resultTitle    = document.getElementById('resultTitle');
+    const scoreValueEl   = document.getElementById('scoreValue');
+    const certaintyPctEl = document.getElementById('certaintyPct');
+    const certaintyBtn   = document.getElementById('certaintyToggle');
+    const certaintyBlurb = document.getElementById('certaintyBlurb');
+
+    if (resultTitle)    resultTitle.textContent = `${y} ${make} ${model}`;
+    if (scoreValueEl)   scoreValueEl.textContent = (score!=null) ? Number(score).toFixed(0) : '00';
+    if (certaintyPctEl) certaintyPctEl.textContent = (cert!=null) ? `${Math.round(cert<=1? cert*100: cert)}%` : '—';
+    if (resultsSection) resultsSection.hidden = false;
+
+    // Old summary text (keep if element still exists)
+    const detailsText = document.getElementById('detailsText');
+    if(detailsText){
+      detailsText.textContent =
+        `${d.ModelYear || y} ${d.Make || make} ${d.Model || model}... • Complaints: ${d.ComplaintCount ?? d.complaint_count ?? '—'}`;
+    }
+
+    // Wire certainty blurb toggle from /static/blurbs.json
+    if (certaintyBtn){
+      certaintyBtn.onclick = async () => {
+        try{
+          const r = await fetch('/static/blurbs.json');
+          if(r.ok){
+            const blurbs = await r.json();
+            const text = blurbs?.certainty || blurbs?.CERTAINTY || 'Info coming soon.';
+            if (certaintyBlurb){
+              if (certaintyBlurb.hidden){
+                certaintyBlurb.textContent = text;
+                certaintyBlurb.hidden = false;
+              } else {
+                certaintyBlurb.hidden = true;
+              }
+            }
+          }
+        }catch(_){ /* ignore */ }
+      };
+    }
+
+  }catch(e){
+    showError('No grade found for that selection.');
+    const resultsSection = document.getElementById('resultsSection');
+    if (resultsSection) resultsSection.hidden = true;
+  }
+
+  // --- Existing sections below preserved ---
+
+  // Top complaints
+  try{
+    const top = await getJSON(`/api/top-complaints?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+    const items = (top.items||[]).slice(0,8);
+    document.getElementById('topList').innerHTML = items.map(it=>`<li>${it.component||it.name||'Unknown'} — ${it.count ?? ''}</li>`).join('');
+  }catch(e){ document.getElementById('topList').innerHTML = '<li>No data.</li>'; }
+
+  // Trims
+  try{
+    const tr = await getJSON(`/api/trims?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+    const items = (tr.items||[]).sort((a,b)=> (b.count||0)-(a.count||0));
+    document.getElementById('trimsList').innerHTML = items.map(it=>`<li>${it.trim||it.name||'Unknown'} — ${it.percentage ?? ''}% (${it.count ?? ''})</li>`).join('');
+  }catch(e){ document.getElementById('trimsList').innerHTML = '<li>No data.</li>'; }
+
+  // History chart
+  try{
+    const hist = await getJSON(`/api/history?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+    const items = hist.items || [];
+    const note = document.getElementById('historyNote');
+    if(hist.note){ note.textContent = hist.note; note.style.display='inline-block'; } else { note.style.display='none'; }
+    const cv = document.getElementById('historyChart');
+    // ensure crisp width
+    cv.width = cv.clientWidth || 740;
+    const ctx = cv.getContext('2d');
+    drawHistoryChart(ctx, items);
+  }catch(e){ /* no-op */ }
+}););
