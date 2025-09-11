@@ -216,6 +216,31 @@ ul.simple{ margin:0; padding-left:18px; }
   font-size:16px;
   margin-bottom:6px;
 }
+/* === Dropdown list (the opened menu) ===
+   Make options readable on a dark theme */
+.controls select option{
+  background:#000;   /* black dropdown panel */
+  color:#fff;        /* white text */
+}
+
+/* Optional: purple highlight when hovering/selected (browser support varies) */
+.controls select option:hover,
+.controls select option:checked{
+  background: var(--primary-600);
+  color:#fff;
+}
+/* Dim placeholder options so they look like placeholders */
+.controls select option[disabled],
+.controls select option[value=""]{
+  color: rgba(255,255,255,.7);
+}
+
+/* Keep disabled selects obviously disabled */
+.controls select:disabled{
+  border-color: var(--border);
+  color: rgba(255,255,255,.7);
+  cursor: not-allowed;
+}
 .btn-get{
   display:block;
   margin: 6px auto 0;              /* centers horizontally */
