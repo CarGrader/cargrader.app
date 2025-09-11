@@ -46,20 +46,29 @@
             </div>
           </div>
         <p id="err" class="err"></p>
-        <div id="result" class="scorecard" style="margin-top:16px; display:none">
-          <div class="kpi">
-            <div class="label">Score</div>
-            <div id="scoreVal" class="value">—</div>
+        <!-- RESULTS — centered, Canva-style -->
+        <section id="resultsSection" class="results hero-centered" hidden>
+          <!-- Large white Y/M/M -->
+          <h2 id="resultTitle" class="results__title">Year Make Model</h2>
+        
+          <!-- Purple label -->
+          <div class="results__label">Score</div>
+        
+          <!-- Very large white number -->
+          <div id="scoreValue" class="results__value">00</div>
+        
+          <!-- Purple label same size as "Score" -->
+          <div class="results__label">Out of 100</div>
+        
+          <!-- Certainty line: "Certainty" is the button; % is plain text next to it -->
+          <div class="results__certainty">
+            <button id="certaintyToggle" class="results__certainty-btn" type="button">Certainty</button>
+            <span id="certaintyPct" class="results__certainty-pct">0%</span>
           </div>
-          <div class="kpi">
-            <div class="label">Certainty</div>
-            <div id="certVal" class="value">—</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Complaints</div>
-            <div id="complaintsVal" class="value">—</div>
-          </div>
-        </div>
+        
+          <!-- Blurb from /static/blurbs.json appears here when Certainty is clicked -->
+          <div id="certaintyBlurb" class="results__blurb" hidden></div>
+        </section>
       </div>
 
       <!-- Collapsible Boxes with + / - toggles -->
@@ -109,6 +118,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
