@@ -138,95 +138,118 @@ function drawHistoryChart(ctx, data){
 
 btn.addEventListener('click', async () => {
   clearError();
-  const y = yearSel.value, make = makeSel.value, model = modelSel.value;
-  if(!(y && make && model)) return;
 
-  // Show centered Canva-style results and fetch correct values from old-good endpoint
-  try{
-    const qs = `year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
-    // Prefer the same endpoint your older code used
-    const d = await getJSON(`/api/details?${qs}`);
+  const y = yearSel.value;
+  const make = makeSel.value;
+  const model = modelSel.value;
+  if (!(y && make && model)) return;
 
-    // Normalize score/certainty (preserve old behavior)
-    const score = (d.score != null) ? d.score :
-                  (d.rel_ratio != null ? (100*Math.max(0,1-d.rel_ratio)) : null);
-    const cert  = (d.certainty != null) ? d.certainty :
-                  (d.certainty_pct != null ? d.certainty_pct :
-                  (d.certainty_percent != null ? d.certainty_percent : null));
+  // --- 1) Read canonical Score + Certainty directly from AllCars via /api/score ---
+  let score = null;
+  let certainty = null;
+  let groupId = null;
 
-    // Update new centered UI
-    const resultsSection = document.getElementById('resultsSection');
-    const resultTitle    = document.getElementById('resultTitle');
-    const scoreValueEl   = document.getElementById('scoreValue');
-    const certaintyPctEl = document.getElementById('certaintyPct');
-    const certaintyBtn   = document.getElementById('certaintyToggle');
-    const certaintyBlurb = document.getElementById('certaintyBlurb');
-
-    if (resultTitle)    resultTitle.textContent = `${y} ${make} ${model}`;
-    if (scoreValueEl)   scoreValueEl.textContent = (score!=null) ? Number(score).toFixed(0) : '00';
-    if (certaintyPctEl) certaintyPctEl.textContent = (cert!=null) ? `${Math.round(cert<=1? cert*100: cert)}%` : '—';
-    if (resultsSection) resultsSection.hidden = false;
-
-    // Old summary text (keep if element still exists)
-    const detailsText = document.getElementById('detailsText');
-    if(detailsText){
-      detailsText.textContent =
-        `${d.ModelYear || y} ${d.Make || make} ${d.Model || model}... • Complaints: ${d.ComplaintCount ?? d.complaint_count ?? '—'}`;
-    }
-
-    // Wire certainty blurb toggle from /static/blurbs.json
-    if (certaintyBtn){
-      certaintyBtn.onclick = async () => {
-        try{
-          const r = await fetch('/static/blurbs.json');
-          if(r.ok){
-            const blurbs = await r.json();
-            const text = blurbs?.certainty || blurbs?.CERTAINTY || 'Info coming soon.';
-            if (certaintyBlurb){
-              if (certaintyBlurb.hidden){
-                certaintyBlurb.textContent = text;
-                certaintyBlurb.hidden = false;
-              } else {
-                certaintyBlurb.hidden = true;
-              }
-            }
-          }
-        }catch(_){ /* ignore */ }
-      };
-    }
-
-  }catch(e){
-    showError('No grade found for that selection.');
-    const resultsSection = document.getElementById('resultsSection');
-    if (resultsSection) resultsSection.hidden = true;
+  try {
+    const sc = await getJSON(`/api/score?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+    score = (sc && sc.score != null) ? Number(sc.score) : null;
+    certainty = (sc && sc.certainty != null) ? Number(sc.certainty) : null;
+    groupId = sc && sc.group_id != null ? sc.group_id : null;
+  } catch (e) {
+    showError('No score found for that selection.');
   }
 
-  // --- Existing sections below preserved ---
+  // Update the centered Canva-style results (new markup)
+  try {
+    const resultsSection = document.getElementById('resultsSection');
+    const resultTitle    = document.getElementById('resultTitle');
+    const scoreValueEl   = document.getElementById('scoreValue');      // new big number
+    const certaintyPctEl = document.getElementById('certaintyPct');    // new certainty %
+
+    if (resultTitle) resultTitle.textContent = `${y} ${make} ${model}`;
+
+    if (scoreValueEl) {
+      scoreValueEl.textContent = (score != null && !Number.isNaN(score))
+        ? Math.round(score)
+        : '00';
+    }
+
+    if (certaintyPctEl) {
+      certaintyPctEl.textContent = (certainty != null && !Number.isNaN(certainty))
+        ? `${Math.round(certainty <= 1 ? certainty * 100 : certainty)}%`
+        : '—';
+    }
+
+    if (resultsSection) resultsSection.hidden = false;
+  } catch (_) {
+    /* no-op for UI update */
+  }
+
+  // (Legacy scorecard IDs, if they still exist in your DOM)
+  try {
+    if (typeof scoreVal !== 'undefined' && scoreVal) {
+      scoreVal.textContent = (score != null && !Number.isNaN(score))
+        ? Number(score).toFixed(1)
+        : '—';
+    }
+    if (typeof certVal !== 'undefined' && certVal) {
+      if (certainty != null && !Number.isNaN(certainty)) {
+        const pct = certainty <= 1 ? certainty * 100 : certainty;
+        certVal.textContent = Number(pct).toFixed(1);
+      } else {
+        certVal.textContent = '—';
+      }
+    }
+  } catch (_) {}
+
+  // --- 2) Continue loading the other panels using your existing endpoints ---
+  // Details (complaints, rel_ratio, etc.) — NOTE: we DO NOT compute score here anymore.
+  try {
+    const d = await getJSON(`/api/details?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+
+    // Optional: show summary text if you keep that element
+    const detailsText = document.getElementById('detailsText');
+    if (detailsText) {
+      detailsText.textContent =
+        `${d.ModelYear || y} ${d.Make || make} ${d.Model || model} • Complaints: ${d.ComplaintCount ?? d.complaint_count ?? '—'}`;
+    }
+  } catch (e) {
+    // details is optional for the main score UI; do not block other loads
+  }
 
   // Top complaints
-  try{
+  try {
     const top = await getJSON(`/api/top-complaints?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
-    const items = (top.items||[]).slice(0,8);
-    document.getElementById('topList').innerHTML = items.map(it=>`<li>${it.component||it.name||'Unknown'} — ${it.count ?? ''}</li>`).join('');
-  }catch(e){ document.getElementById('topList').innerHTML = '<li>No data.</li>'; }
+    const items = (top.items || []).slice(0, 8);
+    document.getElementById('topList').innerHTML =
+      items.map(it => `<li>${it.component || it.name || 'Unknown'} — ${it.count ?? ''}</li>`).join('');
+  } catch (e) {
+    document.getElementById('topList').innerHTML = '<li>No data.</li>';
+  }
 
   // Trims
-  try{
+  try {
     const tr = await getJSON(`/api/trims?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
-    const items = (tr.items||[]).sort((a,b)=> (b.count||0)-(a.count||0));
-    document.getElementById('trimsList').innerHTML = items.map(it=>`<li>${it.trim||it.name||'Unknown'} — ${it.percentage ?? ''}% (${it.count ?? ''})</li>`).join('');
-  }catch(e){ document.getElementById('trimsList').innerHTML = '<li>No data.</li>'; }
+    const items = (tr.items || []).sort((a, b) => (b.count || 0) - (a.count || 0));
+    document.getElementById('trimsList').innerHTML =
+      items.map(it => `<li>${it.trim || it.name || 'Unknown'} — ${it.percentage ?? ''}% (${it.count ?? ''})</li>`).join('');
+  } catch (e) {
+    document.getElementById('trimsList').innerHTML = '<li>No data.</li>';
+  }
 
   // History chart
-  try{
+  try {
     const hist = await getJSON(`/api/history?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
     const items = hist.items || [];
     const note = document.getElementById('historyNote');
-    if(hist.note){ note.textContent = hist.note; note.style.display='inline-block'; } else { note.style.display='none'; }
+    if (note) {
+      if (hist.note) { note.textContent = hist.note; note.style.display = 'inline-block'; }
+      else { note.style.display = 'none'; }
+    }
     const cv = document.getElementById('historyChart');
-    // ensure crisp width
-    cv.width = cv.clientWidth || 740;
-    const ctx = cv.getContext('2d');
-    drawHistoryChart(ctx, items);
-  }catch(e){ /* no-op */ }
+    if (cv) {
+      cv.width = cv.clientWidth || 740;
+      const ctx = cv.getContext('2d');
+      drawHistoryChart(ctx, items);
+    }
+  } catch (e) { /* no-op */ }
 });
