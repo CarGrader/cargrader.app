@@ -14,3 +14,13 @@ def disclaimer():
     except FileNotFoundError:
         text = "Disclaimer file not found. Please add cargrader.app/static/content/disclaimer.txt"
     return render_template("disclaimer.html", text=text)
+
+@pages_bp.get("/terms")
+def terms():
+    path = os.path.join(current_app.static_folder, "content", "terms.txt")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            text = f.read()
+    except FileNotFoundError:
+        text = "Terms and Conditions file not found. Please add cargrader.app/static/content/terms.txt"
+    return render_template("terms.html", text=text)
