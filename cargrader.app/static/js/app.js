@@ -101,7 +101,7 @@ document.querySelectorAll('.box__header').forEach(h => {
 });
 
 // === Draw a square history chart with axes + legend ===
-function drawHistoryChart(ctx, items){
+function drawHistoryChart(ctx, items, cssW, cssH){
   const C = ctx.canvas;
 
   // Colors from CSS variables (fallbacks provided)
