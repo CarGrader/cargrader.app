@@ -154,7 +154,6 @@ function drawHistoryChart(ctx, items, cssW, cssH){
 
   // Padding and geometry
   const padL = 70, padR = 20, padT = 40, padB = 70; // room for labels & legend
-  const W = C.width, H = C.height;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
