@@ -2,6 +2,7 @@
 from flask import Blueprint, redirect, session, url_for, current_app, request
 from authlib.integrations.flask_client import OAuth
 import os
+from authlib.integrations.base_client.errors import OAuthError
 
 auth_bp = Blueprint("auth", __name__)
 oauth = OAuth()  # initialized in create_app via init_auth below
@@ -65,8 +66,25 @@ def login():
 
 @auth_bp.get("/callback")
 def callback():
-    token = oauth.auth0.authorize_access_token()
-    userinfo = token.get("userinfo") or {}
+    try:
+        # This exchanges ?code=... for tokens and validates state
+        token = oauth.create_client("auth0").authorize_access_token()
+        userinfo = token.get("userinfo") or {}
+    except OAuthError as oe:
+        # Most likely: redirect_uri mismatch or missing/invalid state/cookie
+        current_app.logger.exception("OAuthError during callback")
+        return (
+            "Callback failed (OAuthError):<br>"
+            f"- error: {getattr(oe, 'error', None)}<br>"
+            f"- description: {getattr(oe, 'description', None)}<br>"
+            f"- uri: {getattr(oe, 'uri', None)}<br>",
+            500,
+        )
+    except Exception as e:
+        current_app.logger.exception("Unexpected callback error")
+        return f"Callback failed (Exception): {e}", 500
+
+    # Success → set session
     session["user"] = {
         "sub": userinfo.get("sub"),
         "email": userinfo.get("email"),
@@ -75,7 +93,6 @@ def callback():
     }
     next_url = request.args.get("next")
     return redirect(next_url or url_for("public.index"))
-
 
 @auth_bp.get("/logout")
 def logout():
