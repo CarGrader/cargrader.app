@@ -404,7 +404,7 @@ ul.simple{ margin:0; padding-left:18px; }
 /* Footer */
 .site-footer{
   max-width: 1100px;
-  margin: 48px auto 24px;
+  margin: 48px auto 100px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
   text-align: center;
