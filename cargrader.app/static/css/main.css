@@ -388,3 +388,8 @@ ul.simple{ margin:0; padding-left:18px; }
 .trims-table tbody tr + tr td {
   border-top: 12px solid transparent; /* space between rows without full border */
 }
+
+.history-canvas{
+  width: 100%;
+  display: block;
+}
