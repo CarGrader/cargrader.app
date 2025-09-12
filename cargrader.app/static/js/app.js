@@ -100,48 +100,146 @@ document.querySelectorAll('.box__header').forEach(h => {
   });
 });
 
-// Minimal history chart using Canvas 2D with rise-from-zero animation
-function drawHistoryChart(ctx, data){
-  const W = ctx.canvas.width, H = ctx.canvas.height;
+// === Draw a square history chart with axes + legend ===
+function drawHistoryChart(ctx, items){
+  const C = ctx.canvas;
+
+  // Colors from CSS variables (fallbacks provided)
+  const css = getComputedStyle(document.documentElement);
+  const PURPLE = (css.getPropertyValue('--primary-600') || '#522e93').trim();
+  const YELLOW = (css.getPropertyValue('--accent') || '#efc362').trim();
+  const GRID   = (css.getPropertyValue('--border') || '#2a2046').trim();
+  const TEXT   = (css.getPropertyValue('--text') || '#f5f8ff').trim();
+
+  // Padding and geometry
+  const padL = 70, padR = 20, padT = 40, padB = 70; // room for labels & legend
+  const W = C.width, H = C.height;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const years    = items.map(d => d.year ?? d.x ?? '');
+  const actual   = items.map(d => Number(d.actual ?? d.count ?? 0));
+  const expected = items.map(d => Number(d.expected ?? d.exp ?? 0));
+
+  const maxY = Math.max(1, ...actual, ...expected);
+  const { tickMax, step, ticks } = niceTicks(maxY, 5); // 5 y ticks
+
+  // Clear
   ctx.clearRect(0,0,W,H);
-  if(!data || data.length===0){ return; }
-  const pad = 24;
-  const xs = data.map(d=>d.year);
-  const ysA = data.map(d=>d.actual||0);
-  const ysE = data.map(d=>d.expected||0);
-  const maxY = Math.max(10, ...ysA, ...ysE);
-  const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const x = v => pad + (W-2*pad) * (v-minX)/(maxX-minX || 1);
-  const y = v => H - pad - (H-2*pad)*(v/maxY);
+  ctx.font = '12px Open Sans, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = TEXT;
 
-  let t = 0, steps = 45;
-  function frame(){
-    ctx.clearRect(0,0,W,H);
-    // axes
-    ctx.globalAlpha = 0.3;
-    ctx.strokeStyle = '#ffffff';
-    ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(W-pad, H-pad); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(pad, pad); ctx.stroke();
-    ctx.globalAlpha = 1;
+  // Axes
+  ctx.strokeStyle = GRID;
+  ctx.lineWidth = 1;
 
-    // helper to draw line
-    function path(vals, stroke){
-      ctx.beginPath();
-      vals.forEach((v,i)=>{
-        const xv = x(xs[i]);
-        const yv = y(v * (t/steps));
-        if(i===0) ctx.moveTo(xv, yv); else ctx.lineTo(xv, yv);
-      });
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-    path(ysE, '#efc362'); // expected (accent)
-    path(ysA, '#8f78d1'); // actual (purple tint)
+  // Y grid + labels
+  ticks.forEach(t => {
+    const y = padT + plotH * (1 - t/tickMax);
+    // grid line
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(W - padR, y);
+    ctx.stroke();
 
-    if(t<steps){ t++; requestAnimationFrame(frame); }
-  }
-  frame();
+    // label
+    ctx.textAlign = 'right';
+    ctx.fillText(String(t), padL - 10, y);
+  });
+
+  // X axis line
+  ctx.beginPath();
+  ctx.moveTo(padL, padT + plotH + 0.5);
+  ctx.lineTo(W - padR, padT + plotH + 0.5);
+  ctx.stroke();
+
+  // X labels (years)
+  const n = years.length || 1;
+  const xFor = (i) => padL + (plotW * (i/(Math.max(1, n-1))));
+  years.forEach((yr, i) => {
+    const x = xFor(i);
+    ctx.textAlign = 'center';
+    ctx.fillText(String(yr), x, H - padB/2);
+  });
+
+  // Plot helper
+  const yFor = (v) => padT + plotH * (1 - (v / tickMax));
+
+  // Lines: actual (purple)
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = PURPLE;
+  ctx.beginPath();
+  actual.forEach((v,i) => {
+    const x = xFor(i), y = yFor(v);
+    if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // points
+  ctx.fillStyle = PURPLE;
+  actual.forEach((v,i) => {
+    const x = xFor(i), y = yFor(v);
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+  });
+
+  // Lines: expected (yellow)
+  ctx.strokeStyle = YELLOW;
+  ctx.beginPath();
+  expected.forEach((v,i) => {
+    const x = xFor(i), y = yFor(v);
+    if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // points
+  ctx.fillStyle = YELLOW;
+  expected.forEach((v,i) => {
+    const x = xFor(i), y = yFor(v);
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+  });
+
+  // Legend (top-right)
+  const legendX = W - padR - 130;
+  const legendY = padT - 20;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  // actual
+  ctx.strokeStyle = PURPLE;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(legendX, legendY);
+  ctx.lineTo(legendX+22, legendY);
+  ctx.stroke();
+  ctx.fillStyle = TEXT;
+  ctx.font = '13px Open Sans, system-ui, sans-serif';
+  ctx.fillText('Actual', legendX+30, legendY+4);
+
+  // expected
+  ctx.strokeStyle = YELLOW;
+  ctx.beginPath();
+  ctx.moveTo(legendX+80, legendY);
+  ctx.lineTo(legendX+102, legendY);
+  ctx.stroke();
+  ctx.fillStyle = TEXT;
+  ctx.fillText('Expected', legendX+110, legendY+4);
+}
+
+// Compute nice tick marks up to ~max, with `count` intervals
+function niceTicks(maxValue, count=5){
+  const pow10 = (n)=>Math.pow(10, Math.floor(Math.log10(n)));
+  const nice = (x)=>{
+    const base = pow10(x);
+    const m = x / base;
+    if (m <= 1) return 1*base;
+    if (m <= 2) return 2*base;
+    if (m <= 5) return 5*base;
+    return 10*base;
+  };
+  const tickMax = nice(maxValue * 1.05);
+  const step = nice(tickMax / count);
+  const ticks = [];
+  for (let t=0; t<=tickMax + 1e-6; t+=step) ticks.push(Math.round(t));
+  return { tickMax, step, ticks };
 }
 
 btn.addEventListener('click', async () => {
@@ -343,7 +441,10 @@ btn.addEventListener('click', async () => {
     }
     const cv = document.getElementById('historyChart');
     if (cv) {
-      cv.width = cv.clientWidth || 740;
+      // Make it square and use full box width
+      const w = (cv.parentElement?.clientWidth || cv.clientWidth || 720);
+      cv.width  = w;
+      cv.height = w;   // square ratio
       const ctx = cv.getContext('2d');
       drawHistoryChart(ctx, items);
     }
