@@ -6,8 +6,8 @@ from .routes.pages import pages_bp
 from .routes.admin import admin_bp
 from pathlib import Path
 from dotenv import load_dotenv
-from functools import wraps
-from flask import session, redirect, url_for, request
+from .routes.auth 
+import auth_bp
 import json
 import os
 
@@ -60,8 +60,10 @@ def create_app(config_object="config.Config"):
     app.register_blueprint(api_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(pages_bp)
+    app.register_blueprint(auth_bp)
 
     return app
+
 
 
 
