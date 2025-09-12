@@ -87,7 +87,7 @@ function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
 function animateSlotNumber(el, finalValue, opts = {}){
   if (!el) return;
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = prefersReduced ? 0 : (opts.duration ?? 1200);
+  const duration = prefersReduced ? 0 : (opts.duration ?? 800);
   const scramblePortion = 0.6; // first 60% shows “spinning” randoms
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
