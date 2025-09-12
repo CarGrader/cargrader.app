@@ -6,17 +6,39 @@
   <title>Disclaimer • CarGrader</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <style>
-    /* page-specific light tweaks */
-    .legal-page { max-width: 900px; margin: 36px auto; padding: 0 16px; }
-    .legal-title { color:#fff; font-weight:800; font-size:36px; margin: 0 0 18px 0; }
+    /* Page-scoped tweaks (keeps your global CSS clean) */
+    .legal-shell { max-width: 1100px; margin: 0 auto; padding: 0 16px 40px; }
+    .legal-bar { position: relative; padding: 18px 0 6px; text-align: center; }
+    .legal-back { position: absolute; left: 0; top: 16px; }
+    .legal-brand {
+      font-family: 'Fredoka', sans-serif; font-weight: 700;
+      font-size: 56px; line-height: 1; color: #fff; text-decoration: none;
+      display: inline-block;
+      text-shadow: 0 6px 24px rgba(0,0,0,.5);
+    }
+    @media (max-width: 600px){ .legal-brand { font-size: 40px; } }
+
+    .legal-title { 
+      color: var(--primary-600);           /* purple header */
+      font-weight: 800; font-size: 36px; 
+      margin: 12px 0 18px 0; text-align: left; 
+    }
     .legal-body  { color:#fff; font-size:16px; line-height:1.7; white-space:pre-wrap; text-align:left; }
   </style>
 </head>
 <body>
-  <div class="legal-page">
+  <div class="legal-shell">
+    <!-- Top bar: Go Back (left) + CarGrader brand (center, clickable) -->
+    <div class="legal-bar">
+      <a href="/" class="results__certainty-btn legal-back">Go Back</a>
+      <a href="/" class="legal-brand">CarGrader</a>
+    </div>
+
+    <!-- Page heading + content -->
     <h1 class="legal-title">Disclaimer</h1>
     <div class="legal-body">{{ text }}</div>
   </div>
+
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
