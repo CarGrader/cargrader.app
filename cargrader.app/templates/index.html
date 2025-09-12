@@ -16,7 +16,11 @@
     <div class="hero__overlay"></div>
     <div class="hero__inner">
       <h1 class="hero__brand">CarGrader</h1>
-      <button class="auth-btn hero__auth" aria-label="Sign up or log in">Sign Up / Login</button>
+      {% if session.user %}
+        <a href="/logout" class="hero__auth" id="logoutBtn">Logout</a>
+      {% else %}
+        <a href="/login" class="hero__auth" id="loginBtn">Sign Up / Login</a>
+      {% endif %}
     </div>
   </section>
 
@@ -151,6 +155,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
