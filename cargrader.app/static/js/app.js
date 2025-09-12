@@ -298,14 +298,38 @@ btn.addEventListener('click', async () => {
     if (topList) topList.innerHTML = '<li>No data.</li>';
   }
 
-  // Trims
+// Trims (render as table: Trim/Series | Count | %)
   try {
     const tr = await getJSON(`/api/trims?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
     const items = (tr.items || []).sort((a, b) => (b.count || 0) - (a.count || 0));
-    document.getElementById('trimsList').innerHTML =
-      items.map(it => `<li>${it.trim || it.name || 'Unknown'} — ${it.percentage ?? ''}% (${it.count ?? ''})</li>`).join('');
+  
+    const tbody = document.getElementById('trimsTbody');
+    if (!tbody) throw new Error('Missing #trimsTbody');
+  
+    const rows = items.map(it => {
+      const name = it.trim || it.series || it.name || 'Unknown';
+      const count = (it.count != null) ? Number(it.count).toLocaleString() : '—';
+      const pct = (it.percentage != null)
+        ? `${Number(it.percentage).toFixed(0)}%`
+        : (it.percent != null ? `${Number(it.percent).toFixed(0)}%` : '—');
+  
+      return `
+        <tr>
+          <td>${name}</td>
+          <td class="num">${count}</td>
+          <td class="num">${pct}</td>
+        </tr>
+      `;
+    }).join('');
+  
+    tbody.innerHTML = rows || `
+      <tr><td colspan="3" style="text-align:center;color:var(--muted)">No data.</td></tr>
+    `;
   } catch (e) {
-    document.getElementById('trimsList').innerHTML = '<li>No data.</li>';
+    const tbody = document.getElementById('trimsTbody');
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--muted)">No data.</td></tr>`;
+    }
   }
 
   // History chart
