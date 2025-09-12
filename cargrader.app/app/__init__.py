@@ -9,7 +9,7 @@ from .routes.public import public_bp
 from .routes.api import api_bp
 from .routes.pages import pages_bp
 from .routes.admin import admin_bp
-from .routes.auth import auth_bp   # ✅ correct import
+from .routes.auth import auth_bp, init_auth   # ✅ correct import
 
 load_dotenv()  # load env once
 
@@ -32,3 +32,4 @@ def create_app(config_object="config.Config"):
     app.register_blueprint(auth_bp)
 
     return app
+
