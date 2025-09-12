@@ -98,7 +98,18 @@
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
-          <ul id="trimsList" class="simple"></ul>
+          <div class="table-wrap trims-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Trim/Series</th>
+                  <th>Count</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody id="trimsTbody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -118,6 +129,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
