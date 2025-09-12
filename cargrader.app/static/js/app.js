@@ -384,15 +384,29 @@ btn.addEventListener('click', async () => {
 
     if (resultTitle) resultTitle.textContent = `${y} ${make} ${model}`;
 
-    if (scoreValueEl) {
-      const target = (score != null && !Number.isNaN(score)) ? Math.round(score) : 0;
-      animateSlotNumber(scoreValueEl, target, { duration: 800 });
-    }
-
-    if (certaintyPctEl) {
-      certaintyPctEl.textContent = (certainty != null && !Number.isNaN(certainty))
-        ? `${Math.round(certainty <= 1 ? certainty * 100 : certainty)}%`
-        : '—';
+    const scoreBlock = document.getElementById('scoreBlock');   // wrapper div for score UI
+    const noDataMsg  = document.getElementById('noDataMsg');    // new message element
+    
+    if (score === 0 || score == null) {
+      // Hide the normal score UI
+      if (scoreBlock) scoreBlock.style.display = 'none';
+      // Show the yellow message
+      if (noDataMsg) {
+        noDataMsg.style.display = 'block';
+        noDataMsg.textContent = "We don't have enough information yet!";
+      }
+    } else {
+      // Show the normal score UI
+      if (scoreBlock) scoreBlock.style.display = 'block';
+      if (noDataMsg) noDataMsg.style.display = 'none';
+    
+      // Animate score and certainty as usual
+      if (scoreValueEl) {
+        animateSlotNumber(scoreValueEl, Math.round(score), { duration: 800 });
+      }
+      if (certValueEl) {
+        certValueEl.textContent = (cert != null) ? `${Math.round(cert)}%` : '—';
+      }
     }
 
     if (resultsSection) resultsSection.hidden = false;
