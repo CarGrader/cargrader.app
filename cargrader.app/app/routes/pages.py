@@ -6,7 +6,6 @@ pages_bp = Blueprint("pages", __name__)
 
 @pages_bp.get("/disclaimer")
 def disclaimer():
-    # Read the repo-stored text file
     path = os.path.join(current_app.static_folder, "content", "disclaimer.txt")
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -34,4 +33,3 @@ def privacy():
     except FileNotFoundError:
         text = "Privacy Policy file not found. Please add cargrader.app/static/content/privacy.txt"
     return render_template("privacy.html", text=text)
-
