@@ -401,3 +401,26 @@ ul.simple{ margin:0; padding-left:18px; }
   width: 100%;
   display: block;
 }
+/* Footer */
+.site-footer{
+  max-width: 1100px;
+  margin: 48px auto 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.footer-links{
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 8px;
+  align-items: center;
+}
+
+/* Reuse the Certainty button look; just tweak spacing */
+.footer-btn{
+  /* inherits purple underline etc. from .results__certainty-btn */
+  font-size: 16px;
+  padding: 2px 0;
+}
+
