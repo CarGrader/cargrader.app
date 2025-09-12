@@ -21,10 +21,46 @@ def init_auth(app):
 
 @auth_bp.get("/login")
 def login():
-    # Use external URL via BASE_URL to avoid callback mismatch
-    base = current_app.config.get("BASE_URL", "").rstrip("/")
-    redirect_uri = f"{base}/callback" if base else url_for("auth.callback", _external=True)
-    return oauth.auth0.authorize_redirect(redirect_uri=redirect_uri)
+    try:
+        base = current_app.config.get("BASE_URL", "").rstrip("/")
+        redirect_uri = f"{base}/callback" if base else url_for("auth.callback", _external=True)
+
+        # Collect env we depend on
+        domain = os.getenv("AUTH0_DOMAIN")
+        cid    = os.getenv("AUTH0_CLIENT_ID")
+        csec   = os.getenv("AUTH0_CLIENT_SECRET")
+
+        problems = []
+        if not domain: problems.append("Missing AUTH0_DOMAIN")
+        if not cid:    problems.append("Missing AUTH0_CLIENT_ID")
+        if not csec:   problems.append("Missing AUTH0_CLIENT_SECRET")
+        if not redirect_uri: problems.append("Could not construct redirect_uri")
+        if domain and domain.startswith("http"):
+            problems.append("AUTH0_DOMAIN must be a bare hostname (e.g. your-tenant.us.auth0.com), not a URL")
+        if base and not base.startswith("http"):
+            problems.append("BASE_URL must start with http(s) (e.g. https://car-grader.com)")
+
+        # Log what we're using (masked)
+        current_app.logger.info("Auth0 /login debug", extra={
+            "redirect_uri": redirect_uri,
+            "domain": domain,
+            "client_id_prefix": (cid[:6] + "…") if cid else None,
+        })
+
+        if problems:
+            # Return a readable page so you can fix env values quickly
+            return (
+                "Login configuration error:<br>" + "<br>".join(f"- {p}" for p in problems),
+                500,
+            )
+
+        # Proceed to Auth0
+        return oauth.auth0.authorize_redirect(redirect_uri=redirect_uri)
+
+    except Exception as e:
+        # Surface reason in log and response
+        current_app.logger.exception("Login failed")
+        return f"Login failed: {e}", 500
 
 
 @auth_bp.get("/callback")
