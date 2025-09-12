@@ -348,39 +348,43 @@ ul.simple{ margin:0; padding-left:18px; }
   margin-top: 8px;
 }
 
+/* === Trims table === */
+.trims-table {
+  margin-top: 8px;
+}
+
 .trims-table table {
   width: 100%;
-  border-collapse: separate;      /* allow row spacing */
-  border-spacing: 0 18px;         /* vertical gap between rows */
+  border-collapse: collapse;       /* collapse borders for header line */
+  border-spacing: 0;              /* remove row gaps since we'll use borders */
 }
 
 .trims-table thead th {
-  color: #fff;
+  color: var(--primary-600);       /* purple column headers */
   font-weight: 800;
   font-size: 20px;
   text-align: left;
-  padding: 0 8px;
+  padding: 0 8px 10px 8px;        /* extra bottom padding for spacing */
+  border-bottom: 2px solid var(--primary-600); /* line under header */
 }
 
 .trims-table thead th:nth-child(2),
 .trims-table thead th:nth-child(3) {
-  text-align: center;             /* Count and % centered like your mock */
+  text-align: center;              /* Count and % centered */
 }
 
 .trims-table tbody td {
   color: #fff;
   font-size: 22px;
-  padding: 8px 8px;
+  padding: 12px 8px;
   vertical-align: middle;
 }
 
-.trims-table tbody td.num {       /* numeric cells */
+.trims-table tbody td.num {        /* numeric cells */
   text-align: center;
   white-space: nowrap;
 }
 
-/* optional: add subtle separation without full borders */
-.trims-table tbody tr {
-  /* no borders; spacing comes from border-spacing */
+.trims-table tbody tr + tr td {
+  border-top: 12px solid transparent; /* space between rows without full border */
 }
-
