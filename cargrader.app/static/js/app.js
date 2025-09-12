@@ -452,13 +452,26 @@ btn.addEventListener('click', async () => {
       else { note.style.display = 'none'; }
     }
     const cv = document.getElementById('historyChart');
-    if (cv) {
-      // Make it square and use full box width
-      const w = (cv.parentElement?.clientWidth || cv.clientWidth || 720);
-      cv.width  = w;
-      cv.height = w;   // square ratio
-      const ctx = cv.getContext('2d');
-      drawHistoryChart(ctx, items);
-    }
+      if (cv) {
+        // Make it square, render at devicePixelRatio for crisp text/lines
+        const wCss = (cv.parentElement?.clientWidth || cv.clientWidth || 720);
+        const dpr  = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+      
+        // CSS size (layout size)
+        cv.style.width  = `${wCss}px`;
+        cv.style.height = `${wCss}px`;
+      
+        // Backing store (actual pixels)
+        cv.width  = Math.round(wCss * dpr);
+        cv.height = Math.round(wCss * dpr);
+      
+        const ctx = cv.getContext('2d');
+      
+        // Map 1 canvas unit = 1 CSS pixel (so our coordinates stay simple)
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      
+        // Draw using CSS-pixel coordinates
+        drawHistoryChart(ctx, items, wCss, wCss);
+      }
   } catch (e) { /* no-op */ }
 });
