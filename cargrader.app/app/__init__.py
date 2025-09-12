@@ -2,6 +2,7 @@
 from flask import Flask
 from .routes.public import public_bp
 from .routes.api import api_bp
+from .routes.pages import pages_bp
 from .routes.admin import admin_bp
 from pathlib import Path
 import json
@@ -49,6 +50,8 @@ def create_app(config_object="config.Config"):
     app.register_blueprint(public_bp)
     app.register_blueprint(api_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(pages_bp)
 
     return app
+
 
