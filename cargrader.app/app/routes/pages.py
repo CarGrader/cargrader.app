@@ -24,3 +24,14 @@ def terms():
     except FileNotFoundError:
         text = "Terms and Conditions file not found. Please add cargrader.app/static/content/terms.txt"
     return render_template("terms.html", text=text)
+
+@pages_bp.get("/privacy")
+def privacy():
+    path = os.path.join(current_app.static_folder, "content", "privacy.txt")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            text = f.read()
+    except FileNotFoundError:
+        text = "Privacy Policy file not found. Please add cargrader.app/static/content/privacy.txt"
+    return render_template("privacy.html", text=text)
+
