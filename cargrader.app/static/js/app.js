@@ -582,3 +582,11 @@ window.addEventListener('resize', () => {
   clearTimeout(__resizeTimer);
   __resizeTimer = setTimeout(() => renderHistory(window.__historyItems), 120);
 });
+// Footer Disclaimer button → navigates to /disclaimer
+const btnDisclaimer = document.getElementById('btnDisclaimer');
+if (btnDisclaimer) {
+  btnDisclaimer.addEventListener('click', () => {
+    window.location.href = '/disclaimer';
+  });
+}
+
