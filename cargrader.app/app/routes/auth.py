@@ -26,7 +26,7 @@ def login():
         base = current_app.config.get("BASE_URL", "").rstrip("/")
         redirect_uri = f"{base}/callback" if base else url_for("auth.callback", _external=True)
 
-        # Optional sanity checks (keep if you found them helpful)
+        # Optional sanity checks
         domain = os.getenv("AUTH0_DOMAIN")
         cid    = os.getenv("AUTH0_CLIENT_ID")
         csec   = os.getenv("AUTH0_CLIENT_SECRET")
@@ -43,7 +43,7 @@ def login():
         if base and not base.startswith("http"):
             return "BASE_URL must start with http(s), e.g., https://car-grader.com", 500
 
-        # ✅ Look up the client; if missing, initialize and try again
+        # Ensure client exists
         client = oauth.create_client("auth0")
         if client is None:
             from .auth import init_auth as _init_auth
@@ -58,14 +58,14 @@ def login():
         current_app.logger.exception("Login failed")
         return f"Login failed: {e}", 500
 
+
 @auth_bp.get("/callback")
 def callback():
     try:
-        # This exchanges ?code=... for tokens and validates state
-        token = oauth.create_client("auth0").authorize_access_token()
+        client = oauth.create_client("auth0")
+        token = client.authorize_access_token()  # exchanges ?code=... and validates state
         userinfo = token.get("userinfo") or {}
     except OAuthError as oe:
-        # Most likely: redirect_uri mismatch or missing/invalid state/cookie
         current_app.logger.exception("OAuthError during callback")
         return (
             "Callback failed (OAuthError):<br>"
@@ -85,8 +85,11 @@ def callback():
         "name": userinfo.get("name") or userinfo.get("nickname"),
         "picture": userinfo.get("picture"),
     }
+
+    # Go back to where the user was going, or home
     next_url = request.args.get("next")
-    return redirect(next_url or url_for("public.index"))
+    return redirect(next_url or url_for("public.home"))
+
 
 @auth_bp.get("/logout")
 def logout():
@@ -95,5 +98,5 @@ def logout():
     base = current_app.config.get("BASE_URL", "").rstrip("/")
     return redirect(
         f"https://{domain}/v2/logout?client_id={os.getenv('AUTH0_CLIENT_ID')}"
-        f"&returnTo={(base or url_for('public.index', _external=True))}"
+        f"&returnTo={(base or url_for('public.home', _external=True))}"
     )
