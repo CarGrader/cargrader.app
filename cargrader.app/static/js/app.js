@@ -596,4 +596,12 @@ if (btnTerms) {
     window.location.href = '/terms';
   });
 }
+// Footer Privacy button → navigates to /privacy
+const btnPrivacy = document.getElementById('btnPrivacy');
+if (btnPrivacy) {
+  btnPrivacy.addEventListener('click', () => {
+    window.location.href = '/privacy';
+  });
+}
+
 
