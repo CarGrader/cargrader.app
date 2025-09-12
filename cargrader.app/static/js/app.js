@@ -45,30 +45,29 @@ async function loadYears(){
 }
 // --- History chart responsive sizing (16:9) ---
 function getCanvasCssSize(canvas){
-  // Use the container’s inner width (minus padding) if possible
-  const parent = canvas.parentElement;
-  if (!parent) return { w: canvas.clientWidth || 720, h: 405 };
-
-  const cs = getComputedStyle(parent);
-  const padH = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-  const w = Math.max(280, Math.round(parent.clientWidth - padH));
-
-  // 16:9 height
-  const h = Math.round(w * 9 / 16);
+  // Walk up until we find an ancestor with usable width (accordion may be 0 when closed)
+  let node = canvas.parentElement;
+  let w = 0;
+  while (node && w < 320){
+    const cs = getComputedStyle(node);
+    const padH = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    w = Math.round(node.clientWidth - padH);
+    node = node.parentElement;
+  }
+  if (w < 320) {
+    // Fallback to viewport width minus a little margin
+    w = Math.max(320, Math.round(document.documentElement.clientWidth - 48));
+  }
+  const h = Math.round(w * 9 / 16); // 16:9
   return { w, h };
 }
 
 function setupHiDPICanvas(canvas, cssW, cssH){
   const dpr = Math.max(1, window.devicePixelRatio || 1);
-
-  // CSS layout size
   canvas.style.width  = `${cssW}px`;
   canvas.style.height = `${cssH}px`;
-
-  // Backing store (actual pixels)
   canvas.width  = Math.round(cssW * dpr);
   canvas.height = Math.round(cssH * dpr);
-
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS-pixel coords
   return ctx;
@@ -77,10 +76,23 @@ function setupHiDPICanvas(canvas, cssW, cssH){
 function renderHistory(items){
   const cv = document.getElementById('historyChart');
   if (!cv) return;
+
+  // If hidden (accordion closed), wait a tick and try again
+  if (cv.offsetParent === null) {
+    requestAnimationFrame(() => renderHistory(items));
+    return;
+  }
+
   const { w, h } = getCanvasCssSize(cv);
+  if (w < 320) {                      // still suspiciously small? try again shortly
+    setTimeout(() => renderHistory(items), 60);
+    return;
+  }
+
   const ctx = setupHiDPICanvas(cv, w, h);
-  drawHistoryChart(ctx, items, w, h); // pass CSS size
+  drawHistoryChart(ctx, items, w, h);
 }
+
 // === Score "slot machine" animation ===
 function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
 
@@ -172,6 +184,10 @@ document.querySelectorAll('.box__header').forEach(h => {
     const open = box.classList.toggle('open');
     const t = h.querySelector('.box__toggle');
     if(t) t.textContent = open ? '-' : '+';
+
+    if (open && window.__historyItems && box.querySelector('#historyChart')) {
+      setTimeout(() => renderHistory(window.__historyItems), 0);
+    }
   });
 });
 
@@ -363,7 +379,7 @@ btn.addEventListener('click', async () => {
 
     if (scoreValueEl) {
       const target = (score != null && !Number.isNaN(score)) ? Math.round(score) : 0;
-      animateSlotNumber(scoreValueEl, target, { duration: 1200 });
+      animateSlotNumber(scoreValueEl, target, { duration: 800 });
     }
 
     if (certaintyPctEl) {
