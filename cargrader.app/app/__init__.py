@@ -6,6 +6,10 @@ from .routes.pages import pages_bp
 from .routes.admin import admin_bp
 from pathlib import Path
 import json
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def create_app(config_object="config.Config"):
     # These relative folders already point one level up:
@@ -13,6 +17,9 @@ def create_app(config_object="config.Config"):
     # ../static     -> cargrader.app/static
     app = Flask(__name__, template_folder="../templates", static_folder="../static")
     app.config.from_object(config_object)
+
+    app.secret_key = os.getenv("APP_SESSION_SECRET", "dev-not-secret")
+    app.config["BASE_URL"] = os.getenv("BASE_URL", "http://localhost:5000")
 
     # ---------- blurbs wiring (BEGIN) ----------
     def _load_blurbs_for(app):
@@ -53,5 +60,6 @@ def create_app(config_object="config.Config"):
     app.register_blueprint(pages_bp)
 
     return app
+
 
 
