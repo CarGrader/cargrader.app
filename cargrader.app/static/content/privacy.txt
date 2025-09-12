@@ -1,0 +1,66 @@
+Last Updated: September 12, 2025
+
+CarGrader (“we,” “our,” “us”) values your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our website and services. By using CarGrader, you agree to the practices described in this policy.
+
+1. Information We Collect
+
+We may collect the following types of information:
+
+Personal Information: Information you provide directly, such as your name, email address, account login details, or payment information (collected securely by third-party providers such as Stripe).
+
+Usage Data: Information about how you interact with our site, including your IP address, browser type, device type, pages viewed, and time spent on the site.
+
+Cookies and Tracking: We may use cookies or similar technologies to enhance user experience, remember preferences, and collect analytics.
+
+2. How We Use Your Information
+
+We use the information we collect to:
+
+Provide, operate, and improve CarGrader services.
+
+Process payments and manage subscriptions.
+
+Authenticate users and manage accounts.
+
+Send updates, newsletters, or service announcements (if you opt in).
+
+Monitor usage trends and prevent misuse of the website.
+
+3. How We Share Your Information
+
+Service Providers: We may share necessary information with trusted providers (e.g., Stripe for payments, Auth0 for authentication, analytics providers) to operate the site.
+
+Legal Requirements: We may disclose information if required to comply with law, legal process, or to protect the rights and safety of CarGrader and its users.
+
+No Sale of Data: We do not sell or rent your personal information to third parties.
+
+4. Data Security
+
+We take reasonable measures to protect your information from unauthorized access, alteration, or disclosure.
+
+However, no system can be guaranteed 100% secure, and you acknowledge that you use the site at your own risk.
+
+5. Your Choices
+
+You may disable cookies in your browser settings, though this may affect site functionality.
+
+You may opt out of non-essential communications by following unsubscribe instructions in emails.
+
+You can request access to, correction of, or deletion of your personal data by contacting us.
+
+6. Third-Party Services
+
+CarGrader may include links or integrations with third-party services. These third parties have their own privacy practices, and we are not responsible for their policies or actions.
+
+7. Children’s Privacy
+
+CarGrader is not directed at children under 13. We do not knowingly collect personal information from children. If we learn that a child under 13 has provided personal information, we will delete it.
+
+8. Changes to This Policy
+
+We may update this Privacy Policy from time to time. The updated version will be posted here with a new “Last Updated” date. Your continued use of the site after changes means you accept the updated policy.
+
+9. Contact Us
+
+If you have questions about this Privacy Policy or how we handle your data, contact us at:
+cargrader@gmail.com
