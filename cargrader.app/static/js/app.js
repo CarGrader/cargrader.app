@@ -399,13 +399,20 @@ btn.addEventListener('click', async () => {
       // Show the normal score UI
       if (scoreBlock) scoreBlock.style.display = 'block';
       if (noDataMsg) noDataMsg.style.display = 'none';
-    
-      // Animate score and certainty as usual
+
+      // Animate score
       if (scoreValueEl) {
         animateSlotNumber(scoreValueEl, Math.round(score), { duration: 800 });
       }
-      if (certValueEl) {
-        certValueEl.textContent = (cert != null) ? `${Math.round(cert)}%` : '—';
+
+      // Certainty %
+      if (certaintyPctEl) {
+        const pct = (certainty != null)
+          ? (Number(certainty) <= 1 ? Number(certainty) * 100 : Number(certainty))
+          : null;
+        certaintyPctEl.textContent = (pct != null && !Number.isNaN(pct))
+          ? `${Math.round(pct)}%`
+          : '—';
       }
     }
 
