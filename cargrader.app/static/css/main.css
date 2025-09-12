@@ -343,3 +343,44 @@ ul.simple{ margin:0; padding-left:18px; }
   line-height: 1.5;
   text-align: center;
 }
+/* === Trims table === */
+.trims-table {
+  margin-top: 8px;
+}
+
+.trims-table table {
+  width: 100%;
+  border-collapse: separate;      /* allow row spacing */
+  border-spacing: 0 18px;         /* vertical gap between rows */
+}
+
+.trims-table thead th {
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  text-align: left;
+  padding: 0 8px;
+}
+
+.trims-table thead th:nth-child(2),
+.trims-table thead th:nth-child(3) {
+  text-align: center;             /* Count and % centered like your mock */
+}
+
+.trims-table tbody td {
+  color: #fff;
+  font-size: 22px;
+  padding: 8px 8px;
+  vertical-align: middle;
+}
+
+.trims-table tbody td.num {       /* numeric cells */
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* optional: add subtle separation without full borders */
+.trims-table tbody tr {
+  /* no borders; spacing comes from border-spacing */
+}
+
