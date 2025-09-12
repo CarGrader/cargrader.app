@@ -289,31 +289,38 @@ function drawHistoryChart(ctx, items, cssW, cssH){
     ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
   });
 
-  // Legend (top-right)
-  const legendX = W - padR - 130;
-  const legendY = padT - 20;
+// Legend (top-right, stacked)
+  const legendPadR = 24;                    // a little extra right padding
+  const legendX = W - legendPadR - 200;     // 200px allows long labels
+  const legendY = padT - 8;                 // just above the plot area
+  const lineH   = 20;
+  
+  // (Optional) ensure we have enough right padding for the legend
+  // If you prefer, bump padR globally near the top instead of doing this check
+  
   ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
-
-  // actual
+  ctx.textBaseline = 'middle';
+  ctx.font = '13px Open Sans, system-ui, sans-serif';
+  ctx.fillStyle = TEXT;
+  
+  // --- Actual ---
   ctx.strokeStyle = PURPLE;
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(legendX, legendY);
-  ctx.lineTo(legendX+22, legendY);
+  ctx.lineTo(legendX + 22, legendY);
   ctx.stroke();
-  ctx.fillStyle = TEXT;
-  ctx.font = '13px Open Sans, system-ui, sans-serif';
-  ctx.fillText('Actual Complaint Count', legendX+30, legendY+4);
-
-  // expected
+  ctx.fillText('Actual Complaints Count', legendX + 30, legendY);
+  
+  // --- Expected ---
+  const y2 = legendY + lineH;
   ctx.strokeStyle = YELLOW;
   ctx.beginPath();
-  ctx.moveTo(legendX+80, legendY);
-  ctx.lineTo(legendX+102, legendY);
+  ctx.moveTo(legendX, y2);
+  ctx.lineTo(legendX + 22, y2);
   ctx.stroke();
-  ctx.fillStyle = TEXT;
-  ctx.fillText('Expected Complaint Count', legendX+110, legendY+4);
+  ctx.fillText('Expected Complaints Count', legendX + 30, y2);
+
 }
 
 // Headroom-aware tick builder: ~15% padding above max, avoids big jumps (e.g., 200 -> 500)
