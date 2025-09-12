@@ -277,14 +277,25 @@ btn.addEventListener('click', async () => {
     // details is optional for the main score UI; do not block other loads
   }
 
-  // Top complaints
+// Top complaints (use percent + summary from API)
   try {
     const top = await getJSON(`/api/top-complaints?year=${y}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
     const items = (top.items || []).slice(0, 8);
-    document.getElementById('topList').innerHTML =
-      items.map(it => `<li>${it.component || it.name || 'Unknown'} — ${it.count ?? ''}</li>`).join('');
+  
+    const html = items.map(it => {
+      const comp = it.component || 'Unknown';
+      const pct  = (typeof it.percent === 'number')
+        ? `${it.percent.toFixed(1)}%`
+        : (it.percent != null ? `${Number(it.percent).toFixed(1)}%` : '—');
+      const sum  = it.summary ? `<div class="top-summary">${it.summary}</div>` : '';
+      return `<li><strong>${comp}</strong> — ${pct}${sum}</li>`;
+    }).join('');
+  
+    const topList = document.getElementById('topList');
+    if (topList) topList.innerHTML = html || '<li>No data.</li>';
   } catch (e) {
-    document.getElementById('topList').innerHTML = '<li>No data.</li>';
+    const topList = document.getElementById('topList');
+    if (topList) topList.innerHTML = '<li>No data.</li>';
   }
 
   // Trims
