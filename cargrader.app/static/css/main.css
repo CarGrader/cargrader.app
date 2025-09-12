@@ -343,6 +343,14 @@ ul.simple{ margin:0; padding-left:18px; }
   line-height: 1.5;
   text-align: center;
 }
+.no-data-message {
+  color: var(--accent);          /* your yellow */
+  font-weight: 700;
+  font-size: 32px;               /* same size as YMM */
+  text-align: center;
+  margin-top: 16px;
+}
+
 /* === Trims table === */
 .trims-table {
   margin-top: 8px;
