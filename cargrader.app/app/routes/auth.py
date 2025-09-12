@@ -1,3 +1,4 @@
+# cargrader.app/app/routes/auth.py
 from flask import Blueprint, redirect, session, url_for, current_app, request
 from authlib.integrations.flask_client import OAuth
 import os
@@ -13,7 +14,6 @@ def _init_oauth(app):
         client_kwargs={"scope": "openid profile email"},
         server_metadata_url=f"https://{os.getenv('AUTH0_DOMAIN')}/.well-known/openid-configuration",
     )
-_init_oauth(None)  # late-bind in factory below
 
 @auth_bp.before_app_first_request
 def bind_oauth():
@@ -28,15 +28,15 @@ def login():
 def callback():
     token = oauth.auth0.authorize_access_token()
     userinfo = token.get("userinfo") or {}
-    # minimal session
     session["user"] = {
         "sub": userinfo.get("sub"),
         "email": userinfo.get("email"),
         "name": userinfo.get("name") or userinfo.get("nickname"),
         "picture": userinfo.get("picture"),
     }
-    # TODO: upsert user in DB (sub, email) and keep stripe_customer_id (phase 2)
-    return redirect(url_for("public.index"))
+    # TODO: upsert user in DB (sub, email, stripe_customer_id) in Phase 2
+    next_url = request.args.get("next")
+    return redirect(next_url or url_for("public.index"))
 
 @auth_bp.get("/logout")
 def logout():
