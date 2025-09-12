@@ -252,7 +252,7 @@ function drawHistoryChart(ctx, items, cssW, cssH){
   ctx.stroke();
   ctx.fillStyle = TEXT;
   ctx.font = '13px Open Sans, system-ui, sans-serif';
-  ctx.fillText('Actual', legendX+30, legendY+4);
+  ctx.fillText('Actual Complaint Count', legendX+30, legendY+4);
 
   // expected
   ctx.strokeStyle = YELLOW;
@@ -261,7 +261,7 @@ function drawHistoryChart(ctx, items, cssW, cssH){
   ctx.lineTo(legendX+102, legendY);
   ctx.stroke();
   ctx.fillStyle = TEXT;
-  ctx.fillText('Expected', legendX+110, legendY+4);
+  ctx.fillText('Expected Complaint Count', legendX+110, legendY+4);
 }
 
 // Headroom-aware tick builder: ~15% padding above max, avoids big jumps (e.g., 200 -> 500)
