@@ -81,6 +81,42 @@ function renderHistory(items){
   const ctx = setupHiDPICanvas(cv, w, h);
   drawHistoryChart(ctx, items, w, h); // pass CSS size
 }
+// === Score "slot machine" animation ===
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+function animateSlotNumber(el, finalValue, opts = {}){
+  if (!el) return;
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const duration = prefersReduced ? 0 : (opts.duration ?? 1200);
+  const scramblePortion = 0.6; // first 60% shows “spinning” randoms
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+  const end = clamp(Math.round(finalValue ?? 0), 0, 100);
+  if (duration <= 0){ el.textContent = String(end); return; }
+
+  const startTime = performance.now();
+  let raf;
+
+  function frame(now){
+    const t = clamp((now - startTime) / duration, 0, 1);
+    if (t < scramblePortion){
+      // spin random numbers early on
+      const rand = Math.floor(Math.random() * 101);
+      el.textContent = String(rand).padStart(2, '0');
+    }else{
+      // ease into the final value
+      const p = (t - scramblePortion) / (1 - scramblePortion);
+      const eased = easeOutCubic(p);
+      const cur = Math.round(end * eased);
+      el.textContent = String(cur).padStart(2, '0');
+    }
+    if (t < 1){ raf = requestAnimationFrame(frame); }
+    else { el.textContent = String(end).padStart(2, '0'); }
+  }
+
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(frame);
+}
 
 document.addEventListener('DOMContentLoaded', loadYears);
 
@@ -326,9 +362,8 @@ btn.addEventListener('click', async () => {
     if (resultTitle) resultTitle.textContent = `${y} ${make} ${model}`;
 
     if (scoreValueEl) {
-      scoreValueEl.textContent = (score != null && !Number.isNaN(score))
-        ? Math.round(score)
-        : '00';
+      const target = (score != null && !Number.isNaN(score)) ? Math.round(score) : 0;
+      animateSlotNumber(scoreValueEl, target, { duration: 1200 });
     }
 
     if (certaintyPctEl) {
