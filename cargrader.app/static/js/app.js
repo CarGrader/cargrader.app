@@ -589,4 +589,11 @@ if (btnDisclaimer) {
     window.location.href = '/disclaimer';
   });
 }
+// Footer Terms button → navigates to /terms
+const btnTerms = document.getElementById('btnTerms');
+if (btnTerms) {
+  btnTerms.addEventListener('click', () => {
+    window.location.href = '/terms';
+  });
+}
 
