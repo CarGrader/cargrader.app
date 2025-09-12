@@ -51,23 +51,31 @@
           <!-- Large white Y/M/M -->
           <h2 id="resultTitle" class="results__title">Year Make Model</h2>
         
-          <!-- Purple label -->
-          <div class="results__label">Score</div>
+          <!-- Normal score UI (wrapped so we can toggle) -->
+          <div id="scoreBlock">
+            <!-- Purple label -->
+            <div class="results__label">Score</div>
         
-          <!-- Very large white number -->
-          <div id="scoreValue" class="results__value">00</div>
+            <!-- Very large white number -->
+            <div id="scoreValue" class="results__value">00</div>
         
-          <!-- Purple label same size as "Score" -->
-          <div class="results__label">Out of 100</div>
+            <!-- Purple label same size as "Score" -->
+            <div class="results__label">Out of 100</div>
         
-          <!-- Certainty line: "Certainty" is the button; % is plain text next to it -->
-          <div class="results__certainty">
-            <button id="certaintyToggle" class="results__certainty-btn" type="button">Certainty</button>
-            <span id="certaintyPct" class="results__certainty-pct">0%</span>
+            <!-- Certainty line -->
+            <div class="results__certainty">
+              <button id="certaintyToggle" class="results__certainty-btn" type="button">Certainty</button>
+              <span id="certaintyPct" class="results__certainty-pct">0%</span>
+            </div>
           </div>
         
           <!-- Blurb from /static/blurbs.json appears here when Certainty is clicked -->
           <div id="certaintyBlurb" class="results__blurb" hidden></div>
+        
+          <!-- Yellow fallback message -->
+          <div id="noDataMsg" class="no-data-message" style="display:none;">
+            We don't have enough information yet!
+          </div>
         </section>
       </div>
 
@@ -129,6 +137,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
