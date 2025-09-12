@@ -43,6 +43,45 @@ async function loadYears(){
     showError('Failed to load years.');
   }
 }
+// --- History chart responsive sizing (16:9) ---
+function getCanvasCssSize(canvas){
+  // Use the container’s inner width (minus padding) if possible
+  const parent = canvas.parentElement;
+  if (!parent) return { w: canvas.clientWidth || 720, h: 405 };
+
+  const cs = getComputedStyle(parent);
+  const padH = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const w = Math.max(280, Math.round(parent.clientWidth - padH));
+
+  // 16:9 height
+  const h = Math.round(w * 9 / 16);
+  return { w, h };
+}
+
+function setupHiDPICanvas(canvas, cssW, cssH){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  // CSS layout size
+  canvas.style.width  = `${cssW}px`;
+  canvas.style.height = `${cssH}px`;
+
+  // Backing store (actual pixels)
+  canvas.width  = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS-pixel coords
+  return ctx;
+}
+
+function renderHistory(items){
+  const cv = document.getElementById('historyChart');
+  if (!cv) return;
+  const { w, h } = getCanvasCssSize(cv);
+  const ctx = setupHiDPICanvas(cv, w, h);
+  drawHistoryChart(ctx, items, w, h); // pass CSS size
+}
+
 document.addEventListener('DOMContentLoaded', loadYears);
 
 // MAKES
@@ -103,6 +142,8 @@ document.querySelectorAll('.box__header').forEach(h => {
 // === Draw a square history chart with axes + legend ===
 function drawHistoryChart(ctx, items, cssW, cssH){
   const C = ctx.canvas;
+  const W = cssW;
+  const H = cssH;
 
   // Colors from CSS variables (fallbacks provided)
   const css = getComputedStyle(document.documentElement);
@@ -451,27 +492,15 @@ btn.addEventListener('click', async () => {
       if (hist.note) { note.textContent = hist.note; note.style.display = 'inline-block'; }
       else { note.style.display = 'none'; }
     }
-    const cv = document.getElementById('historyChart');
-      if (cv) {
-        // Make it square, render at devicePixelRatio for crisp text/lines
-        const wCss = (cv.parentElement?.clientWidth || cv.clientWidth || 720);
-        const dpr  = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-      
-        // CSS size (layout size)
-        cv.style.width  = `${wCss}px`;
-        cv.style.height = `${wCss}px`;
-      
-        // Backing store (actual pixels)
-        cv.width  = Math.round(wCss * dpr);
-        cv.height = Math.round(wCss * dpr);
-      
-        const ctx = cv.getContext('2d');
-      
-        // Map 1 canvas unit = 1 CSS pixel (so our coordinates stay simple)
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      
-        // Draw using CSS-pixel coordinates
-        drawHistoryChart(ctx, items, wCss, wCss);
-      }
+    renderHistory(items);  // uses 16:9 aspect ratio + Hi-DPI
+    window.__historyItems = items; // optional: save for redraw on resize
   } catch (e) { /* no-op */ }
+});
+
+// --- Redraw history chart when the window is resized ---
+let __resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (!window.__historyItems) return;
+  clearTimeout(__resizeTimer);
+  __resizeTimer = setTimeout(() => renderHistory(window.__historyItems), 120);
 });
