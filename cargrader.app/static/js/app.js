@@ -224,21 +224,33 @@ function drawHistoryChart(ctx, items){
   ctx.fillText('Expected', legendX+110, legendY+4);
 }
 
-// Compute nice tick marks up to ~max, with `count` intervals
-function niceTicks(maxValue, count=5){
-  const pow10 = (n)=>Math.pow(10, Math.floor(Math.log10(n)));
-  const nice = (x)=>{
-    const base = pow10(x);
-    const m = x / base;
-    if (m <= 1) return 1*base;
-    if (m <= 2) return 2*base;
-    if (m <= 5) return 5*base;
-    return 10*base;
-  };
-  const tickMax = nice(maxValue * 1.05);
-  const step = nice(tickMax / count);
+// Headroom-aware tick builder: ~15% padding above max, avoids big jumps (e.g., 200 -> 500)
+function niceTicks(maxValue, desired=5){
+  if (!isFinite(maxValue) || maxValue <= 0){
+    return { tickMax: 10, step: 2, ticks: [0,2,4,6,8,10] };
+  }
+
+  const HEADROOM = 1.15;                         // tweak if you want more/less padding
+  const rawTop   = maxValue * HEADROOM;
+
+  // Choose a "nice" ceiling close to rawTop
+  const base = Math.pow(10, Math.floor(Math.log10(rawTop)));
+  const tops = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].map(m => m * base);
+  let tickMax = tops.find(v => v >= rawTop);
+  if (!tickMax) tickMax = 10 * base;             // fallback
+
+  // Choose a "nice" step size close to tickMax / desired
+  const idealStep   = tickMax / desired;
+  const stepBase    = Math.pow(10, Math.floor(Math.log10(idealStep)));
+  const stepChoices = [1, 1.2, 1.5, 2, 2.5, 5, 10].map(m => m * stepBase);
+  let step = stepChoices.find(v => v >= idealStep) || 10 * stepBase;
+
+  // Build integer tick labels from 0 up to tickMax
   const ticks = [];
-  for (let t=0; t<=tickMax + 1e-6; t+=step) ticks.push(Math.round(t));
+  for (let t = 0; t <= tickMax + 1e-9; t += step){
+    ticks.push(Math.round(t));
+  }
+
   return { tickMax, step, ticks };
 }
 
