@@ -423,4 +423,10 @@ ul.simple{ margin:0; padding-left:18px; }
   font-size: 16px;
   padding: 2px 0;
 }
-
+.legal-title { 
+  color: var(--accent);       /* yellow header */
+  font-weight: 800; 
+  font-size: 36px; 
+  margin: 12px 0 18px 0; 
+  text-align: left; 
+}
