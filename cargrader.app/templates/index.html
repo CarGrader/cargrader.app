@@ -16,6 +16,7 @@
     <div class="hero__overlay"></div>
     <div class="hero__inner">
       <h1 class="hero__brand">CarGrader</h1>
+      {#
       {% if session.user %}
         <a href="/logout" class="hero__auth" id="logoutBtn">Logout</a>
       {% else %}
@@ -24,6 +25,7 @@
       {% if session.user and not has_active_pass %}
         <a href="{{ url_for('billing.store') }}" class="hero__auth" style="margin-left:12px;">Get a Pass</a>
       {% endif %}
+      #}
     </div>
   </section>
 
@@ -158,6 +160,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
