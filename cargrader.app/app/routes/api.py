@@ -2,6 +2,8 @@ import os
 from flask import Blueprint, jsonify, request, current_app
 from app.db.connection import get_conn
 from app.db import queries
+from app.utils.access import requires_pass
+
 
 api_bp = Blueprint("api", __name__)
 
@@ -164,6 +166,7 @@ def details():
 
 
 @api_bp.get("/top-complaints")
+@requires_pass
 def top_complaints():
     # Return top 3 complaint components and summaries for a given Y/M/M.
     try:
@@ -239,6 +242,7 @@ def top_complaints():
 
 
 @api_bp.get("/trims")
+@requires_pass
 def trims():
     """Return trim/series complaint counts & percentages for a given Y/M/M.
 
@@ -313,6 +317,7 @@ def trims():
         return jsonify(ok=False, error=f"/api/trims failed: {repr(e)}"), 500
 
 @api_bp.get("/history")
+@requires_pass
 def history():
     """
     Return complaint history for a given Year/Make/Model as
@@ -401,5 +406,6 @@ def r2_check():
         return jsonify(ok=True, key=key, size=len(data), head_hex=head)
     except Exception as e:
         return jsonify(ok=False, error=f"/api/r2-check failed: {e}")
+
 
 
