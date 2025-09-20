@@ -1,19 +1,65 @@
 <header class="site-header">
   <nav class="site-nav">
+    <!-- Left: Menu -->
     <div class="nav-left">
+      <button class="nav-btn nav-btn--secondary" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">
+        Menu
+      </button>
+      <div class="menu-panel" id="menuPanel" hidden>
+        <a class="menu-item" href="/">Home</a>
+        <a class="menu-item" href="{{ url_for('billing.account') }}">Account</a>
+        <a class="menu-item" href="{{ url_for('billing.store') }}">Store</a>
+        <a class="menu-item" href="{{ url_for('pages.about') }}">About</a>
+      </div>
+    </div>
+
+    <!-- Center: Logo → Home -->
+    <div class="nav-center">
+      <a class="site-logo" href="/">CarGrader</a>
+      <!-- If you have a small logo image, swap the text:
+      <a class="site-logo" href="/">
+        <img src="{{ url_for('static', filename='images/cargrader-logo.svg') }}" alt="CarGrader" height="22">
+      </a>
+      -->
+    </div>
+
+    <!-- Right: Auth (Login or Logout) -->
+    <div class="nav-right">
       {% if session.user %}
-        <a class="nav-btn" href="{{ url_for('billing.account') }}">Account</a>
+        <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
       {% else %}
         <a class="nav-btn" href="{{ url_for('auth.login') }}">Create Account / Login</a>
       {% endif %}
     </div>
-
-    <div class="nav-center">
-      <a class="nav-btn nav-btn--secondary" href="{{ url_for('pages.about') }}">About</a>
-    </div>
-
-    <div class="nav-right">
-      <a class="nav-btn" href="{{ url_for('billing.store') }}">Store</a>
-    </div>
   </nav>
+
+  <!-- Tiny, dependency-free dropdown script -->
+  <script>
+    (function(){
+      const btn = document.getElementById('menuBtn');
+      const panel = document.getElementById('menuPanel');
+      function close() {
+        panel.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('click', onDoc, true);
+        document.removeEventListener('keydown', onKey, true);
+      }
+      function onDoc(e){
+        if (!panel.contains(e.target) && e.target !== btn) close();
+      }
+      function onKey(e){ if (e.key === 'Escape') close(); }
+      btn?.addEventListener('click', function(){
+        const open = panel.hidden;
+        panel.hidden = !open ? false : true;
+        btn.setAttribute('aria-expanded', String(!panel.hidden));
+        if (!panel.hidden) {
+          // Opened
+          setTimeout(()=>{ document.addEventListener('click', onDoc, true); }, 0);
+          document.addEventListener('keydown', onKey, true);
+        } else {
+          close();
+        }
+      });
+    })();
+  </script>
 </header>
