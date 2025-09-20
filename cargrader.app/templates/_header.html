@@ -1,27 +1,21 @@
+<!-- cargrader.app/templates/_header.html -->
 <header class="site-header">
   <nav class="site-nav">
     <!-- Left: Menu -->
     <div class="nav-left">
-      <button class="nav-btn nav-btn--secondary" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">
+      <button class="nav-btn nav-btn--secondary" id="menuBtn" type="button" aria-expanded="false" aria-controls="menuPanel">
         Menu
       </button>
-      <div class="menu-panel" id="menuPanel" hidden>
-        <a class="menu-item" href="/">Home</a>
-        <a class="menu-item" href="{{ url_for('billing.account') }}">Account</a>
-        <a class="menu-item" href="{{ url_for('billing.store') }}">Store</a>
-        <a class="menu-item" href="{{ url_for('pages.about') }}">About</a>
+      <div class="menu-panel" id="menuPanel" role="menu" aria-hidden="true">
+        <a class="menu-item" href="/" role="menuitem">Home</a>
+        <a class="menu-item" href="{{ url_for('billing.account') }}" role="menuitem">Account</a>
+        <a class="menu-item" href="{{ url_for('billing.store') }}" role="menuitem">Store</a>
+        <a class="menu-item" href="{{ url_for('pages.about') }}" role="menuitem">About</a>
       </div>
     </div>
 
-    <!-- Center: Logo → Home -->
-    <div class="nav-center">
-      <a class="site-logo" href="/">CarGrader</a>
-      <!-- If you have a small logo image, swap the text:
-      <a class="site-logo" href="/">
-        <img src="{{ url_for('static', filename='images/cargrader-logo.svg') }}" alt="CarGrader" height="22">
-      </a>
-      -->
-    </div>
+    <!-- Center: (intentionally empty spacer—no logo) -->
+    <div class="nav-center"></div>
 
     <!-- Right: Auth (Login or Logout) -->
     <div class="nav-right">
@@ -33,32 +27,36 @@
     </div>
   </nav>
 
-  <!-- Tiny, dependency-free dropdown script -->
   <script>
     (function(){
-      const btn = document.getElementById('menuBtn');
+      const btn   = document.getElementById('menuBtn');
       const panel = document.getElementById('menuPanel');
-      function close() {
-        panel.hidden = true;
+
+      function openPanel() {
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
+        document.addEventListener('click', onDocClick, true);
+        document.addEventListener('keydown', onKey, true);
+      }
+      function closePanel() {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
         btn.setAttribute('aria-expanded', 'false');
-        document.removeEventListener('click', onDoc, true);
+        document.removeEventListener('click', onDocClick, true);
         document.removeEventListener('keydown', onKey, true);
       }
-      function onDoc(e){
-        if (!panel.contains(e.target) && e.target !== btn) close();
+      function togglePanel() {
+        if (panel.classList.contains('open')) closePanel(); else openPanel();
       }
-      function onKey(e){ if (e.key === 'Escape') close(); }
-      btn?.addEventListener('click', function(){
-        const open = panel.hidden;
-        panel.hidden = !open ? false : true;
-        btn.setAttribute('aria-expanded', String(!panel.hidden));
-        if (!panel.hidden) {
-          // Opened
-          setTimeout(()=>{ document.addEventListener('click', onDoc, true); }, 0);
-          document.addEventListener('keydown', onKey, true);
-        } else {
-          close();
-        }
+      function onDocClick(e) {
+        if (!panel.contains(e.target) && e.target !== btn) closePanel();
+      }
+      function onKey(e) { if (e.key === 'Escape') closePanel(); }
+
+      btn?.addEventListener('click', function(e){
+        e.preventDefault(); // make sure it never submits anything
+        togglePanel();
       });
     })();
   </script>
