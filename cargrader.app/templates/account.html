@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body class="container">
+  {% include "_header.html" %}
+  <main style="padding:24px 16px;">
   <h1>Your Account</h1>
   {% if has_pass %}
     <p>You currently have an <strong>active</strong> pass ✅.</p>
