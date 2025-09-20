@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Your Account – CarGrader</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="container">
+  <h1>Your Account</h1>
+  {% if has_pass %}
+    <p>You currently have an <strong>active</strong> pass ✅.</p>
+  {% else %}
+    <p>You don’t have an active pass.</p>
+    <p><a class="btn-get" href="{{ url_for('billing.store') }}">Get a Pass</a></p>
+  {% endif %}
+</body>
+</html>
