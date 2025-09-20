@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body class="container">
+  {% include "_header.html" %}
+  <main style="padding:24px 16px;">
   <h1>Get Access</h1>
   {% if has_pass %}
     <p>You already have an active pass. You can still extend it by purchasing another pass.</p>
