@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-
+  {% include "_header.html" %}
   <!-- Full-bleed HERO (replaces the old .topbar + .banner) -->
   <section class="hero" role="img" aria-label="Hero banner">
     <div class="hero__overlay"></div>
@@ -158,6 +158,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
