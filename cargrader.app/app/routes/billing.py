@@ -59,7 +59,7 @@ def checkout():
     user_email = user.get("email")
 
     base = current_app.config.get("BASE_URL", "").rstrip("/")
-    success_url = f"{base}/account?paid=1"
+    success_url = f"{base}/account?paid=1&session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url  = f"{base}/store"
 
     s = _stripe()
@@ -112,6 +112,21 @@ def stripe_webhook():
 @billing_bp.get("/account")
 @requires_login
 def account():
-    """Very simple account page showing pass status."""
-    # You can expand this later with more detail/history.
+    # Fallback fulfillment: if we arrive with a Stripe session_id, verify & grant.
+    sess_id = request.args.get("session_id")
+    if sess_id:
+        s = _stripe()
+        try:
+            cs = s.checkout.Session.retrieve(sess_id)
+            # 'complete' means Checkout finished; payment_status can be 'paid' or 'no_payment_required' for 100% off
+            if getattr(cs, "status", None) == "complete" and getattr(cs, "payment_status", None) in ("paid", "no_payment_required"):
+                md = (cs.metadata or {})
+                user_sub = md.get("user_sub") or cs.client_reference_id
+                days = int(md.get("days") or 0)
+                if user_sub and days > 0:
+                    # UNIQUE(stripe_session_id) makes this idempotent if the webhook already granted it.
+                    grant_or_extend_pass(user_sub, days, cs.id, cs.customer)
+        except Exception:
+            current_app.logger.exception("Account fulfillment grant failed")
+
     return render_template("account.html", has_pass=has_active_pass_for_session())
