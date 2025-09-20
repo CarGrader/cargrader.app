@@ -73,6 +73,7 @@ def checkout():
             customer_email=user_email,
             client_reference_id=user_sub,   # tie the checkout to the Auth0 user
             metadata={"user_sub": user_sub, "days": str(PLAN_MAP[plan]["days"])},
+            allow_promotion_codes=True,
         )
         return redirect(cs.url, code=303)
     except Exception as e:
