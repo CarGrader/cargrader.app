@@ -1,0 +1,17 @@
+Hey! It looks like you finally made it to that page that talks about me. My name is Andy Frost, and I am the creator of CarGrader. I’m a husband, a dad, and what some people might call a “Gearhead”. 
+
+In 2017, I bought my first car for college. I was so excited by the sense of independence it gave me to navigate a car dealership all on my own, but the new car ecstasy quickly washed away when I started to realize that I had bought an absolute lemon. It had glitchy electronics, the transmission stuttered, and the doors wouldn’t unlock (which quickly became an issue when I started driving for Uber).
+
+When I finally got rid of my lemon, I couldn’t help but ask myself…is there some way I could have known that that car was going to be so terrible and problematic? When I looked at the normal places on the internet like Kelly Blue Book, Cars.com, Edmunds, etc. there were no obvious red flags for this car. In short – no. There wasn’t a place that had the kind of information I was hoping for, that is until I found out that the National Highway Traffic Safety Administration had been collecting complaint data for nearly 30 years. 
+
+There I found hundreds and hundreds of complaints that mentioned the very things that plagued me with my car! At the time it had roughly 3,500 complaints, which sparked the big question…is 3,500 a lot or a little or is it normal?
+
+So I started collecting and comparing data by hand in Excel spreadsheets and tried to account for different variables like time and sales volume. This led to my first YouTube channel called Data-Driven in 2020, where I tried (rather unsuccessfully) to make videos about the stuff I was finding. As TikTok began to grow in popularity in 202, I decided to start posting videos there with a broader focus on cars, repairs, and a sprinkle of car reviews using the data I had been compiling. The page was called GearHead Official and that’s where things started to take off finally.
+
+On GearHead Official I started trying out the idea of giving a car a score from 0 to 10 along with a letter grade A through F, and to this day, these videos still bring in views, likes, follows, and shares. Seeing the popularity of these videos and as requests to grade more cars kept coming in, I realized that what I needed to do was create a grading tool that everybody could use whenever they wanted to. And knowing that my grading algorithm was limited at the time I knew that whatever this tool was going to be, it was going to be big in terms of data.
+
+CarGrader takes hundreds of thousands of real individual complaints from NHTSA.gov from the last 20 years, comparing against things like sales volume and age, to finally answer that question I had in 2017…is that a lot of complaints or a little? That information is used to determine how far each car has deviated from what’s typical to produce the scores available here. I promise you it has been no small effort, and the scores you get here represent years of my research and development. 
+
+Knowing that it’s impossible to account for all variables that impact these scores, I’ve also provided as much information as I can (and there’s more to come) to help you see the data that’s behind that score. My goal is to give you the best data I can, free from opinions and assumptions, so that YOU can decide if a car is worth buying or not.
+
+This is CarGrader. Enjoy :)
