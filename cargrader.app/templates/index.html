@@ -15,17 +15,10 @@
   <section class="hero" role="img" aria-label="Hero banner">
     <div class="hero__overlay"></div>
     <div class="hero__inner">
-      <h1 class="hero__brand">CarGrader</h1>
-      {#
-      {% if session.user %}
-        <a href="/logout" class="hero__auth" id="logoutBtn">Logout</a>
-      {% else %}
-        <a href="/login" class="hero__auth" id="loginBtn">Sign Up / Login</a>
-      {% endif %}
-      {% if session.user and not has_active_pass %}
-        <a href="{{ url_for('billing.store') }}" class="hero__auth" style="margin-left:12px;">Get a Pass</a>
-      {% endif %}
-      #}
+      <h1 class="hero__brand">CarGrader</h1
+        {% if mission_text %}
+          <p class="hero__mission">{{ mission_text|replace('\n','<br>')|safe }}</p>
+        {% endif %}
     </div>
   </section>
 
@@ -160,6 +153,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
