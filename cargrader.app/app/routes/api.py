@@ -406,7 +406,7 @@ def _build_in_clause(prefix: str, values: list[str]):
 # Filtered Lookup endpoints
 # ----------------------------
 
-@api_bp.get("/filter/makes")
+@api_bp.get("/api/filter/makes")
 def filter_makes():
     """Distinct makes across a year range."""
     min_year = request.args.get("min_year", type=int)
@@ -424,9 +424,9 @@ def filter_makes():
             ).fetchall()
         return jsonify(ok=True, makes=[r["Make"] for r in rows])
     except Exception as e:
-        return jsonify(ok=False, error=f"/filter/makes failed: {e}"), 500
+        return jsonify(ok=False, error=f"/api/filter/makes failed: {e}"), 500
 
-@api_bp.get("/filter/models")
+@api_bp.get("/api/filter/models")
 def filter_models():
     """
     Distinct models across a year range, optionally restricted to a list of makes.
@@ -454,9 +454,9 @@ def filter_models():
             rows = con.execute(sql, params).fetchall()
         return jsonify(ok=True, models=[r["Model"] for r in rows])
     except Exception as e:
-        return jsonify(ok=False, error=f"/filter/models failed: {e}"), 500
+        return jsonify(ok=False, error=f"/api/filter/models failed: {e}"), 500
 
-@api_bp.get("/filter/search")
+@api_bp.get("/api/filter/search")
 @requires_pass
 def filter_search():
     """
@@ -527,4 +527,5 @@ def filter_search():
         ]
         return jsonify(ok=True, rows=data, capped=(len(data) >= limit))
     except Exception as e:
-        return jsonify(ok=False, error=f"/filter/search failed: {e}"), 500
+        return jsonify(ok=False, error=f"/api/filter/search failed: {e}"), 500
+
