@@ -45,6 +45,42 @@ def has_active_pass_for_session() -> bool:
         return False
     return has_active_pass(u.get("sub"))
 
+def active_pass_summary(user_sub: str):
+    """
+    Return a dict for the user's most recent active pass with:
+      - expires_at (ISO UTC string)
+      - starts_at  (ISO UTC string)
+      - days       (int original grant days)
+      - seconds_remaining (int)
+      - days_remaining_ceil (int)  # rounded up whole days remaining
+    Returns None if no active pass.
+    """
+    now = dt.datetime.utcnow()
+    with get_conn(readonly=True) as con:
+        row = con.execute(
+            """
+            SELECT starts_at, expires_at, days
+            FROM Passes
+            WHERE user_sub = :u AND status='active' AND expires_at >= :now
+            ORDER BY expires_at DESC
+            LIMIT 1
+            """,
+            {"u": user_sub, "now": now.replace(microsecond=0).isoformat()},
+        ).fetchone()
+    if not row:
+        return None
+    exp = dt.datetime.fromisoformat(row["expires_at"])
+    secs = max(0, int((exp - now).total_seconds()))
+    days_ceil = (secs + 86399) // 86400
+    return {
+        "starts_at": row["starts_at"],
+        "expires_at": row["expires_at"],
+        "days": int(row["days"]),
+        "seconds_remaining": secs,
+        "days_remaining_ceil": int(days_ceil),
+    }
+
+
 def grant_or_extend_pass(user_sub: str, days: int, stripe_session_id: str | None, stripe_customer_id: str | None):
     now = dt.datetime.utcnow()
     now_iso = now.replace(microsecond=0).isoformat()
