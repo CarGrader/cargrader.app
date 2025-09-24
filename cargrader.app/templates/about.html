@@ -3,13 +3,54 @@
 <head>
   <meta charset="utf-8">
   <title>About – CarGrader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <style>
+    /* Page-local styles so you don't have to touch main.css */
+    .about__wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    .about__photo {
+      display: block;
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 12px auto 16px;   /* centers the image at the top */
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      border: 2px solid rgba(255,255,255,.5);
+    }
+    .about__title {
+      text-align: center;
+      margin: 0 0 12px 0;
+    }
+    .about__body {
+      line-height: 1.6;
+      /* If your site uses a dark background, the default text color should already be readable.
+         Uncomment next line if you need a forced color: */
+      /* color: #fff; */
+    }
+  </style>
 </head>
 <body>
   {% include "_header.html" %}
-  <main class="container" style="padding:24px 16px;">
-    <h1>About CarGrader</h1>
-    <p>Coming soon. We’ll add our story and methodology here.</p>
+
+  <main class="about__wrap">
+    <img src="{{ url_for('static', filename='img/andy.jpg') }}"
+         alt="Photo of Andy"
+         class="about__photo">
+
+    <h1 class="about__title">About CarGrader</h1>
+
+    {% if text %}
+      <!-- Preserve line breaks from about.txt -->
+      <div class="about__body">{{ text|replace('\n','<br>')|safe }}</div>
+    {% else %}
+      <div class="about__body">About content coming soon.</div>
+    {% endif %}
   </main>
 </body>
 </html>
