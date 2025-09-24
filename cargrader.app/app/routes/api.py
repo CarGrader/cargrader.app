@@ -4,24 +4,23 @@ from app.db.connection import get_conn
 from app.db import queries
 from app.utils.access import requires_pass
 
-
 api_bp = Blueprint("api", __name__)
 
 @api_bp.get("/health")
 def health():
     info = {"ok": False}
     try:
-        # 1) What the app sees for DB path
+        # DB paths for quick sanity
         env_db = os.environ.get("DB_PATH")
         cfg_db = current_app.config.get("DB_PATH")
         info["env_DB_PATH"] = env_db
         info["config_DB_PATH"] = cfg_db
 
-        # 2) 🔎 DROP THE PROBE SNIPPET RIGHT HERE
+        # Probe a few common disk locations (Render, repo, subfolder)
         candidates = [
-            "/opt/render/project/src/data/GraderRater.db",               # repo root
-            "/opt/render/project/src/cargrader.app/data/GraderRater.db", # subfolder
-            "/var/data/GraderRater.db",                                  # Render Disk (replace if your mount is different)
+            "/opt/render/project/src/data/GraderRater.db",
+            "/opt/render/project/src/cargrader.app/data/GraderRater.db",
+            "/var/data/GraderRater.db",
         ]
         probes = []
         for p in candidates:
@@ -32,18 +31,14 @@ def health():
             except Exception as _e:
                 probes.append({"path": p, "error": str(_e)})
         info["probes"] = probes
-        # 2) 🔎 END PROBE SNIPPET
 
-        # 3) Fail fast if config path is missing
         if not cfg_db:
             info["error"] = "DB_PATH not set in config"
             return jsonify(info), 500
 
-        # 4) Basic file checks for the configured path
         info["db_exists"] = os.path.exists(cfg_db)
         info["db_size_bytes"] = os.path.getsize(cfg_db) if info["db_exists"] else 0
 
-        # 5) Try a real query only if the file exists
         with get_conn(readonly=True) as con:
             y = con.execute("""
                 SELECT COUNT(DISTINCT ModelYear) AS c
@@ -57,18 +52,21 @@ def health():
         return jsonify(info), 500
 
     return jsonify(info)
+
+# ----------------------------
+# Year/Make/Model primitives
+# ----------------------------
+
 @api_bp.get("/years")
 def years():
     try:
         with get_conn(readonly=True) as con:
             rows = con.execute(queries.YEARS_SQL).fetchall()
-        # row_factory returns dicts with keys matching SELECT names
         years = [r["ModelYear"] for r in rows]
         if not years:
             return jsonify(error="No years found in AllCars"), 404
         return jsonify(years=years)
     except Exception as e:
-        # This will show in DevTools → Network if the UI still says "Failed to load Years"
         return jsonify(error=f"/api/years failed: {e}"), 500
 
 @api_bp.get("/makes")
@@ -95,6 +93,10 @@ def models():
         return jsonify(models=[r["Model"] for r in rows])
     except Exception as e:
         return jsonify(error=f"/api/models failed: {e}"), 500
+
+# ----------------------------
+# Score + Details
+# ----------------------------
 
 @api_bp.get("/score")
 def score():
@@ -136,9 +138,7 @@ def details():
         if not row:
             return jsonify(error="Not found"), 404
 
-        # Compute the Y value and direction wording here to keep the front-end simple
         rel = row.get("RelRatio")
-        # Guard against null or zero
         if rel is None or rel <= 0:
             y_value = None
             direction = None
@@ -163,12 +163,13 @@ def details():
     except Exception as e:
         return jsonify(error=f"/api/details failed: {e}"), 500
 
-
+# ----------------------------
+# Pass-gated data boxes
+# ----------------------------
 
 @api_bp.get("/top-complaints")
 @requires_pass
 def top_complaints():
-    # Return top 3 complaint components and summaries for a given Y/M/M.
     try:
         year = request.args.get("year")
         make = request.args.get("make")
@@ -177,7 +178,6 @@ def top_complaints():
             return jsonify(ok=False, error="Missing year/make/model"), 400
 
         # Resolve GroupID
-        from app.db.connection import get_conn
         group_id = None
         with get_conn(readonly=True) as con:
             cur = con.execute(
@@ -199,9 +199,9 @@ def top_complaints():
         if not group_id:
             return jsonify(ok=False, error="GroupID not found for selection"), 404
 
-        # Pull top3 CSV from R2
+        # Read top3 from R2
         from ..services.r2 import get_bytes, get_text, R2Error
-        import csv, io
+        import csv, io, re as _re
 
         key_top3 = f"ResourceFiles/{group_id}/{group_id}_top3.csv"
         try:
@@ -214,15 +214,13 @@ def top_complaints():
         items = []
         for r in reader:
             comp = (r.get("Component") or "").strip()
-            pct  = r.get("Percentage")
             try:
-                pct = float(pct)
+                pct = float(r.get("Percentage"))
             except Exception:
                 pct = None
 
             summary = None
             if comp:
-                import re as _re
                 comp_key = _re.sub(r'[\\/]+', '_', comp.upper()).strip()
                 key_sum = f"ResourceFiles/{group_id}/{comp_key}_llamasum.txt"
                 try:
@@ -237,18 +235,12 @@ def top_complaints():
 
         return jsonify(ok=True, group_id=group_id, items=items)
     except Exception as e:
-        return jsonify(ok=False, error=f"/api/top-complaints failed: {e}"), 500
-
-
+        return jsonify(ok=False, error=f"/api/top-complaints failed: {repr(e)}"), 500
 
 @api_bp.get("/trims")
 @requires_pass
 def trims():
-    """Return trim/series complaint counts & percentages for a given Y/M/M.
-
-    Reads CSV from R2 at: ResourceFiles/{GroupID}/{GroupID}_ymmtscount.csv
-    and returns an array of { name, count, percentage }.
-    """
+    """Return trim/series complaint counts & percentages for a given Y/M/M."""
     try:
         year = request.args.get("year")
         make = request.args.get("make")
@@ -256,8 +248,7 @@ def trims():
         if not (year and make and model):
             return jsonify(ok=False, error="Missing year/make/model"), 400
 
-        # Resolve GroupID from DB (same approach as /top-complaints)
-        from app.db.connection import get_conn
+        # GroupID
         group_id = None
         with get_conn(readonly=True) as con:
             cur = con.execute(
@@ -266,8 +257,8 @@ def trims():
                 FROM AllCars
                 WHERE ModelYear = ? AND Make = ? AND Model = ?
                 LIMIT 1
-                """
-                , (year, make, model)
+                """,
+                (year, make, model)
             )
             row = cur.fetchone()
             if row:
@@ -284,7 +275,6 @@ def trims():
         try:
             raw = get_bytes(key)
         except (R2Error, botocore.exceptions.ClientError):
-            # Treat missing or access errors as "no data"
             return jsonify(ok=True, group_id=group_id, items=[], note=f"Missing R2 object: {key}")
 
         try:
@@ -293,7 +283,6 @@ def trims():
             items = []
             for row in reader:
                 name = (row.get("Name") or "").strip()
-                # Normalize "Count" and "Percentage"
                 vcount = row.get("Count", 0)
                 vpct = row.get("Percentage", 0)
                 try:
@@ -309,24 +298,15 @@ def trims():
             items.sort(key=lambda x: x["count"], reverse=True)
             return jsonify(ok=True, group_id=group_id, key=key, items=items)
         except Exception as parse_err:
-            # CSV parse issues -> return empty but with note
             return jsonify(ok=True, group_id=group_id, key=key, items=[], note=f"CSV parse error: {parse_err}"), 200
 
     except Exception as e:
-        # Return a more descriptive error (stringify fully)
         return jsonify(ok=False, error=f"/api/trims failed: {repr(e)}"), 500
 
 @api_bp.get("/history")
 @requires_pass
 def history():
-    """
-    Return complaint history for a given Year/Make/Model as
-    an array of { year, actual, expected }.
-
-    Reads CSV from R2 at:
-      ResourceFiles/{GroupID}/{GroupID}_cby.csv
-    expecting columns: "Year", "Actual Count", "Expected Count".
-    """
+    """Return complaint history as {year, actual, expected} for a given Y/M/M."""
     try:
         year = request.args.get("year")
         make = request.args.get("make")
@@ -334,7 +314,7 @@ def history():
         if not (year and make and model):
             return jsonify(ok=False, error="Missing year/make/model"), 400
 
-        # Resolve GroupID from AllCars
+        # GroupID
         group_id = None
         with get_conn(readonly=True) as con:
             cur = con.execute(
@@ -356,7 +336,7 @@ def history():
         if not group_id:
             return jsonify(ok=True, group_id=None, items=[])
 
-        # Pull CSV from R2
+        # Read CSV from R2
         from ..services.r2 import get_bytes, R2Error
         import csv, io, botocore
         key = f"ResourceFiles/{group_id}/{group_id}_cby.csv"
@@ -366,7 +346,6 @@ def history():
         except (R2Error, botocore.exceptions.ClientError):
             return jsonify(ok=True, group_id=group_id, items=[], note=f"Missing R2 object: {key}")
 
-        # Parse CSV
         try:
             f = io.StringIO(raw.decode("utf-8", errors="replace"))
             reader = csv.DictReader(f)
@@ -384,7 +363,6 @@ def history():
                 actual   = _to_num(r.get("Actual Count"))
                 expected = _to_num(r.get("Expected Count"))
                 items.append({"year": y, "actual": actual, "expected": expected})
-            # ensure ascending by year
             items.sort(key=lambda x: x["year"])
             return jsonify(ok=True, group_id=group_id, items=items)
         except Exception as parse_err:
@@ -407,10 +385,15 @@ def r2_check():
     except Exception as e:
         return jsonify(ok=False, error=f"/api/r2-check failed: {e}")
 
+# ----------------------------
+# Filtered Lookup helpers
+# ----------------------------
+
 def _build_in_clause(prefix: str, values: list[str]):
     """
     Returns (clause_sql, params_dict).
-    Example -> ('IN (:m0,:m1)', {'m0':'Ford','m1':'Toyota'})
+    Example: values=['Ford','Toyota'] ->
+      ('IN (:m0,:m1)', {'m0':'Ford','m1':'Toyota'})
     """
     if not values:
         return "", {}
@@ -418,6 +401,10 @@ def _build_in_clause(prefix: str, values: list[str]):
     clause = "IN (" + ",".join(f":{k}" for k in keys) + ")"
     params = {k: v for k, v in zip(keys, values)}
     return clause, params
+
+# ----------------------------
+# Filtered Lookup endpoints
+# ----------------------------
 
 @api_bp.get("/filter/makes")
 def filter_makes():
@@ -438,7 +425,6 @@ def filter_makes():
         return jsonify(ok=True, makes=[r["Make"] for r in rows])
     except Exception as e:
         return jsonify(ok=False, error=f"/filter/makes failed: {e}"), 500
-
 
 @api_bp.get("/filter/models")
 def filter_models():
@@ -470,18 +456,18 @@ def filter_models():
     except Exception as e:
         return jsonify(ok=False, error=f"/filter/models failed: {e}"), 500
 
-
 @api_bp.get("/filter/search")
 @requires_pass
 def filter_search():
     """
-    Search for rows (Year, Make, Model, Score) across a year range
-    with optional multi-make and multi-model filters. Max 100 rows.
+    Return rows (Year, Make, Model, Score) across a year range with optional
+    multi-make, multi-model, and min/max score filters. Max 100 rows.
     Query params:
       min_year, max_year (required)
       makes=comma,separated,list (optional)
       models=comma,separated,list (optional)
-      limit=100 (optional; capped at 100)
+      min_score, max_score (optional; leave blank for no bound)
+      limit (optional; default 100; capped at 100)
     """
     min_year = request.args.get("min_year", type=int)
     max_year = request.args.get("max_year", type=int)
@@ -495,6 +481,9 @@ def filter_search():
 
     makes_raw  = request.args.get("makes", "", type=str).strip()
     models_raw = request.args.get("models", "", type=str).strip()
+    min_score  = request.args.get("min_score", type=float)
+    max_score  = request.args.get("max_score", type=float)
+
     makes  = [m for m in (s.strip() for s in makes_raw.split(",")) if m] if makes_raw else []
     models = [m for m in (s.strip() for s in models_raw.split(",")) if m] if models_raw else []
 
@@ -504,9 +493,19 @@ def filter_search():
     makes_sql  = f"AND Make {makes_clause}" if makes_clause else ""
     models_sql = f"AND Model {models_clause}" if models_clause else ""
 
+    if min_score is not None and max_score is not None:
+        score_sql = "AND Score BETWEEN :min_score AND :max_score"
+    elif min_score is not None:
+        score_sql = "AND Score >= :min_score"
+    elif max_score is not None:
+        score_sql = "AND Score <= :max_score"
+    else:
+        score_sql = ""
+
     sql = queries.FILTER_SEARCH_SQL_BASE.format(
         makes_clause=makes_sql,
-        models_clause=models_sql
+        models_clause=models_sql,
+        score_clause=score_sql
     )
 
     try:
@@ -517,6 +516,9 @@ def filter_search():
             **make_params,
             **model_params,
         }
+        if min_score is not None: params["min_score"] = min_score
+        if max_score is not None: params["max_score"] = max_score
+
         with get_conn(readonly=True) as con:
             rows = con.execute(sql, params).fetchall()
         data = [
@@ -526,5 +528,3 @@ def filter_search():
         return jsonify(ok=True, rows=data, capped=(len(data) >= limit))
     except Exception as e:
         return jsonify(ok=False, error=f"/filter/search failed: {e}"), 500
-
-
