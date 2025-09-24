@@ -71,8 +71,10 @@ FROM AllCars
 WHERE ModelYear BETWEEN :min_year AND :max_year
   {makes_clause}
   {models_clause}
+  {score_clause}
 ORDER BY (Score IS NULL), Score DESC, Year DESC, Make ASC, Model ASC
 LIMIT :limit
 """
+
 
 
