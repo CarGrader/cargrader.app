@@ -640,7 +640,7 @@ async function flLoadMakes(){
   const minY = Number(flMinYear.value), maxY = Number(flMaxYear.value);
   if (!minY || !maxY) return;
   try{
-    const r = await getJSON(`/filter/makes?min_year=${minY}&max_year=${maxY}`);
+    const r = await getJSON(`/api/filter/makes?min_year=${minY}&max_year=${maxY}`);
     const makes = r?.makes || [];
     flMakes.innerHTML = makes.map(m => `<option value="${m}">${m}</option>`).join('');
     flMakes.disabled = false;
@@ -660,7 +660,7 @@ async function flLoadModels(){
       max_year: String(maxY),
       makes: makes.join(',')
     });
-    const r = await getJSON(`/filter/models?${qs.toString()}`);
+    const r = await getJSON(`/api/filter/models?${qs.toString()}`);
     const models = r?.models || [];
     flModels.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
     flModels.disabled = false;
@@ -682,7 +682,7 @@ async function flSearchNow(){
   });
   flTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;opacity:.7;">Searching…</td></tr>`;
   try{
-    const r = await getJSON(`/filter/search?${qs.toString()}`);
+    const r = await getJSON(`/api/filter/search?${qs.toString()}`);
     const rows = r?.rows || [];
     if (!rows.length){
       flTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;opacity:.7;">No results</td></tr>`;
