@@ -1,3 +1,3 @@
 Is it Great, or is it Garbage?
-CarGrader's mission is to provide you with real data-driven information so you can buy used cars with confidence. We strive to put the best data possible into YOUR hands so that YOU can decide what car is and isn't worth buying.
+CarGrader's mission is to put the best data possible into YOUR hands so that YOU can decide what car is and isn't worth buying ny using real data-driven stats.
 
