@@ -4,7 +4,7 @@ from app.utils.access import has_active_pass_for_session
 
 public_bp = Blueprint("public", __name__)
 
-public_bp.route("/")
+@public_bp.route("/")
 def home():
     """Render the homepage."""
     mission_text = ""
@@ -37,5 +37,6 @@ def favicon():
             return send_from_directory(static_img, name, mimetype=mime)
     # No favicon found → return 404
     return ("", 404)
+
 
 
