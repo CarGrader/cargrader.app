@@ -4,33 +4,49 @@
   <meta charset="utf-8">
   <title>About – CarGrader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- main.css already includes @font-face for Fredoka -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
   <style>
-    /* Page-local styles so you don't have to touch main.css */
+    /* Page-scoped styles */
     .about__wrap {
       max-width: 900px;
       margin: 0 auto;
       padding: 24px 16px;
+      text-align: center;
     }
+
     .about__photo {
       display: block;
-      width: 140px;
-      height: 140px;
+      width: 220px;
+      height: 220px;
       object-fit: cover;
+      object-position: center;
       border-radius: 50%;
-      margin: 12px auto 16px;   /* centers the image at the top */
+      margin: 12px auto 16px;
       box-shadow: 0 10px 24px rgba(0,0,0,.35);
       border: 2px solid rgba(255,255,255,.5);
+      background: rgba(255,255,255,.08);
     }
+    @media (max-width: 900px){ .about__photo { width: 180px; height: 180px; } }
+    @media (max-width: 520px){ .about__photo { width: 150px; height: 150px; } }
+
     .about__title {
-      text-align: center;
+      font-family: 'Fredoka', sans-serif; /* your logo font from main.css */
+      font-weight: 700;
+      font-size: 56px;
+      letter-spacing: 1px;
       margin: 0 0 12px 0;
+      color: #fff;
+      text-shadow: 0 6px 24px rgba(0,0,0,.5);
     }
+    @media (max-width: 800px){ .about__title { font-size: 44px; } }
+    @media (max-width: 500px){ .about__title { font-size: 36px; } }
+
     .about__body {
-      line-height: 1.6;
-      /* If your site uses a dark background, the default text color should already be readable.
-         Uncomment next line if you need a forced color: */
+      line-height: 1.7;
+      margin-top: 8px;
+      /* Uncomment if you need forced white text here */
       /* color: #fff; */
     }
   </style>
@@ -39,14 +55,16 @@
   {% include "_header.html" %}
 
   <main class="about__wrap">
+    <!-- Photo at the top -->
     <img src="{{ url_for('static', filename='img/andy.jpg') }}"
          alt="Photo of Andy"
          class="about__photo">
 
-    <h1 class="about__title">About CarGrader</h1>
+    <!-- Title in logo font -->
+    <h1 class="about__title">CarGrader</h1>
 
+    <!-- About text from static/content/about.txt (line breaks preserved) -->
     {% if text %}
-      <!-- Preserve line breaks from about.txt -->
       <div class="about__body">{{ text|replace('\n','<br>')|safe }}</div>
     {% else %}
       <div class="about__body">About content coming soon.</div>
