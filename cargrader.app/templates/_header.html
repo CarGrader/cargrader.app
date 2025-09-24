@@ -1,10 +1,8 @@
-<!-- cargrader.app/templates/_header.html -->
 <header class="site-header">
-  <nav class="site-nav">
-    <!-- Left: Menu -->
+  <div class="container header-inner">
+    <!-- Left side -->
     <div class="left">
       <button id="menu-btn" class="btn header-btn" type="button" aria-expanded="false" aria-controls="menu-panel">
-        <!-- optional hamburger icon -->
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -12,51 +10,53 @@
       </button>
     </div>
 
-
-    <!-- Center: (intentionally empty spacer—no logo) -->
-    <div class="nav-center"></div>
-
-    <!-- Right: Auth (Login or Logout) -->
-    <div class="nav-right">
-      {% if session.user %}
-        <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
+    <!-- Right side -->
+    <div class="right">
+      {% if session.get('user') %}
+        <a class="btn header-btn" href="{{ url_for('auth.logout') }}">Logout</a>
       {% else %}
-        <a class="nav-btn" href="{{ url_for('auth.login') }}">Create Account / Login</a>
+        <a class="btn header-btn" href="{{ url_for('auth.login') }}">Create Account / Login</a>
       {% endif %}
     </div>
+  </div>
+
+  <!-- Collapsible Menu -->
+  <nav id="menu-panel" class="menu-panel is-hidden" aria-hidden="true">
+    <ul>
+      <li><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li><a href="{{ url_for('account.account') }}">Account</a></li>
+      <li><a href="{{ url_for('store.index') }}">Store</a></li>
+      <li><a href="{{ url_for('main.about') }}">About</a></li>
+      <!-- Add FAQ later if needed -->
+    </ul>
   </nav>
-
-  <script>
-    (function(){
-      const btn   = document.getElementById('menuBtn');
-      const panel = document.getElementById('menuPanel');
-
-      function openPanel() {
-        panel.classList.add('open');
-        panel.setAttribute('aria-hidden', 'false');
-        btn.setAttribute('aria-expanded', 'true');
-        document.addEventListener('click', onDocClick, true);
-        document.addEventListener('keydown', onKey, true);
-      }
-      function closePanel() {
-        panel.classList.remove('open');
-        panel.setAttribute('aria-hidden', 'true');
-        btn.setAttribute('aria-expanded', 'false');
-        document.removeEventListener('click', onDocClick, true);
-        document.removeEventListener('keydown', onKey, true);
-      }
-      function togglePanel() {
-        if (panel.classList.contains('open')) closePanel(); else openPanel();
-      }
-      function onDocClick(e) {
-        if (!panel.contains(e.target) && e.target !== btn) closePanel();
-      }
-      function onKey(e) { if (e.key === 'Escape') closePanel(); }
-
-      btn?.addEventListener('click', function(e){
-        e.preventDefault(); // make sure it never submits anything
-        togglePanel();
-      });
-    })();
-  </script>
 </header>
+
+<script>
+(function () {
+  const menuBtn   = document.getElementById('menu-btn');
+  const menuPanel = document.getElementById('menu-panel');
+  if (!menuBtn || !menuPanel) return;
+
+  function setOpen(open) {
+    menuPanel.classList.toggle('is-hidden', !open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuPanel.setAttribute('aria-hidden', String(!open));
+  }
+
+  // Start closed
+  setOpen(false);
+
+  menuBtn.addEventListener('click', () => {
+    const open = menuPanel.classList.contains('is-hidden');
+    setOpen(open);
+  });
+
+  // Optional: close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!menuPanel.contains(e.target) && !menuBtn.contains(e.target)) {
+      setOpen(false);
+    }
+  });
+})();
+</script>
