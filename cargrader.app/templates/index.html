@@ -193,7 +193,7 @@
           {% else %}
             <div class="lookup">
               <!-- Filters stacked at the top -->
-              <div class="lookup__filters">
+               <div class="lookup__filters">
                 <div class="form-row">
                   <label for="fl-min-year">Min Year</label>
                   <select id="fl-min-year"></select>
@@ -204,13 +204,19 @@
                 </div>
             
                 <div class="form-row">
-                  <label>Models</label>
-                  <div id="fl-models-box" class="checks" aria-label="Models (multi-select)"><!-- JS renders checkboxes --></div>
+                  <label>Makes</label>
+                  <!-- OPTIONAL DROPDOWN WRAPPER — see section #4 -->
+                  <!-- <details class="dropdown"><summary id="fl-makes-summary">Makes</summary> -->
+                    <div id="fl-makes-box" class="checks" aria-label="Makes (multi-select)"></div>
+                  <!-- </details> -->
                 </div>
             
                 <div class="form-row">
-                  <label>Makes</label>
-                  <div id="fl-makes-box" class="checks" aria-label="Makes (multi-select)"><!-- JS renders checkboxes --></div>
+                  <label>Models</label>
+                  <!-- OPTIONAL DROPDOWN WRAPPER -->
+                  <!-- <details class="dropdown"><summary id="fl-models-summary">Models</summary> -->
+                    <div id="fl-models-box" class="checks" aria-label="Models (multi-select)"></div>
+                  <!-- </details> -->
                 </div>
             
                 <div class="form-row">
@@ -265,6 +271,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
