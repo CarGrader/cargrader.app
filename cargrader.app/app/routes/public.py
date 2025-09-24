@@ -6,7 +6,14 @@ public_bp = Blueprint("public", __name__)
 @public_bp.route("/")
 def home():
     """Render the homepage."""
-    return render_template("index.html")
+    mission_text = ""
+    try:
+        mission_path = Path(current_app.static_folder) / "content" / "mission.txt"
+        if mission_path.exists():
+            mission_text = mission_path.read_text(encoding="utf-8").strip()
+    except Exception as e:
+        current_app.logger.warning(f"Could not load mission.txt: {e}")
+    return render_template("index.html", mission_text=mission_text)
 
 @public_bp.get("/favicon.ico", endpoint="favicon")
 def favicon():
@@ -22,3 +29,4 @@ def favicon():
             return send_from_directory(static_img, name, mimetype=mime)
     # No favicon found → return 404
     return ("", 404)
+
