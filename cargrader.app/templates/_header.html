@@ -26,4 +26,38 @@
       {% endif %}
     </div>
   </nav>
+
+  <script>
+    (function(){
+      const btn   = document.getElementById('menuBtn');
+      const panel = document.getElementById('menuPanel');
+
+      function openPanel() {
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
+        document.addEventListener('click', onDocClick, true);
+        document.addEventListener('keydown', onKey, true);
+      }
+      function closePanel() {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('click', onDocClick, true);
+        document.removeEventListener('keydown', onKey, true);
+      }
+      function togglePanel() {
+        if (panel.classList.contains('open')) closePanel(); else openPanel();
+      }
+      function onDocClick(e) {
+        if (!panel.contains(e.target) && e.target !== btn) closePanel();
+      }
+      function onKey(e) { if (e.key === 'Escape') closePanel(); }
+
+      btn?.addEventListener('click', function(e){
+        e.preventDefault(); // make sure it never submits anything
+        togglePanel();
+      });
+    })();
+  </script>
 </header>
