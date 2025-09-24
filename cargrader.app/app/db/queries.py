@@ -66,15 +66,15 @@ SELECT
   ModelYear AS Year,
   Make,
   Model,
-  Score
+  MAX(Score) AS Score
 FROM AllCars
 WHERE ModelYear BETWEEN :min_year AND :max_year
   {makes_clause}
   {models_clause}
   {score_clause}
-ORDER BY (Score IS NULL), Score DESC, Year DESC, Make ASC, Model ASC
+GROUP BY ModelYear, Make, Model
+ORDER BY (MAX(Score) IS NULL), MAX(Score) DESC, Year DESC, Make ASC, Model ASC
 LIMIT :limit
 """
-
 
 
