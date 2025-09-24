@@ -36,5 +36,11 @@ def privacy():
 
 @pages_bp.get("/about")
 def about():
-    return render_template("about.html")
+    path = os.path.join(current_app.static_folder, "content", "about.txt")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            text = f.read().strip()
+    except FileNotFoundError:
+        text = "About file not found. Please add cargrader.app/static/content/about.txt"
+    return render_template("about.html", text=text)
 
