@@ -406,7 +406,7 @@ def _build_in_clause(prefix: str, values: list[str]):
 # Filtered Lookup endpoints
 # ----------------------------
 
-@api_bp.get("/api/filter/makes")
+@api_bp.get("/filter/makes")
 def filter_makes():
     """Distinct makes across a year range."""
     min_year = request.args.get("min_year", type=int)
@@ -426,7 +426,7 @@ def filter_makes():
     except Exception as e:
         return jsonify(ok=False, error=f"/api/filter/makes failed: {e}"), 500
 
-@api_bp.get("/api/filter/models")
+@api_bp.get("/filter/models")
 def filter_models():
     """
     Distinct models across a year range, optionally restricted to a list of makes.
@@ -456,7 +456,7 @@ def filter_models():
     except Exception as e:
         return jsonify(ok=False, error=f"/api/filter/models failed: {e}"), 500
 
-@api_bp.get("/api/filter/search")
+@api_bp.get("/filter/search")
 @requires_pass
 def filter_search():
     """
@@ -528,4 +528,5 @@ def filter_search():
         return jsonify(ok=True, rows=data, capped=(len(data) >= limit))
     except Exception as e:
         return jsonify(ok=False, error=f"/api/filter/search failed: {e}"), 500
+
 
