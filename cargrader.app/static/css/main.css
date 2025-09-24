@@ -524,14 +524,20 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 /* Mission line under the big title */
 .hero__mission{
-  color:#fff;
-  text-align:center;   /* center justification */
-  max-width:900px;
-  margin:4px auto 0;
-  font-size:20px;
-  line-height:1.5;
-  font-weight:700;     /* bold */
+  display: block;
+  width: 100%;
+  color: #fff;
+  text-align: center !important;  /* force center alignment */
+  max-width: 900px;
+  margin: 8px auto 0;
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 700;
   text-shadow: 0 3px 12px rgba(0,0,0,.45);
 }
-@media (max-width: 800px){ .hero__mission{ font-size:18px; } }
-@media (max-width: 500px){ .hero__mission{ font-size:16px; } }
+@media (max-width: 800px){
+  .hero__mission{ font-size:18px; }
+}
+@media (max-width: 500px){
+  .hero__mission{ font-size:16px; }
+}
