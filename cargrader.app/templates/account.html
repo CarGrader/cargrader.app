@@ -3,17 +3,55 @@
 <head>
   <meta charset="utf-8">
   <title>Your Account – CarGrader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body class="container">
   {% include "_header.html" %}
-  <main style="padding:24px 16px;">
-  <h1>Your Account</h1>
-  {% if has_pass %}
-    <p>You currently have an <strong>active</strong> pass ✅.</p>
-  {% else %}
-    <p>You don’t have an active pass.</p>
-    <p><a class="btn-get" href="{{ url_for('billing.store') }}">Get a Pass</a></p>
-  {% endif %}
+
+  <main style="padding:24px 16px; max-width:900px; margin:0 auto;">
+    <h1>Your Account</h1>
+
+    {# Optional success notice after returning from Stripe #}
+    {% if request.args.get('paid') == '1' %}
+      <div class="notice success" style="margin:12px 0; padding:10px 12px; border-radius:12px; background:rgba(46,160,67,.1); border:1px solid rgba(46,160,67,.35);">
+        ✅ Thanks! Your purchase was processed. If you don’t see your pass below, refresh in a moment.
+      </div>
+    {% endif %}
+
+    {% if has_pass %}
+      <section class="panel" style="padding:16px; border:1px solid var(--border, rgba(255,255,255,.15)); border-radius:16px; background:rgba(0,0,0,.25);">
+        <p>You currently have an <strong>active</strong> pass ✅.</p>
+
+        {% if days_remaining is not none and expires_at %}
+          <p style="margin-top:8px;">
+            Your pass expires in
+            <strong>{{ days_remaining }}</strong>
+            day{{ '' if days_remaining == 1 else 's' }}
+            (by <strong>{{ expires_at }}</strong> UTC).
+          </p>
+        {% endif %}
+
+        <div style="margin-top:12px;">
+          <a class="btn header-btn" href="{{ url_for('billing.store') }}">Extend / Upgrade</a>
+        </div>
+      </section>
+    {% else %}
+      <section class="panel" style="padding:16px; border:1px solid var(--border, rgba(255,255,255,.15)); border-radius:16px; background:rgba(0,0,0,.25);">
+        <p>You don’t have an active pass.</p>
+        <div style="margin-top:12px;">
+          <a class="btn header-btn" href="{{ url_for('billing.store') }}">Get a Pass</a>
+        </div>
+      </section>
+    {% endif %}
+
+    <section style="margin-top:24px;">
+      <h2 style="margin-bottom:8px;">Account Tips</h2>
+      <ul class="muted" style="line-height:1.6;">
+        <li>Pass time is tracked to the minute in UTC. The “days remaining” number rounds up to the next full day.</li>
+        <li>If you extend while your current pass is active, the new time is added to your existing expiry.</li>
+      </ul>
+    </section>
+  </main>
 </body>
 </html>
