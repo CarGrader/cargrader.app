@@ -614,7 +614,7 @@ function selectedCheckboxValues(containerEl){
 function renderCheckboxes(containerEl, values){
   if (!containerEl) return;
   containerEl.innerHTML = values.map(v => `
-    <label class="chk"><input type="checkbox" value="${v}"> <span>${v}</span></label>
+    <label class="chk"><span class="lbl">${v}</span><input type="checkbox" value="${v}"></label>
   `).join('');
 }
 
