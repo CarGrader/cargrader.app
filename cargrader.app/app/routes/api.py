@@ -407,5 +407,124 @@ def r2_check():
     except Exception as e:
         return jsonify(ok=False, error=f"/api/r2-check failed: {e}")
 
+def _build_in_clause(prefix: str, values: list[str]):
+    """
+    Returns (clause_sql, params_dict).
+    Example -> ('IN (:m0,:m1)', {'m0':'Ford','m1':'Toyota'})
+    """
+    if not values:
+        return "", {}
+    keys = [f"{prefix}{i}" for i in range(len(values))]
+    clause = "IN (" + ",".join(f":{k}" for k in keys) + ")"
+    params = {k: v for k, v in zip(keys, values)}
+    return clause, params
+
+@api_bp.get("/filter/makes")
+def filter_makes():
+    """Distinct makes across a year range."""
+    min_year = request.args.get("min_year", type=int)
+    max_year = request.args.get("max_year", type=int)
+    if min_year is None or max_year is None:
+        return jsonify(error="Missing min_year/max_year"), 400
+    if min_year > max_year:
+        min_year, max_year = max_year, min_year
+
+    try:
+        with get_conn(readonly=True) as con:
+            rows = con.execute(
+                queries.FILTER_MAKES_RANGE_SQL,
+                {"min_year": min_year, "max_year": max_year}
+            ).fetchall()
+        return jsonify(ok=True, makes=[r["Make"] for r in rows])
+    except Exception as e:
+        return jsonify(ok=False, error=f"/filter/makes failed: {e}"), 500
+
+
+@api_bp.get("/filter/models")
+def filter_models():
+    """
+    Distinct models across a year range, optionally restricted to a list of makes.
+    Query params:
+      min_year, max_year
+      makes=comma,separated,list
+    """
+    min_year = request.args.get("min_year", type=int)
+    max_year = request.args.get("max_year", type=int)
+    makes_raw = request.args.get("makes", "", type=str).strip()
+    if min_year is None or max_year is None:
+        return jsonify(error="Missing min_year/max_year"), 400
+    if min_year > max_year:
+        min_year, max_year = max_year, min_year
+
+    makes = [m for m in (s.strip() for s in makes_raw.split(",")) if m] if makes_raw else []
+    makes_clause, make_params = _build_in_clause("m", makes)
+    makes_sql = f"AND Make {makes_clause}" if makes_clause else ""
+
+    sql = queries.FILTER_MODELS_RANGE_SQL_BASE.format(makes_clause=makes_sql)
+
+    try:
+        params = {"min_year": min_year, "max_year": max_year, **make_params}
+        with get_conn(readonly=True) as con:
+            rows = con.execute(sql, params).fetchall()
+        return jsonify(ok=True, models=[r["Model"] for r in rows])
+    except Exception as e:
+        return jsonify(ok=False, error=f"/filter/models failed: {e}"), 500
+
+
+@api_bp.get("/filter/search")
+@requires_pass
+def filter_search():
+    """
+    Search for rows (Year, Make, Model, Score) across a year range
+    with optional multi-make and multi-model filters. Max 100 rows.
+    Query params:
+      min_year, max_year (required)
+      makes=comma,separated,list (optional)
+      models=comma,separated,list (optional)
+      limit=100 (optional; capped at 100)
+    """
+    min_year = request.args.get("min_year", type=int)
+    max_year = request.args.get("max_year", type=int)
+    limit    = request.args.get("limit", default=100, type=int)
+    limit = max(1, min(limit, 100))
+
+    if min_year is None or max_year is None:
+        return jsonify(ok=False, error="Missing min_year/max_year"), 400
+    if min_year > max_year:
+        min_year, max_year = max_year, min_year
+
+    makes_raw  = request.args.get("makes", "", type=str).strip()
+    models_raw = request.args.get("models", "", type=str).strip()
+    makes  = [m for m in (s.strip() for s in makes_raw.split(",")) if m] if makes_raw else []
+    models = [m for m in (s.strip() for s in models_raw.split(",")) if m] if models_raw else []
+
+    makes_clause, make_params   = _build_in_clause("m", makes)
+    models_clause, model_params = _build_in_clause("d", models)
+
+    makes_sql  = f"AND Make {makes_clause}" if makes_clause else ""
+    models_sql = f"AND Model {models_clause}" if models_clause else ""
+
+    sql = queries.FILTER_SEARCH_SQL_BASE.format(
+        makes_clause=makes_sql,
+        models_clause=models_sql
+    )
+
+    try:
+        params = {
+            "min_year": min_year,
+            "max_year": max_year,
+            "limit":    limit,
+            **make_params,
+            **model_params,
+        }
+        with get_conn(readonly=True) as con:
+            rows = con.execute(sql, params).fetchall()
+        data = [
+            {"year": r["Year"], "make": r["Make"], "model": r["Model"], "score": r["Score"]}
+            for r in rows
+        ]
+        return jsonify(ok=True, rows=data, capped=(len(data) >= limit))
+    except Exception as e:
+        return jsonify(ok=False, error=f"/filter/search failed: {e}"), 500
 
 
