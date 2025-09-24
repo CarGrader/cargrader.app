@@ -105,12 +105,12 @@
             {% if not is_logged_in %}
               <div class="gate">
                 <p>Login to see more!</p>
-                <a class="btn header-btn" href="{{ url_for('auth.login') }}">Login</a>
+                <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
               </div>
             {% elif not has_pass %}
               <div class="gate">
                 <p>Buy a pass to see more!</p>
-                <a class="btn header-btn" href="{{ url_for('billing.store') }}">Buy Pass</a>
+                <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
               </div>
             {% else %}
               <ul id="topList" class="simple"></ul>
@@ -127,12 +127,12 @@
           {% if not is_logged_in %}
             <div class="gate">
               <p>Login to see more!</p>
-              <a class="btn header-btn" href="{{ url_for('auth.login') }}">Login</a>
+              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
             </div>
           {% elif not has_pass %}
             <div class="gate">
               <p>Buy a pass to see more!</p>
-              <a class="btn header-btn" href="{{ url_for('billing.store') }}">Buy Pass</a>
+              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
             </div>
           {% else %}
             <div class="table-wrap trims-table">
@@ -160,12 +160,12 @@
           {% if not is_logged_in %}
             <div class="gate">
               <p>Login to see more!</p>
-              <a class="btn header-btn" href="{{ url_for('auth.login') }}">Login</a>
+              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
             </div>
           {% elif not has_pass %}
             <div class="gate">
               <p>Buy a pass to see more!</p>
-              <a class="btn header-btn" href="{{ url_for('billing.store') }}">Buy Pass</a>
+              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
             </div>
           {% else %}
             <canvas id="historyChart" class="history-canvas"></canvas>
@@ -193,6 +193,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
