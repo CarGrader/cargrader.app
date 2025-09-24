@@ -1,7 +1,7 @@
 # cargrader.app/app/routes/billing.py
 from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, jsonify
 from app.utils.auth import requires_login
-from app.utils.access import grant_or_extend_pass, has_active_pass_for_session
+from app.utils.access import grant_or_extend_pass, has_active_pass_for_session, active_pass_summary
 import os, stripe
 
 billing_bp = Blueprint("billing", __name__)
@@ -129,4 +129,13 @@ def account():
         except Exception:
             current_app.logger.exception("Account fulfillment grant failed")
 
-    return render_template("account.html", has_pass=has_active_pass_for_session())
+    has_pass = has_active_pass_for_session()
+    days_remaining = None
+    expires_at = None
+    if has_pass:
+        u = session.get("user") or {}
+        s = active_pass_summary(u.get("sub"))
+        if s:
+            days_remaining = s.get("days_remaining_ceil")
+            expires_at = s.get("expires_at")
+    return render_template("account.html", has_pass=has_pass, days_remaining=days_remaining, expires_at=expires_at)
