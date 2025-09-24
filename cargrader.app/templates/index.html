@@ -88,23 +88,35 @@
       <!-- Collapsible Boxes with + / - toggles -->
       <section class="box" id="box-details">
         <header class="box__header" data-toggle="#box-details">
-          <div class="box__title">Details</div>
-          <div class="box__toggle" aria-hidden="true">+</div>
-        </header>
-        <div class="box__content">
-          <p id="detailsText" class="muted">Select a car to see details.</p>
-        </div>
-      </section>
-
-      <section class="box" id="box-top">
-        <header class="box__header" data-toggle="#box-top">
-          <div class="box__title">Top Complaints</div>
-          <div class="box__toggle" aria-hidden="true">+</div>
-        </header>
-        <div class="box__content">
-          <ul id="topList" class="simple"></ul>
-        </div>
-      </section>
+            <div class="box__title">Details</div>
+            <div class="box__toggle" aria-hidden="true">+</div>
+          </header>
+          <div class="box__content">
+            <p id="detailsText" class="muted">Select a car to see details.</p>
+          </div>
+        </section>
+  
+        <section class="box" id="box-top">
+          <header class="box__header" data-toggle="#box-top">
+            <div class="box__title">Top Complaints</div>
+            <div class="box__toggle" aria-hidden="true">+</div>
+          </header>
+          <div class="box__content">
+            {% if not is_logged_in %}
+              <div class="gate">
+                <p>Login to see more!</p>
+                <a class="btn header-btn" href="{{ url_for('auth.login') }}">Login</a>
+              </div>
+            {% elif not has_pass %}
+              <div class="gate">
+                <p>Buy a pass to see more!</p>
+                <a class="btn header-btn" href="{{ url_for('billing.store') }}">Buy Pass</a>
+              </div>
+            {% else %}
+              <ul id="topList" class="simple"></ul>
+            {% endif %}
+          </div>
+        </section>
 
       <section class="box" id="box-trims">
         <header class="box__header" data-toggle="#box-trims">
@@ -112,18 +124,30 @@
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
-          <div class="table-wrap trims-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Trim/Series</th>
-                  <th>Count</th>
-                  <th>%</th>
-                </tr>
-              </thead>
-              <tbody id="trimsTbody"></tbody>
-            </table>
-          </div>
+          {% if not is_logged_in %}
+            <div class="gate">
+              <p>Login to see more!</p>
+              <a class="btn header-btn" href="{{ url_for('auth.login') }}">Login</a>
+            </div>
+          {% elif not has_pass %}
+            <div class="gate">
+              <p>Buy a pass to see more!</p>
+              <a class="btn header-btn" href="{{ url_for('billing.store') }}">Buy Pass</a>
+            </div>
+          {% else %}
+            <div class="table-wrap trims-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Trim/Series</th>
+                    <th>Count</th>
+                    <th>%</th>
+                  </tr>
+                </thead>
+                <tbody id="trimsTbody"></tbody>
+              </table>
+            </div>
+          {% endif %}
         </div>
       </section>
 
@@ -133,8 +157,20 @@
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
-          <canvas id="historyChart" class="history-canvas"></canvas>
-          <div class="badge" id="historyNote" style="display:none; margin-top:8px;"></div>
+          {% if not is_logged_in %}
+            <div class="gate">
+              <p>Login to see more!</p>
+              <a class="btn header-btn" href="{{ url_for('auth.login') }}">Login</a>
+            </div>
+          {% elif not has_pass %}
+            <div class="gate">
+              <p>Buy a pass to see more!</p>
+              <a class="btn header-btn" href="{{ url_for('billing.store') }}">Buy Pass</a>
+            </div>
+          {% else %}
+            <canvas id="historyChart" class="history-canvas"></canvas>
+            <div class="badge" id="historyNote" style="display:none; margin-top:8px;"></div>
+          {% endif %}
         </div>
       </section>
     </div>
@@ -157,6 +193,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
