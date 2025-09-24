@@ -563,3 +563,28 @@ ul.simple{ margin:0; padding-left:18px; }
 
 .gate p{ margin:0; font-weight:600; }
 
+/* Yellow pill button for gated content */
+.btn-yellow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #000; /* black text for contrast */
+  background: #ffd93b; /* bright yellow */
+  border: 1px solid #e6c200;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-yellow:hover {
+  background: #ffcf00;
+}
+
+.btn-yellow:active {
+  background: #e6b800;
+}
+
