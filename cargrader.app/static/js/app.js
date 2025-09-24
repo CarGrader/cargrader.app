@@ -606,28 +606,19 @@ if (btnPrivacy) {
 
 
 // ======== Filtered Lookup (New Feature) ========
-/* 
-   This block powers the "Filtered Lookup" box below History.
-   It relies on existing endpoints: /api/years, and the new endpoints:
-     GET /filter/makes?min_year=YYYY&max_year=YYYY
-     GET /filter/models?min_year=YYYY&max_year=YYYY&makes=Ford,Toyota
-     GET /filter/search?min_year=YYYY&max_year=YYYY&makes=...&models=...&limit=100
-   It also uses existing globals: yearSel, makeSel, modelSel, btn (main search).
-*/
-
 function selectedValues(selectEl){
   return Array.from(selectEl?.options || [])
     .filter(o => o.selected && o.value)
     .map(o => o.value);
 }
-
 const flMinYear = document.getElementById('fl-min-year');
 const flMaxYear = document.getElementById('fl-max-year');
 const flMakes   = document.getElementById('fl-makes');
 const flModels  = document.getElementById('fl-models');
 const flSearch  = document.getElementById('fl-search');
 const flTbody   = document.getElementById('fl-tbody');
-
+const flMinScore = document.getElementById('fl-min-score');
+const flMaxScore = document.getElementById('fl-max-score');
 async function flLoadYears(){
   if (!flMinYear || !flMaxYear) return;
   try{
@@ -640,11 +631,8 @@ async function flLoadYears(){
     flMinYear.value = years[0];
     flMaxYear.value = years[years.length - 1];
     await flLoadMakes();
-  }catch(e){
-    console.error('flLoadYears error', e);
-  }
+  }catch(e){ console.error('flLoadYears error', e); }
 }
-
 async function flLoadMakes(){
   if (!flMakes) return;
   flMakes.disabled = true; flModels.disabled = true;
@@ -657,11 +645,8 @@ async function flLoadMakes(){
     flMakes.innerHTML = makes.map(m => `<option value="${m}">${m}</option>`).join('');
     flMakes.disabled = false;
     await flLoadModels();
-  }catch(e){
-    console.error('flLoadMakes error', e);
-  }
+  }catch(e){ console.error('flLoadMakes error', e); }
 }
-
 async function flLoadModels(){
   if (!flModels) return;
   flModels.disabled = true;
@@ -679,27 +664,23 @@ async function flLoadModels(){
     const models = r?.models || [];
     flModels.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
     flModels.disabled = false;
-  }catch(e){
-    console.error('flLoadModels error', e);
-  }
+  }catch(e){ console.error('flLoadModels error', e); }
 }
-
 async function flSearchNow(){
   if (!flTbody) return;
   const minY = Number(flMinYear.value), maxY = Number(flMaxYear.value);
   const makes  = selectedValues(flMakes);
   const models = selectedValues(flModels);
-
   const qs = new URLSearchParams({
     min_year: String(minY),
     max_year: String(maxY),
     makes: makes.join(','),
     models: models.join(','),
+    min_score: (flMinScore && flMinScore.value ? String(flMinScore.value) : ''),
+    max_score: (flMaxScore && flMaxScore.value ? String(flMaxScore.value) : ''),
     limit: '100'
   });
-
   flTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;opacity:.7;">Searching…</td></tr>`;
-
   try{
     const r = await getJSON(`/filter/search?${qs.toString()}`);
     const rows = r?.rows || [];
@@ -719,8 +700,6 @@ async function flSearchNow(){
         </tr>
       `;
     }).join('');
-
-    // Wire "View" buttons
     flTbody.querySelectorAll('button.mini-view').forEach(btnEl => {
       btnEl.addEventListener('click', async () => {
         const y     = btnEl.getAttribute('data-y');
@@ -729,53 +708,41 @@ async function flSearchNow(){
         await gotoSelection(y, make, model);
       });
     });
-
   }catch(e){
     console.error('flSearchNow error', e);
     flTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#c66;">Error loading results</td></tr>`;
   }
 }
-
 async function gotoSelection(y, make, model){
   try{
-    // Set Year
     if (yearSel && yearSel.value !== String(y)){
       yearSel.value = String(y);
-      // Load makes for that year
       if (makeSel && modelSel){
         makeSel.disabled = true; modelSel.disabled = true; btn && (btn.disabled = true);
-        makeSel.innerHTML = '<option value="">Select...</option>';
-        modelSel.innerHTML = '<option value="">Select...</option>';
+        makeSel.innerHTML = '<option value=\"\">Select...</option>';
+        modelSel.innerHTML = '<option value=\"\">Select...</option>';
         const respMks = await getJSON(`/api/makes?year=${y}`);
         const makes = Array.isArray(respMks) ? respMks : (respMks.makes || []);
-        makeSel.insertAdjacentHTML('beforeend', makes.map(m=>`<option value="${m}">${m}</option>`).join(''));
+        makeSel.insertAdjacentHTML('beforeend', makes.map(m=>`<option value=\"${m}\">${m}</option>`).join(''));
         makeSel.disabled = false;
       }
     }
-
-    // Set Make
     if (makeSel && makeSel.value !== make){
       makeSel.value = make;
       if (modelSel){
         modelSel.disabled = true; btn && (btn.disabled = true);
-        modelSel.innerHTML = '<option value="">Select...</option>';
+        modelSel.innerHTML = '<option value=\"\">Select...</option>';
         const respModels = await getJSON(`/api/models?year=${y}&make=${encodeURIComponent(make)}`);
         const models = Array.isArray(respModels) ? respModels : (respModels.models || []);
-        modelSel.insertAdjacentHTML('beforeend', models.map(m=>`<option value="${m}">${m}</option>`).join(''));
+        modelSel.insertAdjacentHTML('beforeend', models.map(m=>`<option value=\"${m}\">${m}</option>`).join(''));
         modelSel.disabled = false;
       }
     }
-
-    // Set Model
     if (modelSel) modelSel.value = model;
     if (btn) btn.disabled = !(yearSel?.value && makeSel?.value && modelSel?.value);
     if (btn && !btn.disabled) btn.click();
-  }catch(e){
-    console.error('gotoSelection error', e);
-  }
+  }catch(e){ console.error('gotoSelection error', e); }
 }
-
-// Only wire up if the elements exist (box is visible for pass holders)
 if (flMinYear && flMaxYear){
   flMinYear.addEventListener('change', async () => {
     if (Number(flMinYear.value) > Number(flMaxYear.value)){
@@ -791,7 +758,6 @@ if (flMinYear && flMaxYear){
   });
   flMakes?.addEventListener('change', flLoadModels);
   flSearch?.addEventListener('click', flSearchNow);
-
   document.addEventListener('DOMContentLoaded', flLoadYears);
 }
 // ======== End Filtered Lookup ========
