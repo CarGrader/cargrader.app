@@ -210,6 +210,14 @@
                   <label for="fl-models">Models</label>
                   <select id="fl-models" multiple size="10" disabled><!-- populated by JS --></select>
                 </div>
+                <div class="form-row">
+                  <label for="fl-min-score">Min Score</label>
+                  <input id="fl-min-score" type="number" min="0" max="100" step="1" placeholder="Any">
+                </div>
+                <div class="form-row">
+                  <label for="fl-max-score">Max Score</label>
+                  <input id="fl-max-score" type="number" min="0" max="100" step="1" placeholder="Any">
+                </div>
       
                 <button id="fl-search" class="btn-get" type="button">Search</button>
                 <div class="lookup__hint">Max 100 rows.</div>
@@ -256,6 +264,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
