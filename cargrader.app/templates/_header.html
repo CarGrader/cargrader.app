@@ -17,12 +17,12 @@
     <!-- Center: (intentionally empty spacer—no logo) -->
     <div class="nav-center"></div>
 
-    <!-- Right: Auth -->
+    <!-- Right: Auth (Login or Logout) -->
     <div class="nav-right">
-      {% if session.get('user') %}
-        <a class="btn header-btn" href="{{ url_for('auth.logout') }}">Logout</a>
+      {% if session.user %}
+        <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
       {% else %}
-        <a class="btn header-btn" href="{{ url_for('auth.login') }}">Create Account / Login</a>
+        <a class="nav-btn" href="{{ url_for('auth.login') }}">Create Account / Login</a>
       {% endif %}
     </div>
   </nav>
