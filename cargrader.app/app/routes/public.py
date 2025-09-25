@@ -38,5 +38,12 @@ def favicon():
     # No favicon found → return 404
     return ("", 404)
 
+@public_bp.get("/lookup")
+def filtered_lookup():
+    """Render the Filtered Lookup page."""
+    return render_template("filtered_lookup.html")
+
+
+
 
 
