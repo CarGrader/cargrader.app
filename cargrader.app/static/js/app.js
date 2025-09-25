@@ -381,7 +381,7 @@ const btnTerms = document.getElementById('btnTerms'); if (btnTerms) btnTerms.add
 const btnPrivacy = document.getElementById('btnPrivacy'); if (btnPrivacy) btnPrivacy.addEventListener('click', () => { window.location.href='/privacy'; });
 
 // ===== Filtered Lookup Page =====
-const FILTERED_API = "/api/filtered-lookup"; // reuse your existing API
+const FILTERED_API = "/api/filter/search"; // reuse your existing API
 
 function initFilteredLookupPage() {
   const tbody = document.getElementById("lookup-tbody");
