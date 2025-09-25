@@ -174,83 +174,11 @@
         </div>
       </section>
 
-      <section class="box" id="box-lookup">
-        <header class="box__header" data-toggle="#box-lookup">
-          <div class="box__title">Filtered Lookup</div>
-          <div class="box__toggle" aria-hidden="true">+</div>
-        </header>
-        <div class="box__content">
-          {% if not is_logged_in %}
-            <div class="gate">
-              <p>Login to use the Filtered Lookup.</p>
-              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
-            </div>
-          {% elif not has_pass %}
-            <div class="gate">
-              <p>Buy a pass to use the Filtered Lookup.</p>
-              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
-            </div>
-          {% else %}
-            <div class="lookup">
-              <!-- Filters stacked at the top -->
-               <div class="lookup__filters">
-                <div class="form-row">
-                  <label for="fl-min-year">Min Year</label>
-                  <select id="fl-min-year"></select>
-                </div>
-                <div class="form-row">
-                  <label for="fl-max-year">Max Year</label>
-                  <select id="fl-max-year"></select>
-                </div>
-            
-                <div class="form-row">
-                  <label>Makes</label>
-                  <!-- OPTIONAL DROPDOWN WRAPPER — see section #4 -->
-                  <!-- <details class="dropdown"><summary id="fl-makes-summary">Makes</summary> -->
-                    <div id="fl-makes-box" class="checks" aria-label="Makes (multi-select)"></div>
-                  <!-- </details> -->
-                </div>
-            
-                <div class="form-row">
-                  <label>Models</label>
-                  <!-- OPTIONAL DROPDOWN WRAPPER -->
-                  <!-- <details class="dropdown"><summary id="fl-models-summary">Models</summary> -->
-                    <div id="fl-models-box" class="checks" aria-label="Models (multi-select)"></div>
-                  <!-- </details> -->
-                </div>
-            
-                <div class="form-row">
-                  <label for="fl-min-score">Min Score</label>
-                  <input id="fl-min-score" type="number" min="0" max="100" step="1" placeholder="Any">
-                </div>
-                <div class="form-row">
-                  <label for="fl-max-score">Max Score</label>
-                  <input id="fl-max-score" type="number" min="0" max="100" step="1" placeholder="Any">
-                </div>
-            
-                <button id="fl-search" class="btn-get" type="button">Search</button>
-                <div class="lookup__hint">Max 100 rows.</div>
-              </div>
-            
-              <!-- Results -->
-              <div class="lookup__results">
-                <div class="table-wrap">
-                  <table id="fl-table">
-                    <thead>
-                      <tr>
-                        <th>Year</th><th>Make</th><th>Model</th><th>Score</th><th style="width:1%"></th>
-                      </tr>
-                    </thead>
-                    <tbody id="fl-tbody">
-                      <tr><td colspan="5" style="text-align:center;opacity:.7;">Use the filters and press Search</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-        </div>
-      </section>
+      <div class="flex justify-center mt-6">
+        <a href="{{ url_for('public.filtered_lookup') }}" class="btn-yellow px-5 py-2 rounded-full text-black font-semibold">
+          Filtered Lookup
+        </a>
+      </div>
     </div>
   </div>
     <footer class="site-footer">
@@ -271,6 +199,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
