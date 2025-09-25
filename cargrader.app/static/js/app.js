@@ -381,7 +381,7 @@ const btnTerms = document.getElementById('btnTerms'); if (btnTerms) btnTerms.add
 const btnPrivacy = document.getElementById('btnPrivacy'); if (btnPrivacy) btnPrivacy.addEventListener('click', () => { window.location.href='/privacy'; });
 
 // ===== Filtered Lookup Page =====
-const FILTERED_API = "/api/filter/search"; // <-- correct endpoint
+const FILTERED_API = "/api/filtered-lookup"; // reuse your existing API
 
 function initFilteredLookupPage() {
   const tbody = document.getElementById("lookup-tbody");
@@ -395,62 +395,42 @@ function initFilteredLookupPage() {
   const maxScore   = document.getElementById("flt-max-score");
   const searchBtn  = document.getElementById("flt-search");
 
-  // Populate years
+  // Populate years (adjust range if you have a helper already)
   const now = new Date().getFullYear();
   const startYear = 1990;
-  minYearSel.innerHTML = "";
-  maxYearSel.innerHTML = "";
   for (let y = now; y >= startYear; y--) {
-    minYearSel.add(new Option(String(y), y));
-    maxYearSel.add(new Option(String(y), y));
+    const o1 = new Option(String(y), y);
+    const o2 = new Option(String(y), y);
+    minYearSel.add(o1.cloneNode(true));
+    maxYearSel.add(o2.cloneNode(true));
   }
-  minYearSel.value = String(startYear);
-  maxYearSel.value = String(now);
+  minYearSel.value = startYear;
+  maxYearSel.value = now;
 
-  // Load makes/models using the current year range
-  const refreshMakes = async () => {
-    await loadMakes(makeSel, minYearSel.value, maxYearSel.value);
-    await loadModels(modelSel, makeSel.value, minYearSel.value, maxYearSel.value);
-  };
+  // Populate makes/models — if you already have cached lists or endpoints, call those here.
+  // These two helpers expect your existing endpoints:
+  loadMakes(makeSel).then(() => {
+    // Seed models for the default make (or empty)
+    loadModels(modelSel, makeSel.value);
+  });
 
-  // Change handlers
-  makeSel.addEventListener("change", () =>
-    loadModels(modelSel, makeSel.value, minYearSel.value, maxYearSel.value)
-  );
-  minYearSel.addEventListener("change", refreshMakes);
-  maxYearSel.addEventListener("change", refreshMakes);
+  makeSel.addEventListener("change", () => loadModels(modelSel, makeSel.value));
 
-  // Initial load
-  refreshMakes();
-
-  // Search click
   searchBtn.addEventListener("click", async () => {
-    const minY = minYearSel.value || "";
-    const maxY = maxYearSel.value || "";
-    const make = makeSel.value || "";
-    const model = modelSel.value || "";
-    const minS = (minScore.value || "").trim();
-    const maxS = (maxScore.value || "").trim();
-
-    const params = new URLSearchParams();
-    if (minY) params.set("min_year", minY);
-    if (maxY) params.set("max_year", maxY);
-    if (make) params.set("makes", make);      // <-- plural key
-    if (model) params.set("models", model);   // <-- plural key
-    if (minS !== "") params.set("min_score", minS);
-    if (maxS !== "") params.set("max_score", maxS);
-
+    const params = new URLSearchParams({
+      min_year: minYearSel.value || "",
+      max_year: maxYearSel.value || "",
+      make: makeSel.value || "",
+      model: modelSel.value || "",
+      min_score: minScore.value || "",
+      max_score: maxScore.value || ""
+    });
     const resp = await fetch(`${FILTERED_API}?${params.toString()}`);
-    let payload = null;
-    try { payload = await resp.json(); } catch {}
+    const data = await resp.json();
 
-    // Expected shape: { ok, rows, capped }
-    const rows = (payload && payload.ok && Array.isArray(payload.rows))
-      ? payload.rows
-      : (Array.isArray(payload) ? payload : []);
-
+    // data expected as array of rows: { year, make, model, score }
     tbody.innerHTML = "";
-    rows.forEach(row => {
+    (data || []).forEach(row => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="py-2 text-center">${row.year ?? ""}</td>
@@ -469,12 +449,13 @@ function initFilteredLookupPage() {
       tbody.appendChild(tr);
     });
 
-    // Wire "View" buttons → Home with query params
+    // Wire "View" buttons: send user to Home with query params
     tbody.querySelectorAll(".view-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const year  = btn.getAttribute("data-year") || "";
         const make  = btn.getAttribute("data-make") || "";
         const model = btn.getAttribute("data-model") || "";
+        // Redirect to home; home JS will autoload these
         const qs = new URLSearchParams({ year, make, model });
         window.location.href = `/?${qs.toString()}`;
       });
@@ -482,28 +463,71 @@ function initFilteredLookupPage() {
   });
 }
 
-// Year-aware helpers hitting your real endpoints
-async function loadMakes(selectEl, minYear, maxYear) {
-  const url = `/api/filter/makes?min_year=${encodeURIComponent(minYear)}&max_year=${encodeURIComponent(maxYear)}`;
-  const resp = await fetch(url);
-  let json = null;
-  try { json = await resp.json(); } catch {}
-  const makes = (json && json.ok && Array.isArray(json.makes)) ? json.makes
-              : (Array.isArray(json) ? json : []);
-  selectEl.innerHTML = `<option value="">(Any)</option>` + makes.map(m => `<option value="${m}">${m}</option>`).join("");
+// Example helpers; replace with your actual endpoints if different.
+async function loadMakes(selectEl) {
+  // If you already have a global cache or endpoint like /api/makes, use that here:
+  const resp = await fetch("/api/makes");
+  const makes = await resp.json();
+  selectEl.innerHTML = `<option value="">(Any)</option>` + (makes || []).map(m => `<option value="${m}">${m}</option>`).join("");
 }
 
-async function loadModels(selectEl, make, minYear, maxYear) {
-  if (!make) { selectEl.innerHTML = `<option value="">(Any)</option>`; return; }
-  const url = `/api/filter/models?min_year=${encodeURIComponent(minYear)}&max_year=${encodeURIComponent(maxYear)}&makes=${encodeURIComponent(make)}`;
-  const resp = await fetch(url);
-  let json = null;
-  try { json = await resp.json(); } catch {}
-  const models = (json && json.ok && Array.isArray(json.models)) ? json.models
-               : (Array.isArray(json) ? json : []);
-  selectEl.innerHTML = `<option value="">(Any)</option>` + models.map(m => `<option value="${m}">${m}</option>`).join("");
+async function loadModels(selectEl, make) {
+  if (!make) {
+    selectEl.innerHTML = `<option value="">(Any)</option>`;
+    return;
+  }
+  const resp = await fetch(`/api/models?make=${encodeURIComponent(make)}`);
+  const models = await resp.json();
+  selectEl.innerHTML = `<option value="">(Any)</option>` + (models || []).map(m => `<option value="${m}">${m}</option>`).join("");
 }
 
+function hydrateHomeFromQuery() {
+  // Only if home selectors exist on the page
+  const yearSel  = document.getElementById("year");
+  const makeSel  = document.getElementById("make");
+  const modelSel = document.getElementById("model");
+  if (!yearSel || !makeSel || !modelSel) return;
+
+  const qs = new URLSearchParams(window.location.search);
+  const year  = qs.get("year");
+  const make  = qs.get("make");
+  const model = qs.get("model");
+
+  if (!(year || make || model)) return;
+
+  // If your home page already has logic to populate makes/models, reuse it.
+  // Example flow: set year -> set make -> load models -> set model -> trigger fetch
+  if (year)  yearSel.value = year;
+
+  // Set make, then wait for models to populate
+  const setModelAndSearch = () => {
+    if (model) modelSel.value = model;
+    // Trigger your existing details load; replace with your function name
+    const checkBtn = document.getElementById("checkBtn");
+    if (checkBtn) checkBtn.click()
+  };
+
+  const afterMake = () => {
+    // if you have a hook that loads models on make change, it should run; otherwise:
+    if (typeof loadModelsForMake === "function") {
+      loadModelsForMake(make).then(setModelAndSearch);
+    } else {
+      // if models already present:
+      setTimeout(setModelAndSearch, 150); // small delay to let any listeners run
+    }
+  };
+
+  if (make) {
+    makeSel.value = make;
+    // fire change so any listeners populate models
+    const ev = new Event("change", { bubbles: true });
+    makeSel.dispatchEvent(ev);
+    afterMake();
+  } else {
+    // no make, just trigger search if you want
+    if (typeof fetchCarDetails === "function") fetchCarDetails();
+  }
+}
 
 // Global boot
 document.addEventListener("DOMContentLoaded", () => {
