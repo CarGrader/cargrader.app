@@ -673,35 +673,3 @@ ul.simple{ margin:0; padding-left:18px; }
 .dropdown summary::after { content: "▾"; opacity: .7; }
 .dropdown[open] summary::after { content: "▴"; }
 .dropdown .checks { border-top-left-radius: 0; border-top-right-radius: 0; border-top: 0; }
-
-/* pill-style yellow button */
-.btn-yellow {
-  background: #FFD54D;
-  border: 1px solid #C7A93A;
-  border-radius: 9999px;
-}
-
-.btn-yellow:hover { filter: brightness(0.95); }
-
-/* subtle ghost button for "View" */
-.btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-.btn-ghost:hover { background: rgba(255,255,255,0.06); }
-
-/* inputs / selects, if you don't already have a form-input class */
-.form-input {
-  background: #0d0f12;
-  border: 1px solid #2a2f36;
-  color: #e5e7eb;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.75rem;
-  width: 100%;
-}
-.form-input:focus {
-  outline: none;
-  border-color: #FFD54D;
-  box-shadow: 0 0 0 3px rgba(255,213,77,0.15);
-}
-
