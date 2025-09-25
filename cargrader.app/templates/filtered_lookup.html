@@ -1,125 +1,89 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Filtered Lookup • CarGrader</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <style>
-    /* Keep styles scoped to this page */
-    .lookup-shell { max-width: 1100px; margin: 0 auto; padding: 0 16px 40px; }
-    .lookup-bar   { position: relative; padding: 18px 0 6px; text-align: center; }
-    .lookup-back  { position: absolute; left: 0; top: 16px; }
-    .lookup-brand {
-      font-family: 'Fredoka', sans-serif; font-weight: 700;
-      font-size: 56px; line-height: 1; color: #fff; text-decoration: none;
-      display: inline-block; text-shadow: 0 6px 24px rgba(0,0,0,.5);
-    }
-    .lookup-title {
-      margin: 8px 0 16px; font-size: 28px; line-height: 1.2; font-weight: 700;
-      color: #FFD54D; text-align: center;
-    }
-    .lookup-box {
-      background: rgba(15,17,22,.75); border: 1px solid #262b33; border-radius: 16px;
-      padding: 16px; margin-top: 18px;
-    }
-    .filters-grid { display: grid; gap: 12px; justify-content: center; }
-    /* two small boxes side-by-side (years), then wide make dropdown, wide model dropdown, then two small boxes (scores) */
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 420px; margin: 0 auto; }
-    .row-wide { max-width: 420px; margin: 0 auto; }
-    .form-label { display:block; font-size: 13px; color: #cbd5e1; margin-bottom: 6px; }
-    .form-input, .form-select {
-      width: 100%; background: #0d0f12; border: 1px solid #2a2f36; color: #e5e7eb;
-      padding: 10px 12px; border-radius: 12px;
-    }
-    .btn-yellow {
-      background: #FFD54D; border: 1px solid #C7A93A; color: #000;
-      border-radius: 9999px; padding: 8px 16px; font-weight: 600;
-    }
-    .btn-ghost {
-      background: transparent; border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 9999px; padding: 4px 12px; font-size: 14px;
-    }
-    .btn-ghost:hover { background: rgba(255,255,255,0.06); }
-    table { width: 100%; }
-    th, td { padding: 8px 6px; text-align: center; }
-    thead th { color: #cbd5e1; font-weight: 600; }
-  </style>
-</head>
-<body>
-  <!-- Top bar: Go Back (left) + CarGrader “logo” at top (center, clickable) -->
-  <div class="lookup-shell">
-    <div class="lookup-bar">
-      <a href="/" class="results__certainty-btn lookup-back">Go Back</a>
-      <a href="/" class="lookup-brand">CarGrader</a>
-    </div>
+{% extends "base.html" %}
+{% block title %}Filtered Lookup · CarGrader{% endblock %}
 
-    <h1 class="lookup-title">Filtered Lookup</h1>
+{% block body %}
+<div class="container mx-auto px-4 py-6">
 
-    <!-- Filters box -->
-    <section class="lookup-box" aria-label="Filters">
-      <div class="filters-grid">
-        <!-- Row: Min/Max Year (two small boxes side-by-side) -->
-        <div class="row-2">
-          <div>
-            <label for="flt-min-year" class="form-label">Min Year</label>
-            <select id="flt-min-year" class="form-select"></select>
-          </div>
-          <div>
-            <label for="flt-max-year" class="form-label">Max Year</label>
-            <select id="flt-max-year" class="form-select"></select>
-          </div>
-        </div>
-
-        <!-- Row: Make dropdown (wide) -->
-        <div class="row-wide">
-          <label for="flt-make" class="form-label">Make</label>
-          <select id="flt-make" class="form-select"></select>
-        </div>
-
-        <!-- Row: Model dropdown (wide) -->
-        <div class="row-wide">
-          <label for="flt-model" class="form-label">Model</label>
-          <select id="flt-model" class="form-select"></select>
-        </div>
-
-        <!-- Row: Min/Max Score (two small boxes side-by-side) -->
-        <div class="row-2">
-          <div>
-            <label for="flt-min-score" class="form-label">Min Score</label>
-            <input id="flt-min-score" type="number" min="0" max="100" step="1" class="form-input" placeholder="0">
-          </div>
-          <div>
-            <label for="flt-max-score" class="form-label">Max Score</label>
-            <input id="flt-max-score" type="number" min="0" max="100" step="1" class="form-input" placeholder="100">
-          </div>
-        </div>
-
-        <div style="display:flex; justify-content:center; margin-top: 4px;">
-          <button id="flt-search" class="btn-yellow">Search</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Results box -->
-    <section class="lookup-box" aria-label="Results">
-      <div class="overflow-x-auto">
-        <table>
-          <thead>
-            <tr>
-              <th>Year</th>
-              <th>Make</th>
-              <th>Model</th>
-              <th>Score</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="lookup-tbody"><!-- rows injected by app.js --></tbody>
-        </table>
-      </div>
-    </section>
+  <!-- Top logo (not in header) that returns to Home -->
+  <div class="flex justify-center mb-4">
+    <a href="{{ url_for('public.home') }}" aria-label="Go to Home">
+      <img src="{{ url_for('static', filename='images/cargrader-logo.png') }}"
+           alt="CarGrader" class="h-12 md:h-14 hover:opacity-90 transition">
+    </a>
   </div>
 
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-</body>
-</html>
+  <!-- Page title -->
+  <h1 class="text-center text-yellow-400 text-3xl md:text-4xl font-bold mb-6">
+    Filtered Lookup
+  </h1>
+
+  <!-- Filters box -->
+  <section id="lookup-filters"
+           class="rounded-2xl shadow-md bg-neutral-900/60 border border-neutral-700 p-4 md:p-6 max-w-3xl mx-auto">
+
+    <!-- Row 1: Min/Max Year (two small boxes side-by-side, centered) -->
+    <div class="w-full flex justify-center gap-3 mb-4">
+      <div class="w-1/2 max-w-52">
+        <label for="flt-min-year" class="block text-sm text-neutral-300 mb-1">Min Year</label>
+        <select id="flt-min-year" class="w-full form-input"></select>
+      </div>
+      <div class="w-1/2 max-w-52">
+        <label for="flt-max-year" class="block text-sm text-neutral-300 mb-1">Max Year</label>
+        <select id="flt-max-year" class="w-full form-input"></select>
+      </div>
+    </div>
+
+    <!-- Row 2: Make dropdown (wide; same width as the two year boxes combined) -->
+    <div class="mx-auto mb-4 max-w-[26rem] md:max-w-[28rem]">
+      <label for="flt-make" class="block text-sm text-neutral-300 mb-1">Make</label>
+      <select id="flt-make" class="w-full form-input"></select>
+    </div>
+
+    <!-- Row 3: Model dropdown (wide; same width as make dropdown) -->
+    <div class="mx-auto mb-4 max-w-[26rem] md:max-w-[28rem]">
+      <label for="flt-model" class="block text-sm text-neutral-300 mb-1">Model</label>
+      <select id="flt-model" class="w-full form-input"></select>
+    </div>
+
+    <!-- Row 4: Min/Max Score (two small boxes side-by-side, centered) -->
+    <div class="w-full flex justify-center gap-3">
+      <div class="w-1/2 max-w-52">
+        <label for="flt-min-score" class="block text-sm text-neutral-300 mb-1">Min Score</label>
+        <input id="flt-min-score" type="number" min="0" max="100" step="1" class="w-full form-input" placeholder="0">
+      </div>
+      <div class="w-1/2 max-w-52">
+        <label for="flt-max-score" class="block text-sm text-neutral-300 mb-1">Max Score</label>
+        <input id="flt-max-score" type="number" min="0" max="100" step="1" class="w-full form-input" placeholder="100">
+      </div>
+    </div>
+
+    <!-- Search button -->
+    <div class="flex justify-center mt-5">
+      <button id="flt-search" class="btn-yellow px-6 py-2 rounded-full text-black font-semibold">
+        Search
+      </button>
+    </div>
+  </section>
+
+  <!-- Results box -->
+  <section id="lookup-results"
+           class="rounded-2xl shadow-md bg-neutral-900/60 border border-neutral-700 p-4 md:p-6 max-w-5xl mx-auto mt-6">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm md:text-base">
+        <thead>
+          <tr class="text-neutral-300">
+            <th class="py-2 text-center">Year</th>
+            <th class="py-2 text-center">Make</th>
+            <th class="py-2 text-center">Model</th>
+            <th class="py-2 text-center">Score</th>
+            <th class="py-2 text-center"></th>
+          </tr>
+        </thead>
+        <tbody id="lookup-tbody">
+          <!-- rows injected by app.js -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
