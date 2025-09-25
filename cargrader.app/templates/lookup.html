@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Filtered Lookup – CarGrader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="container">
+  {% include "_header.html" %}
+
+  <main style="padding:24px 16px; max-width:900px; margin:0 auto;">
+    <h1>Filtered Lookup</h1>
+
+    {# ———————————————————————————————————————————————— #}
+    {# Paste the EXACT gated block from index.html here   #}
+    {# It begins at the lookup box’s `{% if not is_logged_in %}` #}
+    {# and ends at the matching `{% endif %}` inside that box.  #}
+    {# ———————————————————————————————————————————————— #}
+
+    {% if not is_logged_in %}
+      <div class="gate">
+        <p>Login to use the Filtered Lookup.</p>
+        <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+      </div>
+    {% elif not has_pass %}
+      <div class="gate">
+        <p>Buy a pass to use the Filtered Lookup.</p>
+        <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+      </div>
+    {% else %}
+      <!-- ↓↓↓ COPY THIS INNER UI EXACTLY FROM the home page lookup box ↓↓↓ -->
+      <div class="lookup">
+        <!-- Filters stacked at the top -->
+        <div class="lookup__filters">
+          <div class="form-row">
+            <label for="fl-min-year">Min Year</label>
+            <select id="fl-min-year"></select>
+          </div>
+          <div class="form-row">
+            <label for="fl-max-year">Max Year</label>
+            <select id="fl-max-year"></select>
+          </div>
+
+          <div class="form-row">
+            <label>Makes</label>
+            <!-- OPTIONAL DROPDOWN WRAPPER — keep commented as in index.html -->
+            <!-- <details class="dropdown"><summary id="fl-makes-summary">Makes</summary> -->
+              <div id="fl-makes-box" class="checks" aria-label="Makes (multi-select)"></div>
+            <!-- </details> -->
+          </div>
+
+          <div class="form-row">
+            <label>Models</label>
+            <!-- OPTIONAL DROPDOWN WRAPPER — keep commented as in index.html -->
+            <!-- <details class="dropdown"><summary id="fl-models-summary">Models</summary> -->
+              <div id="fl-models-box" class="checks" aria-label="Models (multi-select)"></div>
+            <!-- </details> -->
+          </div>
+
+          <div class="form-row">
+            <label for="fl-min-score">Min Score</label>
+            <input id="fl-min-score" type="number" min="0" max="100" step="1" placeholder="Any">
+          </div>
+          <div class="form-row">
+            <label for="fl-max-score">Max Score</label>
+            <input id="fl-max-score" type="number" min="0" max="100" step="1" placeholder="Any">
+          </div>
+
+          <button id="fl-search" class="btn-get" type="button">Search</button>
+          <div class="lookup__hint">Max 100 rows.</div>
+        </div>
+
+        <!-- Results -->
+        <div class="lookup__results">
+          <div class="panel">
+            <div class="panel__body">
+              <div class="table-wrap">
+                <table class="results">
+                  <thead>
+                    <tr>
+                      <th>Year</th><th>Make</th><th>Model</th><th>Score</th><th style="width:1%"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="fl-tbody">
+                    <tr><td colspan="5" style="text-align:center;opacity:.7;">Use the filters and press Search</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ↑↑↑ keep IDs and structure exactly the same ↑↑↑ -->
+    {% endif %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
