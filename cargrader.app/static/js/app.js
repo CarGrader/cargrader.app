@@ -483,9 +483,9 @@ async function loadModels(selectEl, make) {
 
 function hydrateHomeFromQuery() {
   // Only if home selectors exist on the page
-  const yearSel  = document.getElementById("year-select");
-  const makeSel  = document.getElementById("make-select");
-  const modelSel = document.getElementById("model-select");
+  const yearSel  = document.getElementById("year");
+  const makeSel  = document.getElementById("make");
+  const modelSel = document.getElementById("model");
   if (!yearSel || !makeSel || !modelSel) return;
 
   const qs = new URLSearchParams(window.location.search);
@@ -503,9 +503,8 @@ function hydrateHomeFromQuery() {
   const setModelAndSearch = () => {
     if (model) modelSel.value = model;
     // Trigger your existing details load; replace with your function name
-    if (typeof fetchCarDetails === "function") {
-      fetchCarDetails(); // should read current Y/M/M from the selects
-    }
+    const checkBtn = document.getElementById("checkBtn");
+    if (checkBtn) checkBtn.click()
   };
 
   const afterMake = () => {
