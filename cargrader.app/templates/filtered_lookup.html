@@ -1,89 +1,81 @@
-{% extends "base.html" %}
-{% block title %}Filtered Lookup · CarGrader{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filtered Lookup · CarGrader</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Fredoka-SemiBold.ttf') }}" type="font/ttf" crossorigin>
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/OpenSans-Regular.ttf') }}" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  {% include "_header.html" %}
 
-{% block body %}
-<div class="container mx-auto px-4 py-6">
+  <div class="container mx-auto px-4 py-6">
+    <h1 class="text-center text-yellow-400 text-3xl md:text-4xl font-bold mb-6">
+      Filtered Lookup
+    </h1>
 
-  <!-- Top logo (not in header) that returns to Home -->
-  <div class="flex justify-center mb-4">
-    <a href="{{ url_for('public.home') }}" aria-label="Go to Home">
-      <img src="{{ url_for('static', filename='images/cargrader-logo.png') }}"
-           alt="CarGrader" class="h-12 md:h-14 hover:opacity-90 transition">
-    </a>
+    <!-- error banner -->
+    <div id="err" class="error-banner" style="display:none;"></div>
+
+    <!-- Filters -->
+    <section aria-labelledby="filtersTitle" class="card">
+      <h2 id="filtersTitle" class="card-title">Filter Cars</h2>
+      <div class="filters-grid">
+        <div>
+          <label for="flt-min-year">Min Year</label>
+          <select id="flt-min-year"></select>
+        </div>
+        <div>
+          <label for="flt-max-year">Max Year</label>
+          <select id="flt-max-year"></select>
+        </div>
+        <div>
+          <label for="flt-make">Make</label>
+          <select id="flt-make"></select>
+        </div>
+        <div>
+          <label for="flt-model">Model</label>
+          <select id="flt-model"></select>
+        </div>
+        <div>
+          <label for="flt-min-score">Score Min</label>
+          <input id="flt-min-score" type="number" min="0" max="100" step="1" value="">
+        </div>
+        <div>
+          <label for="flt-max-score">Score Max</label>
+          <input id="flt-max-score" type="number" min="0" max="100" step="1" value="">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="flt-search" class="btn-yellow px-6 py-2 rounded-full text-black font-semibold">Apply Filters</button>
+        <button id="flt-clear" class="btn-secondary">Clear</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section aria-labelledby="resultsTitle" class="card">
+      <h2 id="resultsTitle" class="card-title">Results</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="py-2 text-center">Year</th>
+              <th class="py-2 text-center">Make</th>
+              <th class="py-2 text-center">Model</th>
+              <th class="py-2 text-center">Score</th>
+              <th class="py-2 text-center"></th>
+            </tr>
+          </thead>
+          <tbody id="lookup-tbody"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
-  <!-- Page title -->
-  <h1 class="text-center text-yellow-400 text-3xl md:text-4xl font-bold mb-6">
-    Filtered Lookup
-  </h1>
-
-  <!-- Filters box -->
-  <section id="lookup-filters"
-           class="rounded-2xl shadow-md bg-neutral-900/60 border border-neutral-700 p-4 md:p-6 max-w-3xl mx-auto">
-
-    <!-- Row 1: Min/Max Year (two small boxes side-by-side, centered) -->
-    <div class="w-full flex justify-center gap-3 mb-4">
-      <div class="w-1/2 max-w-52">
-        <label for="flt-min-year" class="block text-sm text-neutral-300 mb-1">Min Year</label>
-        <select id="flt-min-year" class="w-full form-input"></select>
-      </div>
-      <div class="w-1/2 max-w-52">
-        <label for="flt-max-year" class="block text-sm text-neutral-300 mb-1">Max Year</label>
-        <select id="flt-max-year" class="w-full form-input"></select>
-      </div>
-    </div>
-
-    <!-- Row 2: Make dropdown (wide; same width as the two year boxes combined) -->
-    <div class="mx-auto mb-4 max-w-[26rem] md:max-w-[28rem]">
-      <label for="flt-make" class="block text-sm text-neutral-300 mb-1">Make</label>
-      <select id="flt-make" class="w-full form-input"></select>
-    </div>
-
-    <!-- Row 3: Model dropdown (wide; same width as make dropdown) -->
-    <div class="mx-auto mb-4 max-w-[26rem] md:max-w-[28rem]">
-      <label for="flt-model" class="block text-sm text-neutral-300 mb-1">Model</label>
-      <select id="flt-model" class="w-full form-input"></select>
-    </div>
-
-    <!-- Row 4: Min/Max Score (two small boxes side-by-side, centered) -->
-    <div class="w-full flex justify-center gap-3">
-      <div class="w-1/2 max-w-52">
-        <label for="flt-min-score" class="block text-sm text-neutral-300 mb-1">Min Score</label>
-        <input id="flt-min-score" type="number" min="0" max="100" step="1" class="w-full form-input" placeholder="0">
-      </div>
-      <div class="w-1/2 max-w-52">
-        <label for="flt-max-score" class="block text-sm text-neutral-300 mb-1">Max Score</label>
-        <input id="flt-max-score" type="number" min="0" max="100" step="1" class="w-full form-input" placeholder="100">
-      </div>
-    </div>
-
-    <!-- Search button -->
-    <div class="flex justify-center mt-5">
-      <button id="flt-search" class="btn-yellow px-6 py-2 rounded-full text-black font-semibold">
-        Search
-      </button>
-    </div>
-  </section>
-
-  <!-- Results box -->
-  <section id="lookup-results"
-           class="rounded-2xl shadow-md bg-neutral-900/60 border border-neutral-700 p-4 md:p-6 max-w-5xl mx-auto mt-6">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm md:text-base">
-        <thead>
-          <tr class="text-neutral-300">
-            <th class="py-2 text-center">Year</th>
-            <th class="py-2 text-center">Make</th>
-            <th class="py-2 text-center">Model</th>
-            <th class="py-2 text-center">Score</th>
-            <th class="py-2 text-center"></th>
-          </tr>
-        </thead>
-        <tbody id="lookup-tbody">
-          <!-- rows injected by app.js -->
-        </tbody>
-      </table>
-    </div>
-  </section>
-</div>
-{% endblock %}
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
