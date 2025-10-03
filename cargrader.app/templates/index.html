@@ -5,26 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CarGrader</title>
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
-  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Fredoka-SemiBold.ttf') }}" type="font/ttf" crossorigin>
-  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/OpenSans-Regular.ttf') }}" type="font/ttf" crossorigin>
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Montserrat-SemiBold.woff2') }}" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Lato-Regular.woff2') }}" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
   {% include "_header.html" %}
-  <!-- Full-bleed HERO (replaces the old .topbar + .banner) -->
-  <section class="hero" role="img" aria-label="Hero banner">
-    <div class="hero__overlay"></div>
-    <div class="hero__inner">
-      <h1 class="hero__brand">CarGrader</h1>
-        {% if mission_text %}
-          <div class="hero__mission">
-            {% for line in mission_text.splitlines() if line.strip() %}
-              <div class="hero__mission-line">{{ line }}</div>
-            {% endfor %}
-          </div>
-        {% endif %}
+  <!-- === HERO (Primary) === -->
+<section class="hero hero--primary" role="img" aria-label="Car grading made simple">
+  <div class="hero__inner">
+    <h1 class="hero__title">Get Your Car Grade Instantly</h1>
+    <p class="hero__sub">
+      Find out how your car scores using real, data-driven stats—market value, mileage, condition, and more.
+    </p>
+    <div>
+      <!-- If your Filtered Lookup lives at /lookup, keep this. Otherwise change the href to your flow. -->
+      <a class="btn btn--cta" href="/lookup">Get Started</a>
     </div>
-  </section>
+  </div>
+</section>
+
+<!-- === THREE FEATURE CARDS (placeholder content) === -->
+<section class="features">
+  <div class="features__grid">
+
+    <article class="card">
+      <span class="icon" aria-hidden="true"></span>
+      <h3>Accurate Valuations</h3>
+      <p>Receive reliable market value assessments.</p>
+    </article>
+
+    <article class="card">
+      <span class="icon" aria-hidden="true"></span>
+      <h3>Comprehensive Analysis</h3>
+      <p>Get a detailed evaluation of your vehicle.</p>
+    </article>
+
+    <article class="card">
+      <span class="icon" aria-hidden="true"></span>
+      <h3>Fast &amp; Easy Process</h3>
+      <p>Simple steps to obtain your car grade quickly.</p>
+    </article>
+
+  </div>
+</section>
 
   <!-- Page content container starts AFTER the hero -->
   <div class="container">
@@ -197,6 +221,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
