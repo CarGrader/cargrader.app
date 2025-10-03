@@ -1,63 +1,63 @@
 <!-- cargrader.app/templates/_header.html -->
-<header class="site-header">
+<header class="site-header site-header--light">
   <nav class="site-nav">
-    <!-- Left: Menu -->
-    <div class="nav-left">
-      <button class="btn header-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menuPanel">
-        Menu
-      </button>
-      <div class="menu-panel" id="menuPanel" role="menu" aria-hidden="true">
-        <a class="menu-item" href="/" role="menuitem">Home</a>
-        <a class="menu-item" href="{{ url_for('billing.account') }}" role="menuitem">Account</a>
-        <a class="menu-item" href="{{ url_for('billing.store') }}" role="menuitem">Store</a>
-        <a class="menu-item" href="{{ url_for('pages.about') }}" role="menuitem">About</a>
+    <div class="header-inner">
+      <!-- Left: Brand -->
+      <a class="brand" href="/" aria-label="CarGrader Home">
+        <img class="brand__logo"
+             src="{{ url_for('static', filename='img/logo-long.svg') }}"
+             onerror="this.src='{{ url_for('static', filename='img/logo-long.png') }}'"
+             alt="CarGrader">
+      </a>
+
+      <!-- Right: Actions -->
+      <div class="header-actions">
+        <a class="btn btn--ghost" href="{{ url_for('billing.account') }}">Sign In</a>
+        <button class="btn btn--outline" id="menuBtn" type="button" aria-expanded="false" aria-controls="menuPanel">
+          Menu
+        </button>
+
+        <!-- Flyout menu -->
+        <div class="menu-panel" id="menuPanel" role="menu" aria-hidden="true">
+          <a class="menu-item" href="/" role="menuitem">Home</a>
+          <a class="menu-item" href="{{ url_for('billing.account') }}" role="menuitem">Account</a>
+          <a class="menu-item" href="{{ url_for('billing.store') }}" role="menuitem">Store</a>
+          <a class="menu-item" href="{{ url_for('pages.about') }}" role="menuitem">About</a>
+        </div>
       </div>
-    </div>
-
-    <!-- Center: (intentionally empty spacer—no logo) -->
-    <div class="nav-center"></div>
-
-    <!-- Right: Auth (Login or Logout) -->
-    <div class="nav-right">
-      {% if session.user %}
-        <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
-      {% else %}
-        <a class="nav-btn" href="{{ url_for('auth.login') }}">Create Account / Login</a>
-      {% endif %}
     </div>
   </nav>
 
+  <!-- Keep your existing inlined JS for toggling, adapted to new DOM -->
   <script>
     (function(){
-      const btn   = document.getElementById('menuBtn');
+      const btn = document.getElementById('menuBtn');
       const panel = document.getElementById('menuPanel');
+      let open = false;
 
-      function openPanel() {
+      function openPanel(){
         panel.classList.add('open');
-        panel.setAttribute('aria-hidden', 'false');
-        btn.setAttribute('aria-expanded', 'true');
-        document.addEventListener('click', onDocClick, true);
-        document.addEventListener('keydown', onKey, true);
+        panel.setAttribute('aria-hidden','false');
+        btn.setAttribute('aria-expanded','true');
+        document.addEventListener('click', onDocClick);
+        document.addEventListener('keydown', onKey);
+        open = true;
       }
-      function closePanel() {
+      function closePanel(){
         panel.classList.remove('open');
-        panel.setAttribute('aria-hidden', 'true');
-        btn.setAttribute('aria-expanded', 'false');
-        document.removeEventListener('click', onDocClick, true);
-        document.removeEventListener('keydown', onKey, true);
+        panel.setAttribute('aria-hidden','true');
+        btn.setAttribute('aria-expanded','false');
+        document.removeEventListener('click', onDocClick);
+        document.removeEventListener('keydown', onKey);
+        open = false;
       }
-      function togglePanel() {
-        if (panel.classList.contains('open')) closePanel(); else openPanel();
-      }
-      function onDocClick(e) {
+      function togglePanel(){ open ? closePanel() : openPanel(); }
+      function onDocClick(e){
         if (!panel.contains(e.target) && e.target !== btn) closePanel();
       }
-      function onKey(e) { if (e.key === 'Escape') closePanel(); }
+      function onKey(e){ if (e.key === 'Escape') closePanel(); }
 
-      btn?.addEventListener('click', function(e){
-        e.preventDefault(); // make sure it never submits anything
-        togglePanel();
-      });
+      btn?.addEventListener('click', (e) => { e.preventDefault(); togglePanel(); });
     })();
   </script>
 </header>
