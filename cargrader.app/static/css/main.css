@@ -550,24 +550,6 @@ ul.simple{ margin:0; padding-left:18px; }
   border-color: rgba(255,255,255,.25);
   box-shadow: none;
 }
-
-/* Dropdown menu */
-.menu-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  min-width: 180px;
-  background: #121218;
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow: 0 12px 32px rgba(0,0,0,.35);
-  border-radius: 12px;
-  padding: 8px;
-  display: none;            /* <-- start hidden */
-  z-index: 200;             /* ensure it overlays hero/content */
-}
-.menu-panel.open {          /* <-- shown when JS adds .open */
-  display: block;
-}
 .menu-item {
   display: block;
   padding: 10px 12px;
@@ -762,18 +744,36 @@ ul.simple{ margin:0; padding-left:18px; }
 .btn--cta{ background:var(--cg-orange); color:var(--cg-white); }
 .btn--cta:hover{ filter:brightness(0.95); }
 
-.menu-panel{
-  position:absolute; right:20px; top:64px; width:240px;
-  background:var(--cg-white); border:1px solid var(--cg-gray-200);
-  border-radius:12px; padding:8px; box-shadow:0 6px 24px rgba(0,0,0,.08);
-  display:none;
+/* Light header menu panel (CarGrader theme) */
+.menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 1000;
+  display: none;
+
+  background: var(--cg-navy);     /* navy blue background */
+  color: var(--cg-white);         /* default text color */
+  border: 1px solid var(--cg-navy);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.2);
 }
-.menu-panel.open{ display:block; }
-.menu-item{
-  display:block; padding:10px 12px; border-radius:8px; color:var(--cg-text);
-  text-decoration:none;
+.menu-panel.open { display: block; }
+
+.menu-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--cg-white);          /* white text */
+  text-decoration: none;
+  font-weight: 500;
 }
-.menu-item:hover{ background:var(--cg-gray-100); }
+.menu-item:hover {
+  background: var(--cg-royal);     /* royal blue hover */
+  color: var(--cg-white);
+}
+
 
 /* === Hero banner === */
 .hero--primary{
@@ -828,6 +828,7 @@ ul.simple{ margin:0; padding-left:18px; }
 .header-actions { 
   display: flex; gap: 12px; align-items: center;
   justify-self: end;            /* <-- key fix */
+  position: relative;
 }
 
 /* Plain text Sign In link */
