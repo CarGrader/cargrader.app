@@ -867,3 +867,44 @@ ul.simple{ margin:0; padding-left:18px; }
   /* optional: keep it from getting too tall if you want */
   max-height: 420px;
 }
+/* === Header layout fixes (override legacy flex wrapper) === */
+.site-nav{ 
+  display:block;               /* let the inner grid take over */
+}
+
+.header-inner{
+  /* ensure the inner grid stretches full width, then centers within max width */
+  width:100%;
+  max-width: var(--cg-maxw);
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;   /* brand on left, actions on right */
+  gap: 16px;
+  align-items: center;
+}
+
+.header-actions{
+  display:flex; gap:12px; align-items:center;
+  justify-self: end;                 /* hard-right within the grid */
+}
+
+/* plain text Sign In link */
+.link-signin{
+  font-weight:700;
+  color: var(--cg-navy);
+  text-decoration:none;
+}
+.link-signin:hover{ text-decoration:underline; }
+
+/* icon-only button (no pill) */
+.icon-button{
+  background:transparent;
+  border:0;
+  padding:8px;
+  line-height:0;
+  cursor:pointer;
+  color: var(--cg-navy);
+}
+.icon-button:hover{ opacity:.8; }
+.icon-20{ width:20px; height:20px; display:inline-block; }
