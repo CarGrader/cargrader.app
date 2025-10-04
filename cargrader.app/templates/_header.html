@@ -12,9 +12,10 @@
 
       <!-- Right: Actions -->
       <div class="header-actions">
-        <a class="btn btn--ghost" href="{{ url_for('billing.account') }}">Sign In</a>
+        <a class="link-signin" href="{{ url_for('billing.account') }}">Sign In</a>
         <button class="btn btn--outline" id="menuBtn" type="button" aria-expanded="false" aria-controls="menuPanel">
-          Menu
+          <img src="{{ url_for('static', filename='img/icons/menu.svg') }}" alt="" aria-hidden="true" class="icon-16">
+          <span>Menu</span>
         </button>
 
         <!-- Flyout menu -->
