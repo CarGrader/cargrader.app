@@ -841,3 +841,29 @@ ul.simple{ margin:0; padding-left:18px; }
 /* Icon sizing for the Menu button */
 .icon-16 { width: 18px; height: 18px; margin-right: 8px; display: inline-block; }
 .btn--outline span { display: inline-block; }
+/* Two-column hero on desktop; text constrained ~1/3-2/5 of width */
+.hero__grid {
+  display: grid;
+  gap: 16px;
+}
+.hero__text { max-width: 58ch; } /* keeps subtext readable */
+
+@media (min-width: 1000px){
+  /* Left column ≈ 38% (close to a third), right column fills the rest */
+  .hero__grid { grid-template-columns: minmax(320px, 38%) 1fr; }
+
+  /* Force a controlled line break on wide screens only */
+  .break-lg { display: block; height: 0; }
+}
+
+/* Right-side art */
+.hero__art {
+  display: flex; align-items: center; justify-content: center;
+}
+.hero__art img {
+  max-width: 100%;
+  height: auto;
+  opacity: 0.3;                 /* 30% opacity */
+  /* optional: keep it from getting too tall if you want */
+  max-height: 420px;
+}
