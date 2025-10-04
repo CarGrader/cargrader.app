@@ -824,4 +824,20 @@ ul.simple{ margin:0; padding-left:18px; }
   width: 40px; height: 40px; display:inline-block;
   border-radius:10px; border:1px solid var(--cg-gray-200);
 }
+/* Make the header actions sit at the right edge of the grid */
+.header-actions { 
+  display: flex; gap: 12px; align-items: center;
+  justify-self: end;            /* <-- key fix */
+}
 
+/* Plain text Sign In link */
+.link-signin {
+  font-weight: 700;
+  color: var(--cg-navy);
+  text-decoration: none;
+}
+.link-signin:hover { text-decoration: underline; }
+
+/* Icon sizing for the Menu button */
+.icon-16 { width: 18px; height: 18px; margin-right: 8px; display: inline-block; }
+.btn--outline span { display: inline-block; }
