@@ -12,18 +12,30 @@
 <body>
   {% include "_header.html" %}
   <!-- === HERO (Primary) === -->
-<section class="hero hero--primary" role="img" aria-label="Car grading made simple">
-  <div class="hero__inner">
-    <h1 class="hero__title">Get Your Car Grade Instantly</h1>
-    <p class="hero__sub">
-      Find out how your car scores using real, data-driven stats—market value, mileage, condition, and more.
-    </p>
-    <div>
-      <!-- If your Filtered Lookup lives at /lookup, keep this. Otherwise change the href to your flow. -->
-      <a class="btn btn--cta" href="/lookup">Get Started</a>
+  <section class="hero hero--primary" role="img" aria-label="Car grading made simple">
+    <div class="hero__inner hero__grid">
+      <!-- Left: text -->
+      <div class="hero__text">
+        <h1 class="hero__title">
+          Get Your Car <span class="break-lg"></span>Grade Instantly
+        </h1>
+        <p class="hero__sub">
+          Find out how your car scores using real, data-driven stats—market value, mileage, condition, and more.
+        </p>
+        <div>
+          <a class="btn btn--cta" href="/lookup">Get Started</a>
+        </div>
+      </div>
+  
+      <!-- Right: art (car image with fallback to logo) -->
+      <div class="hero__art">
+        <img
+          src="{{ url_for('static', filename='img/hero-car.png') }}"
+          onerror="this.src='{{ url_for('static', filename='img/hero-logo.png') }}'"
+          alt="CarGrader banner graphic">
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
 <!-- === THREE FEATURE CARDS (placeholder content) === -->
 <section class="features">
@@ -221,6 +233,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
