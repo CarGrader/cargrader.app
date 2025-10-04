@@ -12,7 +12,7 @@
 
       <!-- Right: Actions -->
       <div class="header-actions">
-        <a class="link-signin" href="{{ url_for('billing.account') }}">Sign In</a>
+        <a class="link-signin" href="{{ url_for('billing.account') }}">Login</a>
         <button class="icon-button" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
           <img src="{{ url_for('static', filename='img/icons/menu.svg') }}" alt="" aria-hidden="true" class="icon-20">
         </button>
@@ -30,34 +30,43 @@
 
   <!-- Keep your existing inlined JS for toggling, adapted to new DOM -->
   <script>
-    (function(){
-      const btn = document.getElementById('menuBtn');
-      const panel = document.getElementById('menuPanel');
-      let open = false;
+  (function(){
+    const btn   = document.getElementById('menuBtn');
+    const panel = document.getElementById('menuPanel');
+    if (!btn || !panel) return;        // ✅ guard if markup changes
 
-      function openPanel(){
-        panel.classList.add('open');
-        panel.setAttribute('aria-hidden','false');
-        btn.setAttribute('aria-expanded','true');
-        document.addEventListener('click', onDocClick);
-        document.addEventListener('keydown', onKey);
-        open = true;
-      }
-      function closePanel(){
-        panel.classList.remove('open');
-        panel.setAttribute('aria-hidden','true');
-        btn.setAttribute('aria-expanded','false');
-        document.removeEventListener('click', onDocClick);
-        document.removeEventListener('keydown', onKey);
-        open = false;
-      }
-      function togglePanel(){ open ? closePanel() : openPanel(); }
-      function onDocClick(e){
-        if (!panel.contains(e.target) && e.target !== btn) closePanel();
-      }
-      function onKey(e){ if (e.key === 'Escape') closePanel(); }
+    let open = false;
 
-      btn?.addEventListener('click', (e) => { e.preventDefault(); togglePanel(); });
-    })();
-  </script>
+    function openPanel(){
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden','false');
+      btn.setAttribute('aria-expanded','true');
+      document.addEventListener('click', onDocClick);
+      document.addEventListener('keydown', onKey);
+      open = true;
+    }
+    function closePanel(){
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden','true');
+      btn.setAttribute('aria-expanded','false');
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKey);
+      open = false;
+    }
+    function togglePanel(){ open ? closePanel() : openPanel(); }
+
+    function onDocClick(e){
+      // ✅ treat clicks on the IMG *inside* the button as "on the button"
+      if (!panel.contains(e.target) && !btn.contains(e.target)) {
+        closePanel();
+      }
+    }
+    function onKey(e){ if (e.key === 'Escape') closePanel(); }
+
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      togglePanel();
+    });
+  })();
+</script>
 </header>
