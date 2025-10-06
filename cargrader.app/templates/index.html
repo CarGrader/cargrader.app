@@ -37,30 +37,46 @@
     </div>
   </section>
 
-<!-- === THREE FEATURE CARDS (placeholder content) === -->
+<!-- === THREE FEATURE CARDS === -->
 <section class="features">
   <div class="features__grid">
 
+    <!-- Card 1 -->
     <article class="card">
-      <span class="icon" aria-hidden="true"></span>
-      <h3>Accurate Valuations</h3>
-      <p>Receive reliable market value assessments.</p>
+      <div class="card__icon" aria-hidden="true">
+        <img src="{{ url_for('static', filename='img/icons/fast.svg') }}" alt="" class="svg-icon">
+      </div>
+      <h3 class="card__title">Fast &amp; Easy</h3>
+      <p class="card__body">
+        Search and compare thousands of cars in seconds. Whether you’re researching your next ride or checking your current one, CarGrader makes it easy.
+      </p>
     </article>
 
+    <!-- Card 2 -->
     <article class="card">
-      <span class="icon" aria-hidden="true"></span>
-      <h3>Comprehensive Analysis</h3>
-      <p>Get a detailed evaluation of your vehicle.</p>
+      <div class="card__icon" aria-hidden="true">
+        <img src="{{ url_for('static', filename='img/icons/smart.svg') }}" alt="" class="svg-icon">
+      </div>
+      <h3 class="card__title">Smart Scoring</h3>
+      <p class="card__body">
+       Our scoring system analyzes complaint frequency against age and sales volume to reveal how each vehicle performs in the real world.
+      </p>
     </article>
 
+    <!-- Card 3 -->
     <article class="card">
-      <span class="icon" aria-hidden="true"></span>
-      <h3>Fast &amp; Easy Process</h3>
-      <p>Simple steps to obtain your car grade quickly.</p>
+      <div class="card__icon" aria-hidden="true">
+        <img src="{{ url_for('static', filename='img/icons/independent.svg') }}" alt="" class="svg-icon">
+      </div>
+      <h3 class="card__title">Independent Ratings</h3>
+      <p class="card__body">
+        Every CarGrader score is calculated from verified NHTSA data—not ads, sponsors, or opinions. You get reliability ratings you can actually trust.
+      </p>
     </article>
 
   </div>
 </section>
+
 
   <!-- Page content container starts AFTER the hero -->
   <div class="container">
@@ -233,6 +249,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
