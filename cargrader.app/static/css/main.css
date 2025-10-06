@@ -799,67 +799,100 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 
 /* === Three feature cards === */
-.features{
+.features {
   padding: 40px 20px 64px;
   background: var(--cg-white);
 }
-.features__grid{
+
+/* Grid is single-column by default (mobile). */
+.features__grid {
   max-width: var(--cg-maxw);
   margin: 0 auto;
   display: grid;
-  gap: 16px;
+  gap: 24px;
+  text-align: left;              /* ← mobile: left-align everything */
 }
-@media (min-width: 900px){
-  .features__grid{ grid-template-columns: repeat(3, 1fr); }
-}
-.card{
+
+/* Card: mobile layout = horizontal row, icon left, text right */
+.card {
   background: var(--cg-white);
   border: 1px solid var(--cg-gray-200);
   border-radius: var(--cg-radius);
-  padding: 24px;
+  padding: 20px 16px;
+  display: flex;                 /* ← row by default (mobile) */
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;                     /* space between icon and text */
 }
-.card h3{ margin: 10px 0 6px; font-weight:700; }
-.card p{ color: var(--cg-text-2); margin: 0; }
+
+/* Icon (mobile sizes) */
 .card .icon {
-  width: 40px;
-  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--cg-orange); /* accent orange */
-}
-/* Make the header actions sit at the right edge of the grid */
-.header-actions { 
-  display: flex; gap: 12px; align-items: center;
-  justify-self: end;            /* <-- key fix */
-  position: relative;
+  width: 56px;                   /* mobile: slightly smaller footprint */
+  height: 56px;
+  flex: 0 0 56px;                /* fixed column for icon */
+  color: var(--cg-orange);       /* accent orange */
 }
 
-/* Plain text Sign In link */
-.link-signin {
+/* SVG adopts CSS color via currentColor */
+.svg-icon {
+  width: 36px;                   /* mobile: clean, readable size */
+  height: 36px;
+  display: block;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* Text block (mobile) */
+.card__content {
+  flex: 1 1 auto;
+  min-width: 0;                  /* prevent overflow on long text */
+}
+.card__content h3 {
+  margin: 2px 0 6px;
   font-weight: 700;
   color: var(--cg-navy);
-  text-decoration: none;
+  font-size: 1.125rem;
+  line-height: 1.25;
 }
-.link-signin:hover { text-decoration: underline; }
-
-/* Icon sizing for the Menu button */
-.icon-16 { width: 18px; height: 18px; margin-right: 8px; display: inline-block; }
-.btn--outline span { display: inline-block; }
-/* Two-column hero on desktop; text constrained ~1/3-2/5 of width */
-.hero__grid {
-  display: grid;
-  gap: 16px;
+.card__content p {
+  color: var(--cg-text-2);
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
-.hero__text { max-width: 58ch; } /* keeps subtext readable */
 
-@media (min-width: 1000px){
-  /* Left column ≈ 38% (close to a third), right column fills the rest */
-  .hero__grid { grid-template-columns: minmax(320px, 38%) 1fr; }
+/* Desktop/tablet ≥ 900px: switch to 3 columns and centered/stacked look */
+@media (min-width: 900px) {
+  .features__grid {
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;          /* desktop: center titles + body */
+  }
 
-  /* Force a controlled line break on wide screens only */
-  .break-lg { display: block; height: 0; }
+  .card {
+    padding: 32px 24px;
+    flex-direction: column;      /* stack icon above text */
+    align-items: center;
+    gap: 16px;
+  }
+
+  .card .icon {
+    width: 84px;                 /* larger icon container */
+    height: 84px;
+    flex: 0 0 84px;
+  }
+  .svg-icon {
+    width: 64px;                 /* larger actual SVG */
+    height: 64px;
+  }
+
+  .card__content { text-align: center; }
+  .card__content h3 { margin: 10px 0 8px; }
 }
+
+
 
 /* Right-side art */
 .hero__art {
