@@ -892,6 +892,12 @@ ul.simple{ margin:0; padding-left:18px; }
   .card__content h3 { margin: 10px 0 8px; }
 }
 
+/* Force feature-card icons to use the accent orange */
+.features .card .icon { color: var(--cg-orange) !important; }
+.features .card .svg-icon {
+  fill: currentColor;
+  stroke: currentColor;
+}
 
 
 /* Right-side art */
