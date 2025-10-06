@@ -863,15 +863,25 @@ ul.simple{ margin:0; padding-left:18px; }
 
 /* Right-side art */
 .hero__art {
-  display: flex; align-items: center; justify-content: center;
+  display: none;                                  /* hide by default (mobile) */
+  align-items: center;
+  justify-content: center;
 }
+
 .hero__art img {
   max-width: 100%;
   height: auto;
-  opacity: 0.3;                 /* 30% opacity */
-  /* optional: keep it from getting too tall if you want */
+  opacity: 0.75;                                  /* 75% opacity */
   max-height: 420px;
 }
+
+/* Show only on desktop screens */
+@media (min-width: 1000px) {
+  .hero__art {
+    display: flex;                                /* reveal on desktop */
+  }
+}
+
 /* === Header layout fixes (override legacy flex wrapper) === */
 .site-nav{ 
   display:block;               /* let the inner grid take over */
