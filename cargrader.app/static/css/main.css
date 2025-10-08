@@ -948,4 +948,40 @@ ul.simple{ margin:0; padding-left:18px; }
   }
 }
 
+/* === Header (brand / navy) === */
+.site-header--brand{
+  background: var(--cg-navy);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  color: var(--cg-white);
+}
+
+/* Make header links/buttons white */
+.site-header--brand .link-signin { 
+  color: var(--cg-white);
+}
+.site-header--brand .icon-button{
+  color: var(--cg-white);
+}
+
+/* Accessible focus ring on dark header */
+.site-header--brand a:focus-visible,
+.site-header--brand button:focus-visible {
+  outline: 3px solid var(--cg-royal);
+  outline-offset: 2px;
+}
+
+/* Flyout menu stays consistent with brand colors */
+.site-header--brand .menu-panel{
+  background: var(--cg-navy);
+  color: var(--cg-white);
+  border: 1px solid rgba(255,255,255,.15);
+}
+.site-header--brand .menu-item{
+  color: var(--cg-white);
+}
+.site-header--brand .menu-item:hover{
+  background: var(--cg-royal);
+  color: var(--cg-white);
+}
+
 
