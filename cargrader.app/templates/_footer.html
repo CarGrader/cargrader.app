@@ -1,0 +1,21 @@
+<footer class="site-footer site-footer--brand" role="contentinfo" aria-label="Site footer">
+  <div class="footer-inner">
+    <!-- Left: brand / copyright -->
+    <div class="footer-left">
+      <a class="footer-brand" href="/" aria-label="CarGrader Home">
+        <img class="footer-brand__logo"
+             src="{{ url_for('static', filename='img/logo-long.png') }}"
+             onerror="this.src='{{ url_for('static', filename='img/logo-long.svg') }}'"
+             alt="CarGrader">
+      </a>
+      <p class="footer-copy">© {{  now().year if false else ""  }} CarGrader</p>
+    </div>
+
+    <!-- Right: legal buttons (keep the same IDs so your JS keeps working) -->
+    <nav class="footer-links" aria-label="Legal">
+      <button id="btnDisclaimer" class="footer-btn" type="button">Disclaimer</button>
+      <button id="btnTerms" class="footer-btn" type="button">Terms and Conditions</button>
+      <button id="btnPrivacy" class="footer-btn" type="button">Privacy Policy</button>
+    </nav>
+  </div>
+</footer>
