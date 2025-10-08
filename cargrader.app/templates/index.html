@@ -236,24 +236,11 @@
         </button>
     </div>
   </div>
-    <footer class="site-footer">
-    <div class="footer-links">
-      <button id="btnDisclaimer" class="results__certainty-btn footer-btn" type="button">
-        Disclaimer
-      </button>
-      <button id="btnTerms" class="results__certainty-btn footer-btn" type="button">
-        Terms and Conditions
-      </button>
-      <button id="btnPrivacy" class="results__certainty-btn footer-btn" type="button">
-        Privacy Policy
-      </button>
-    </div>
-  </footer>
-  <!-- 👇 spacer div for empty space -->
-  <div style="height: 80px;"></div>
+    {% include "_footer.html" %}
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
+
 
 
 
