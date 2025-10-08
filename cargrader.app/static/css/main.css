@@ -648,14 +648,17 @@ ul.simple{ margin:0; padding-left:18px; }
 .header-inner{
   max-width: var(--cg-maxw);
   margin: 0 auto;
-  padding: 14px 20px;
+  padding: 10px 10px;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
 }
 .brand{ display:inline-flex; align-items:center; gap:12px; text-decoration:none; }
-.brand__logo{ height:32px; width:auto; display:block; }
+/* Bigger logo */
+.brand__logo { height: 36px; width:auto; display:block; }        /* mobile/base */
+@media (min-width: 768px){ .brand__logo { height: 44px; } }      /* tablets */
+@media (min-width: 1280px){ .brand__logo { height: 52px; } }     /* desktop+ */
 .header-actions{ display:flex; gap:12px; align-items:center; }
 
 .btn{
@@ -857,7 +860,7 @@ ul.simple{ margin:0; padding-left:18px; }
   width:100%;
   max-width: var(--cg-maxw);
   margin: 0 auto;
-  padding: 14px 20px;
+  padding: 10px 10px;
   display: grid;
   grid-template-columns: 1fr auto;   /* brand on left, actions on right */
   gap: 16px;
