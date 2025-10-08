@@ -987,4 +987,71 @@ ul.simple{ margin:0; padding-left:18px; }
   color: var(--cg-white);
 }
 
+/* === Global Footer (brand) === */
+.site-footer--brand{
+  background: var(--cg-navy);
+  color: var(--cg-white);
+  border-top: 0;                 /* remove the light divider */
+}
+
+.site-footer--brand .footer-inner{
+  max-width: var(--cg-maxw);
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: grid;
+  grid-template-columns: 1fr;    /* stack on mobile */
+  gap: 16px;
+}
+
+@media (min-width: 800px){
+  .site-footer--brand .footer-inner{
+    grid-template-columns: 1fr auto; /* left info, right links */
+    align-items: center;
+  }
+}
+
+/* Left block: logo + copyright */
+.footer-left{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.footer-brand__logo{ height: 28px; width: auto; display: block; }
+.footer-copy{ margin: 0; opacity: .9; font-weight: 600; }
+
+/* Right block: legal links */
+.footer-links{
+  display: flex;
+  flex-direction: column;        /* stack on mobile */
+  gap: 8px;
+  align-items: flex-start;
+}
+
+@media (min-width: 800px){
+  .footer-links{
+    flex-direction: row;         /* row on desktop */
+    align-items: center;
+    gap: 16px;
+    justify-self: end;
+  }
+}
+
+/* Buttons look like links, but remain <button> for your JS */
+.footer-btn{
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--cg-white);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.footer-btn:hover{ color: var(--cg-royal); }   /* brand hover */
+.footer-btn:focus-visible{
+  outline: 3px solid var(--cg-royal);
+  outline-offset: 2px;
+}
+
+/* Give bottom breathing room globally instead of a spacer div */
+main, .container, .page-wrap{ padding-bottom: 24px; } /* adjust to taste */
 
