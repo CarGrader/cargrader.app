@@ -53,3 +53,10 @@ def lookup():
     has_pass = has_active_pass_for_session()
     return render_template("lookup.html", is_logged_in=is_logged_in, has_pass=has_pass)
 
+@pages_bp.get("/grade")
+def grade():
+    # Mirror the flags your homepage used so gated sections keep working
+    is_logged_in = bool(session.get("user"))
+    has_pass = has_active_pass_for_session()
+    return render_template("grading.html", is_logged_in=is_logged_in, has_pass=has_pass)
+
