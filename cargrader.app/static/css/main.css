@@ -1056,3 +1056,38 @@ ul.simple{ margin:0; padding-left:18px; }
 /* Give bottom breathing room globally instead of a spacer div */
 main, .container, .page-wrap{ padding-bottom: 24px; } /* adjust to taste */
 
+/* === Legal pages (Disclaimer/Terms/Privacy) === */
+.legal-shell { 
+  max-width: var(--cg-maxw); 
+  margin: 0 auto; 
+  padding: 24px 16px 64px; 
+  background: var(--cg-white); 
+}
+
+.legal-bar { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 12px 0 8px; 
+}
+
+.legal-back { 
+  color: var(--cg-royal); 
+  font-weight: 800; 
+  text-decoration: underline; 
+  text-underline-offset: 4px; 
+}
+
+.legal-title { 
+  /* already defined in your CSS; keep this here only if you want to tweak */
+  /* color: var(--accent); font-weight: 800; font-size: 36px; margin: 12px 0 18px; text-align: left; */
+}
+
+.legal-body { 
+  color: var(--cg-text); 
+  font-size: 16px; 
+  line-height: 1.7; 
+  white-space: pre-wrap; 
+  text-align: left; 
+}
+
