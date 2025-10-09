@@ -995,6 +995,7 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 
 .site-footer--brand .footer-inner{
+  width:100%;
   max-width: var(--cg-maxw);
   margin: 0 auto;
   padding: 24px 16px;
