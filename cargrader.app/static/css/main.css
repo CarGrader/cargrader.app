@@ -1013,7 +1013,12 @@ ul.simple{ margin:0; padding-left:18px; }
 
 /* Left block: logo + copyright */
 .footer-left{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.footer-brand__logo{ height: 40px; width: auto; display: block; }
+.site-footer--brand .footer-brand__logo {
+  height: clamp(48px, 8vh, 96px); /* grows with viewport height */
+  width: auto;
+  display: block;
+  object-fit: contain; /* keeps proportions */
+}
 .footer-copy{ margin: 0; opacity: .9; font-weight: 600; }
 
 /* Right block: legal links */
