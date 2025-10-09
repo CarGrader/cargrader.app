@@ -1102,6 +1102,11 @@ main, .container, .page-wrap{ padding-bottom: 24px; } /* adjust to taste */
 .legal-body ol { margin: 12px 0 12px 1.25rem; }
 .legal-body a { text-decoration: underline; }
 
+/* Respect line breaks from imported text on legal pages */
+.page--legal .legal-body{
+  white-space: pre-wrap;
+}
+
 /* Make brand footer full-bleed */
 .site-footer--brand{
   background: var(--cg-navy);
