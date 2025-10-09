@@ -1,21 +1,10 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Terms and Conditions • CarGrader</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-</head>
-<body>
+<body class="page--legal">
 
   {% include "_header.html" %}
 
   <main class="page-wrap">
     <section class="legal-shell">
-      <div class="legal-bar">
-        <a href="/" class="results__certainty-btn legal-back">Go Back</a>
-      </div>
-
+      <!-- Removed: legal-bar / Go Back -->
       <h1 class="legal-title">Terms and Conditions</h1>
       <div class="legal-body">
         {{ text }}
