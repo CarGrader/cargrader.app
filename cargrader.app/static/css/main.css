@@ -1061,40 +1061,43 @@ ul.simple{ margin:0; padding-left:18px; }
 /* Give bottom breathing room globally instead of a spacer div */
 main, .container, .page-wrap{ padding-bottom: 24px; } /* adjust to taste */
 
-/* === Legal pages (Disclaimer/Terms/Privacy) === */
-.legal-shell { 
-  max-width: var(--cg-maxw); 
-  margin: 0 auto; 
-  padding: 24px 16px 64px; 
-  background: var(--cg-white); 
+/* === Legal pages (Disclaimer / Terms / Privacy) === */
+
+/* Make page background white while header/footer keep their own colors */
+.page--legal {
+  background: #fff;
 }
 
-.legal-bar { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 12px 0 8px; 
+/* Layout container */
+.legal-shell {
+  max-width: var(--cg-maxw, 1200px);
+  margin: 0 auto;
+  padding: 24px 20px 72px;
 }
 
-.legal-back { 
-  color: var(--cg-royal); 
-  font-weight: 800; 
-  text-decoration: underline; 
-  text-underline-offset: 4px; 
+/* Title: Montserrat + navy (replace any old .legal-title rule) */
+.legal-title {
+  font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--cg-navy);
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 44px);
+  margin: 12px 0 18px;
 }
 
-.legal-title { 
-  /* already defined in your CSS; keep this here only if you want to tweak */
-  /* color: var(--accent); font-weight: 800; font-size: 36px; margin: 12px 0 18px; text-align: left; */
+/* Body copy: Lato */
+.legal-body {
+  font-family: "Lato", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #0e0f12;
+  font-size: 18px;
+  line-height: 1.65;
 }
 
-.legal-body { 
-  color: var(--cg-text); 
-  font-size: 16px; 
-  line-height: 1.7; 
-  white-space: pre-wrap; 
-  text-align: left; 
-}
+/* Nice defaults for text blocks */
+.legal-body p + p { margin-top: 16px; }
+.legal-body ul,
+.legal-body ol { margin: 12px 0 12px 1.25rem; }
+.legal-body a { text-decoration: underline; }
+
 /* Make brand footer full-bleed */
 .site-footer--brand{
   background: var(--cg-navy);
