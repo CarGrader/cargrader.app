@@ -991,53 +991,57 @@ ul.simple{ margin:0; padding-left:18px; }
 .site-footer--brand{
   background: var(--cg-navy);
   color: var(--cg-white);
-  border-top: 0;                 /* remove the light divider */
+  border-top: 0;
 }
 
 .site-footer--brand .footer-inner{
-  width:100%;
+  width: 100%;
   max-width: var(--cg-maxw);
   margin: 0 auto;
   padding: 24px 16px;
   display: grid;
-  grid-template-columns: 1fr;    /* stack on mobile */
+  grid-template-columns: 1fr;   /* mobile: stack */
   gap: 16px;
 }
 
+/* Desktop: two columns, align center, place items on same row */
 @media (min-width: 800px){
   .site-footer--brand .footer-inner{
-    grid-template-columns: 1fr auto; /* left info, right links */
+    grid-template-columns: auto 1fr; /* logo | links */
     align-items: center;
+    gap: 24px;
   }
+  .footer-left  { grid-column: 1; grid-row: 1; }
+  .footer-links { grid-column: 2; grid-row: 1; justify-self: end; }
 }
 
-/* Left block: logo + copyright */
-.footer-left{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* Left block */
+.footer-left{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 .site-footer--brand .footer-brand__logo{
-  height: 92px;   /* try 88–96px to taste */
+  height: 92px;         /* adjust 88–96px to taste */
   width: auto;
   display: block;
 }
-
 .footer-copy{ margin: 0; opacity: .9; font-weight: 600; }
 
-/* Right block: legal links */
+/* Right block */
 .footer-links{
   display: flex;
-  flex-direction: column;        /* stack on mobile */
+  flex-direction: column; /* stack on mobile & desktop */
   gap: 8px;
-  align-items: flex-start;
+  align-items: flex-start; /* mobile: left align */
 }
-
 @media (min-width: 800px){
   .footer-links{
-    flex-direction: column;         /* stack on desktop */
-    align-items: center;
+    align-items: center;  /* desktop: center each button’s text */
     gap: 16px;
-    justify-self: end;
   }
 }
-
 /* Buttons look like links, but remain <button> for your JS */
 .footer-btn{
   appearance: none;
