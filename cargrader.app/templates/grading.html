@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CarGrader – Grade a Car</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Montserrat-SemiBold.woff2') }}" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Lato-Regular.woff2') }}" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- Page-scoped light theme for the grader (new branding) -->
+  <style>
+    /* Map legacy chart vars to your new palette so app.js charts match branding */
+    :root{
+      --primary-600: var(--cg-royal, #1769FF);   /* used by history chart + labels */
+      --accent:      var(--cg-orange, #FF8C00);  /* used by history chart */
+      --border:      var(--cg-gray-200, #E5E8EE);
+      --text:        var(--cg-text, #101317);
+      --muted:       var(--cg-text-2, #505661);
+    }
+
+    /* Page shell */
+    body.page--grade{
+      background: var(--cg-white, #FFFFFF);
+      color: var(--cg-text, #101317);
+    }
+    main.grade-shell{
+      max-width: var(--cg-maxw, 1200px);
+      margin: 0 auto;
+      padding: 24px 16px 72px;
+    }
+
+    /* Title section */
+    .grade-title{
+      margin: 8px 0 12px;
+      color: var(--cg-navy, #0A2145);
+      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight: 800;
+      font-size: clamp(28px, 4vw, 44px);
+      text-align: left;
+    }
+    .grade-sub{
+      color: var(--cg-text-2, #505661);
+      max-width: 72ch;
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
+
+    /* Panel & boxes in light theme */
+    .panel{
+      background: #FFFFFF;
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: var(--cg-radius, 16px);
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(16,19,23,.04);
+    }
+    .box{
+      background: #FFFFFF;
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: var(--cg-radius, 16px);
+    }
+    .box__header{
+      background: #FFFFFF;
+      padding: 14px 18px;
+    }
+    .box__title{ color: var(--cg-navy, #0A2145); font-weight: 800; }
+    .box__toggle{
+      background: #FFFFFF;
+      color: var(--cg-navy, #0A2145);
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+    }
+
+    /* Controls (selects, button) in light theme */
+    .controls{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 560px;
+      margin: 6px auto 0;
+    }
+    .controls label{
+      color: var(--cg-navy, #0A2145);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .controls select{
+      background: #FFFFFF;
+      color: var(--cg-text, #101317);
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 0 0 0 transparent;
+    }
+    .controls select:focus{
+      outline: none;
+      border-color: var(--cg-royal, #1769FF);
+      box-shadow: 0 0 0 4px rgba(23,105,255,.12);
+    }
+    .controls select:disabled{
+      color: var(--cg-muted, #9AA3B5);
+      background: #F8F9FC;
+    }
+
+    /* CTA button in brand orange */
+    .btn-get{
+      display:block;
+      margin: 6px auto 0;
+      background: var(--cg-orange, #FF8C00);
+      border: 1px solid var(--cg-orange, #FF8C00);
+      color:#fff;
+      font-weight:800;
+      font-size:18px;
+      padding:12px 22px;
+      border-radius:999px;
+      box-shadow: 0 6px 16px rgba(255,140,0,.25);
+      cursor:pointer;
+      width: fit-content;
+    }
+    .btn-get:hover{ filter:brightness(.98); }
+    .btn-get:disabled{ opacity:.5; cursor:not-allowed; }
+
+    /* Results area adopts light look but keeps the large number */
+    .results.hero-centered{ margin-top: 24px; }
+    .results__title{
+      color: var(--cg-navy, #0A2145);
+      text-shadow: none;
+    }
+    .results__label{
+      color: var(--cg-royal, #1769FF);
+    }
+    .results__value{
+      color: var(--cg-navy, #0A2145);
+      text-shadow: none;
+    }
+    .results__certainty-btn{
+      color: var(--cg-royal, #1769FF);
+    }
+    .results__blurb{
+      color: var(--cg-text-2, #505661);
+    }
+    .no-data-message{
+      color: var(--cg-orange, #FF8C00);
+    }
+
+    /* Table + misc */
+    .trims-table thead th{
+      color: var(--cg-navy, #0A2145);
+      border-bottom: 2px solid var(--cg-gray-200, #E5E8EE);
+    }
+    .trims-table tbody td{
+      color: var(--cg-text, #101317);
+    }
+    .gate{
+      border: 1px dashed var(--cg-gray-200, #E5E8EE);
+      background: #FAFBFE;
+      color: var(--cg-text, #101317);
+    }
+    .badge{ border-color: var(--cg-gray-200, #E5E8EE); color: var(--cg-text-2, #505661); }
+  </style>
+</head>
+
+<body class="page--grade">
+  {% include "_header.html" %}
+
+  <main class="grade-shell">
+    <h1 class="grade-title">Check a Vehicle’s Reliability</h1>
+    <p class="grade-sub">Choose a year, make, and model to see a data-driven score, certainty, complaint details, top issues, trims, and history—powered by verified NHTSA data.</p>
+
+    <div class="grid" style="margin-top:16px;">
+      <div class="panel">
+        <div class="controls">
+          <div>
+            <label for="year">Year</label>
+            <select id="year"><option value="">Select...</option></select>
+          </div>
+          <div>
+            <label for="make">Make</label>
+            <select id="make" disabled><option value="">Select...</option></select>
+          </div>
+          <div>
+            <label for="model">Model</label>
+            <select id="model" disabled><option value="">Select...</option></select>
+          </div>
+          <div>
+            <button id="checkBtn" class="btn-get" disabled>Get Results</button>
+          </div>
+        </div>
+
+        <p id="err" class="err"></p>
+
+        <!-- RESULTS -->
+        <section id="resultsSection" class="results hero-centered" hidden>
+          <h2 id="resultTitle" class="results__title">Year Make Model</h2>
+
+          <div id="scoreBlock">
+            <div class="results__label">Score</div>
+            <div id="scoreValue" class="results__value">00</div>
+            <div class="results__label">Out of 100</div>
+
+            <div class="results__certainty">
+              <button id="certaintyToggle" class="results__certainty-btn" type="button">Certainty</button>
+              <span id="certaintyPct" class="results__certainty-pct">0%</span>
+            </div>
+          </div>
+
+          <div id="certaintyBlurb" class="results__blurb" hidden></div>
+
+          <div id="noDataMsg" class="no-data-message" style="display:none;">
+            We don't have enough information yet!
+          </div>
+        </section>
+      </div>
+
+      <!-- Collapsible boxes -->
+      <section class="box" id="box-details">
+        <header class="box__header" data-toggle="#box-details">
+          <div class="box__title">Details</div>
+          <div class="box__toggle" aria-hidden="true">+</div>
+        </header>
+        <div class="box__content">
+          <p id="detailsText" class="muted">Select a car to see details.</p>
+        </div>
+      </section>
+
+      <section class="box" id="box-top">
+        <header class="box__header" data-toggle="#box-top">
+          <div class="box__title">Top Complaints</div>
+          <div class="box__toggle" aria-hidden="true">+</div>
+        </header>
+        <div class="box__content">
+          {% if not is_logged_in %}
+            <div class="gate">
+              <p>Login to see more!</p>
+              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+            </div>
+          {% elif not has_pass %}
+            <div class="gate">
+              <p>Buy a pass to see more!</p>
+              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+            </div>
+          {% else %}
+            <ul id="topList" class="simple"></ul>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="box" id="box-trims">
+        <header class="box__header" data-toggle="#box-trims">
+          <div class="box__title">Trims</div>
+          <div class="box__toggle" aria-hidden="true">+</div>
+        </header>
+        <div class="box__content">
+          {% if not is_logged_in %}
+            <div class="gate">
+              <p>Login to see more!</p>
+              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+            </div>
+          {% elif not has_pass %}
+            <div class="gate">
+              <p>Buy a pass to see more!</p>
+              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+            </div>
+          {% else %}
+            <div class="table-wrap trims-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Trim/Series</th>
+                    <th>Count</th>
+                    <th>%</th>
+                  </tr>
+                </thead>
+                <tbody id="trimsTbody"></tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="box" id="box-history">
+        <header class="box__header" data-toggle="#box-history">
+          <div class="box__title">History</div>
+          <div class="box__toggle" aria-hidden="true">+</div>
+        </header>
+        <div class="box__content">
+          {% if not is_logged_in %}
+            <div class="gate">
+              <p>Login to see more!</p>
+              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+            </div>
+          {% elif not has_pass %}
+            <div class="gate">
+              <p>Buy a pass to see more!</p>
+              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+            </div>
+          {% else %}
+            <canvas id="historyChart" class="history-canvas"></canvas>
+            <div class="badge" id="historyNote" style="display:none; margin-top:8px;"></div>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+  </main>
+
+  {% include "_footer.html" %}
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
