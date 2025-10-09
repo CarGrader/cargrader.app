@@ -1026,7 +1026,7 @@ ul.simple{ margin:0; padding-left:18px; }
 
 @media (min-width: 800px){
   .footer-links{
-    flex-direction: row;         /* row on desktop */
+    flex-direction: column;         /* stack on desktop */
     align-items: center;
     gap: 16px;
     justify-self: end;
