@@ -1090,4 +1090,26 @@ main, .container, .page-wrap{ padding-bottom: 24px; } /* adjust to taste */
   white-space: pre-wrap; 
   text-align: left; 
 }
+/* Make brand footer full-bleed */
+.site-footer--brand{
+  background: var(--cg-navy);
+  color: var(--cg-white);
+  border-top: 0;
+  /* override base .site-footer constraints */
+  max-width: none;
+  width: 100%;
+  margin: 0;             /* remove auto side margins */
+  padding: 0;            /* we'll pad via .footer-inner */
+}
+
+/* Keep content width controlled inside */
+.site-footer--brand .footer-inner{
+  width: 100%;
+  max-width: var(--cg-maxw);
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
 
