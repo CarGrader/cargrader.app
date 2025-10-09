@@ -1013,7 +1013,7 @@ ul.simple{ margin:0; padding-left:18px; }
 
 /* Left block: logo + copyright */
 .footer-left{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.footer-brand__logo{ height: 28px; width: auto; display: block; }
+.footer-brand__logo{ height: 40px; width: auto; display: block; }
 .footer-copy{ margin: 0; opacity: .9; font-weight: 600; }
 
 /* Right block: legal links */
