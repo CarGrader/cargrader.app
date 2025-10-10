@@ -35,7 +35,7 @@
     .grade-title{
       margin: 8px 0 12px;
       color: var(--cg-navy, #0A2145);
-      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
       font-weight: 800;
       font-size: clamp(28px, 4vw, 44px);
       text-align: left;
@@ -65,7 +65,20 @@
       background: #FFFFFF;
       padding: 14px 18px;
     }
-    .box__title{ color: var(--cg-navy, #0A2145); font-weight: 800; }
+    .box__title{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cg-navy, #0A2145);
+      font-weight: 800;
+    }
+    .box__icon{
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      flex: 0 0 20px;
+      opacity: .9;
+    }
     .box__toggle{
       background: #FFFFFF;
       color: var(--cg-navy, #0A2145);
@@ -128,14 +141,20 @@
       text-shadow: none;
     }
     .results__label{
-      color: var(--cg-royal, #1769FF);
+      color: var(--cg-royal, #101317);
     }
     .results__value{
       color: var(--cg-navy, #0A2145);
       text-shadow: none;
     }
     .results__certainty-btn{
-      color: var(--cg-royal, #1769FF);
+      color: var(--cg-royal, #101317);
+    }
+    /* Make the certainty percent visible on white */
+    .results__certainty-pct{
+      color: var(--cg-navy, #0A2145);
+      font-weight: 800;
+      margin-left: 6px;
     }
     .results__blurb{
       color: var(--cg-text-2, #505661);
@@ -216,7 +235,11 @@
       <!-- Collapsible boxes -->
       <section class="box" id="box-details">
         <header class="box__header" data-toggle="#box-details">
-          <div class="box__title">Details</div>
+          <div class="box__title">
+            <img class="box__icon" alt="" 
+                 src="{{ url_for('static', filename='img/icons/details.svg') }}">
+            Details
+          </div>
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
@@ -226,7 +249,11 @@
 
       <section class="box" id="box-top">
         <header class="box__header" data-toggle="#box-top">
-          <div class="box__title">Top Complaints</div>
+          <div class="box__title">
+            <img class="box__icon" alt="" 
+                 src="{{ url_for('static', filename='img/icons/topcomplaints.svg') }}">
+            Top Complaints
+          </div>
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
@@ -248,7 +275,11 @@
 
       <section class="box" id="box-trims">
         <header class="box__header" data-toggle="#box-trims">
-          <div class="box__title">Trims</div>
+          <div class="box__title">
+            <img class="box__icon" alt="" 
+                 src="{{ url_for('static', filename='img/icons/trims.svg') }}">
+            Complaint % by Trim
+          </div>
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
@@ -281,7 +312,11 @@
 
       <section class="box" id="box-history">
         <header class="box__header" data-toggle="#box-history">
-          <div class="box__title">History</div>
+          <div class="box__title">
+            <img class="box__icon" alt="" 
+                 src="{{ url_for('static', filename='img/icons/history.svg') }}">
+            Complaint Accumulation Over Time
+          </div>
           <div class="box__toggle" aria-hidden="true">+</div>
         </header>
         <div class="box__content">
