@@ -177,6 +177,38 @@
       color: var(--cg-text, #101317);
     }
     .badge{ border-color: var(--cg-gray-200, #E5E8EE); color: var(--cg-text-2, #505661); }
+    
+    /* Force light native controls on this page */
+    body.page--grade{ 
+      color-scheme: light; 
+    }
+
+    /* Stronger select styling for a white page */
+    .page--grade .controls select{
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: #FFFFFF;
+      color: var(--cg-text, #101317);
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: none;
+    }
+    
+    /* Optional: visible hover/focus */
+    .page--grade .controls select:focus{
+      outline: none;
+      border-color: var(--cg-royal, #1769FF);
+      box-shadow: 0 0 0 4px rgba(23,105,255,.12);
+    }
+    
+    /* Disabled state that looks light, not dark */
+    .page--grade .controls select:disabled{
+      background-color: #F8F9FC;
+      color: var(--cg-muted, #9AA3B5);
+    }
+
   </style>
 </head>
 
