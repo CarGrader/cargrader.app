@@ -376,9 +376,29 @@ window.addEventListener('resize', () => {
 });
 
 // Footer nav
-const btnDisclaimer = document.getElementById('btnDisclaimer'); if (btnDisclaimer) btnDisclaimer.addEventListener('click', () => { window.location.href='/disclaimer'; });
-const btnTerms = document.getElementById('btnTerms'); if (btnTerms) btnTerms.addEventListener('click', () => { window.location.href='/terms'; });
-const btnPrivacy = document.getElementById('btnPrivacy'); if (btnPrivacy) btnPrivacy.addEventListener('click', () => { window.location.href='/privacy'; });
+const btnDisclaimer = document.getElementById('btnDisclaimer'); 
+if (btnDisclaimer) {
+  console.log('Disclaimer button found');
+  btnDisclaimer.addEventListener('click', () => { window.location.href='/disclaimer'; });
+} else {
+  console.log('Disclaimer button NOT found');
+}
+
+const btnTerms = document.getElementById('btnTerms'); 
+if (btnTerms) {
+  console.log('Terms button found');
+  btnTerms.addEventListener('click', () => { window.location.href='/terms'; });
+} else {
+  console.log('Terms button NOT found');
+}
+
+const btnPrivacy = document.getElementById('btnPrivacy'); 
+if (btnPrivacy) {
+  console.log('Privacy button found');
+  btnPrivacy.addEventListener('click', () => { window.location.href='/privacy'; });
+} else {
+  console.log('Privacy button NOT found');
+}
 
 // ======== Filtered Lookup (Updated) ========
 
