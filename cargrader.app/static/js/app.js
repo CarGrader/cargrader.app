@@ -69,10 +69,12 @@ async function loadYears(){
     const resp = await getJSON('/api/years');
     const years = Array.isArray(resp) ? resp : (resp.years || []);
     if (!years.length) throw new Error('No years');
-    yearSel.insertAdjacentHTML(
-      'beforeend',
-      years.map(y => `<option value="${y}">${y}</option>`).join('')
-    );
+    if (yearSel) {
+      yearSel.insertAdjacentHTML(
+        'beforeend',
+        years.map(y => `<option value="${y}">${y}</option>`).join('')
+      );
+    }
   } catch (e) {
     console.error('loadYears error:', e);
     showError('Failed to load years.');
@@ -146,6 +148,7 @@ function animateSlotNumber(el, finalValue, opts = {}){
 }
 
 // === Top selectors: makes/models ===
+if (yearSel) {
 yearSel.addEventListener('change', async () => {
   try{
     clearError();
@@ -179,7 +182,10 @@ makeSel.addEventListener('change', async () => {
     showError('Failed to load models.');
   }
 });
+}
+if (modelSel) {
 modelSel.addEventListener('change', () => { btn.disabled = !(yearSel.value && makeSel.value && modelSel.value); });
+}
 
 // Collapsible box toggle (+ / -)
 document.querySelectorAll('.box__header').forEach(h => {
