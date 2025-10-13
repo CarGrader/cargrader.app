@@ -248,6 +248,7 @@ function niceTicks(maxValue, desired=5){
 }
 
 // === Main "Check" button behavior ===
+if (btn) {
 btn.addEventListener('click', async () => {
   clearError();
   const y = yearSel.value, make = makeSel.value, model = modelSel.value;
@@ -366,6 +367,7 @@ btn.addEventListener('click', async () => {
     window.__historyItems = items;
   } catch (_) {}
 });
+}
 
 // Redraw chart on resize
 let __resizeTimer = null;
