@@ -1,3 +1,6 @@
+// === CarGrader App ===
+console.log('app.js loaded successfully');
+
 // === Core helpers ===
 async function getJSON(url){
   const r = await fetch(url);
@@ -378,6 +381,7 @@ window.addEventListener('resize', () => {
 });
 
 // Footer nav
+console.log('Setting up footer buttons...');
 const btnDisclaimer = document.getElementById('btnDisclaimer'); 
 if (btnDisclaimer) {
   console.log('Disclaimer button found');
