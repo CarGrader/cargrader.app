@@ -53,6 +53,7 @@ console.log('DOM elements retrieved');
 console.log('CSS injection completed');
 
 // === Blurbs cache ===
+console.log('Starting blurbs cache setup...');
 let __blurbsCache = null;
 async function loadBlurbs(){
   if (__blurbsCache) return __blurbsCache;
@@ -60,6 +61,7 @@ async function loadBlurbs(){
   __blurbsCache = r.ok ? await r.json() : {};
   return __blurbsCache;
 }
+console.log('loadBlurbs function defined');
 
 // === Years (top selectors) ===
 async function loadYears(){
@@ -384,29 +386,38 @@ window.addEventListener('resize', () => {
 });
 
 // Footer nav
-console.log('Setting up footer buttons...');
-const btnDisclaimer = document.getElementById('btnDisclaimer'); 
-if (btnDisclaimer) {
-  console.log('Disclaimer button found');
-  btnDisclaimer.addEventListener('click', () => { window.location.href='/disclaimer'; });
-} else {
-  console.log('Disclaimer button NOT found');
+function setupFooterButtons() {
+  console.log('Setting up footer buttons...');
+  const btnDisclaimer = document.getElementById('btnDisclaimer'); 
+  if (btnDisclaimer) {
+    console.log('Disclaimer button found');
+    btnDisclaimer.addEventListener('click', () => { window.location.href='/disclaimer'; });
+  } else {
+    console.log('Disclaimer button NOT found');
+  }
+
+  const btnTerms = document.getElementById('btnTerms'); 
+  if (btnTerms) {
+    console.log('Terms button found');
+    btnTerms.addEventListener('click', () => { window.location.href='/terms'; });
+  } else {
+    console.log('Terms button NOT found');
+  }
+
+  const btnPrivacy = document.getElementById('btnPrivacy'); 
+  if (btnPrivacy) {
+    console.log('Privacy button found');
+    btnPrivacy.addEventListener('click', () => { window.location.href='/privacy'; });
+  } else {
+    console.log('Privacy button NOT found');
+  }
 }
 
-const btnTerms = document.getElementById('btnTerms'); 
-if (btnTerms) {
-  console.log('Terms button found');
-  btnTerms.addEventListener('click', () => { window.location.href='/terms'; });
+// Setup footer buttons when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupFooterButtons);
 } else {
-  console.log('Terms button NOT found');
-}
-
-const btnPrivacy = document.getElementById('btnPrivacy'); 
-if (btnPrivacy) {
-  console.log('Privacy button found');
-  btnPrivacy.addEventListener('click', () => { window.location.href='/privacy'; });
-} else {
-  console.log('Privacy button NOT found');
+  setupFooterButtons();
 }
 
 // ======== Filtered Lookup (Updated) ========
