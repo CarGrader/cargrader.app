@@ -22,6 +22,7 @@ function clearError(){
 }
 
 // === DOM refs (top selectors & score UI) ===
+console.log('Getting DOM elements...');
 const yearSel = document.getElementById('year');
 const makeSel = document.getElementById('make');
 const modelSel = document.getElementById('model');
@@ -30,6 +31,7 @@ const result = document.getElementById('result');
 const scoreVal = document.getElementById('scoreVal');
 const certVal = document.getElementById('certVal');
 const complaintsVal = document.getElementById('complaintsVal');
+console.log('DOM elements retrieved');
 
 // === Inject minimal CSS to center/stack filters and style checklists & "View" link ===
 (function injectLookupStyles(){
@@ -48,6 +50,7 @@ const complaintsVal = document.getElementById('complaintsVal');
   style.textContent = css;
   document.head.appendChild(style);
 })();
+console.log('CSS injection completed');
 
 // === Blurbs cache ===
 let __blurbsCache = null;
