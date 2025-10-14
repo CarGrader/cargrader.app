@@ -382,7 +382,7 @@ ul.simple{ margin:0; padding-left:18px; }
   .footer-inner {
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
   }
 }
 
@@ -398,7 +398,7 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 
 .footer-brand__logo {
-  height: 24px;
+  height: 32px;
   width: auto;
 }
 
@@ -411,8 +411,9 @@ ul.simple{ margin:0; padding-left:18px; }
 
 @media (min-width: 768px) {
   .footer-links {
-    flex-direction: row;
-    gap: 24px;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
   }
 }
 
@@ -515,13 +516,32 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 
 .hero--primary {
-  background: linear-gradient(135deg, var(--cg-navy) 0%, #1a3a5c 100%);
+  background: var(--cg-navy);
   color: var(--cg-white);
+  position: relative;
+}
+
+.hero--primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../img/logo-notext.png');
+  background-size: 80vh;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.3;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .hero__inner {
   max-width: var(--cg-maxw);
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .hero__grid {
@@ -540,6 +560,7 @@ ul.simple{ margin:0; padding-left:18px; }
 
 .hero__text {
   text-align: center;
+  max-width: 33.333%;
 }
 
 @media (min-width: 768px) {
@@ -562,7 +583,7 @@ ul.simple{ margin:0; padding-left:18px; }
   line-height: 1.5;
   margin: 0 0 24px;
   color: rgba(255, 255, 255, 0.9);
-  max-width: 500px;
+  max-width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -572,15 +593,22 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 
 .hero__art {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hero__art {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 .hero__art img {
   max-width: 100%;
   height: auto;
   max-height: 300px;
+  opacity: 0.75;
 }
 
 /* CTA Button */
@@ -591,7 +619,7 @@ ul.simple{ margin:0; padding-left:18px; }
   padding: 14px 28px;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 18px;
   text-decoration: none;
   transition: all 0.2s ease;
   border: 2px solid transparent;
