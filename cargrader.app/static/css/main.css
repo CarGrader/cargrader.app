@@ -936,10 +936,20 @@ ul.simple{ margin:0; padding-left:18px; }
   white-space: pre-wrap;
 }
 
+/* === Heading Icons === */
+.heading-icon {
+  width: clamp(32px, 4vw, 48px);
+  height: clamp(32px, 4vw, 48px);
+  display: inline-block;
+  color: var(--cg-orange);
+  fill: currentColor;
+  stroke: currentColor;
+}
+
 /* === Example Screenshots Section === */
 .examples {
   padding: 60px 20px 80px;
-  background: var(--cg-white);
+  background: var(--cg-gray-100);
 }
 
 .examples__inner {
@@ -955,6 +965,9 @@ ul.simple{ margin:0; padding-left:18px; }
   text-align: left;
   margin: 0 0 32px 0;
   line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .examples__grid {
@@ -978,6 +991,12 @@ ul.simple{ margin:0; padding-left:18px; }
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
+.examples__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
 /* === Insights Section === */
 .insights {
   padding: 60px 20px 80px;
@@ -997,6 +1016,9 @@ ul.simple{ margin:0; padding-left:18px; }
   text-align: left;
   margin: 0 0 32px 0;
   line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .insights__featured {
@@ -1023,18 +1045,37 @@ ul.simple{ margin:0; padding-left:18px; }
   height: auto;
   border-radius: var(--cg-radius);
   border: 1px solid var(--cg-gray-200);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.insights__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
 }
 
 /* === Filtered Search Section === */
 .filtered-search {
   padding: 60px 20px 80px;
-  background: var(--cg-white);
+  background: var(--cg-gray-100);
 }
 
 .filtered-search__inner {
   max-width: var(--cg-maxw);
   margin: 0 auto;
+}
+
+.filtered-search__heading {
+  font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 4vw, 40px);
+  color: var(--cg-navy);
+  text-align: left;
+  margin: 0 0 32px 0;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .filtered-search__content {
@@ -1065,6 +1106,7 @@ ul.simple{ margin:0; padding-left:18px; }
 
 .filtered-search__text {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -1074,7 +1116,12 @@ ul.simple{ margin:0; padding-left:18px; }
   color: var(--cg-text);
   font-size: clamp(18px, 2.5vw, 22px);
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 24px 0;
+}
+
+.filtered-search__cta {
+  display: flex;
+  justify-content: center;
 }
 
 

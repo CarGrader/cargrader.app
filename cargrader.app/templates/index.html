@@ -85,7 +85,10 @@
 <!-- === EXAMPLE SCREENSHOTS === -->
 <section class="examples">
   <div class="examples__inner">
-    <h2 class="examples__heading">Select from thousands of vehicles</h2>
+    <h2 class="examples__heading">
+      Select from thousands of vehicles
+      <img src="{{ url_for('static', filename='img/icons/jeep.svg') }}" alt="" class="heading-icon">
+    </h2>
     <div class="examples__grid">
       <img 
         src="{{ url_for('static', filename='img/example-search.png') }}" 
@@ -96,13 +99,19 @@
         alt="Search results display" 
         class="examples__img">
     </div>
+    <div class="examples__cta">
+      <a class="btn btn--cta" href="/grade">Try it out now</a>
+    </div>
   </div>
 </section>
 
 <!-- === INSIGHTS SECTION === -->
 <section class="insights">
   <div class="insights__inner">
-    <h2 class="insights__heading">Get powerful insights</h2>
+    <h2 class="insights__heading">
+      Get powerful insights
+      <img src="{{ url_for('static', filename='img/icons/turbo.svg') }}" alt="" class="heading-icon">
+    </h2>
     
     <!-- Centered graph image -->
     <div class="insights__featured">
@@ -123,12 +132,20 @@
         alt="Vehicle trims comparison" 
         class="insights__img">
     </div>
+    
+    <div class="insights__cta">
+      <a class="btn btn--cta" href="/grade">Explore Now</a>
+    </div>
   </div>
 </section>
 
 <!-- === FILTERED SEARCH SECTION === -->
 <section class="filtered-search">
   <div class="filtered-search__inner">
+    <h2 class="filtered-search__heading">
+      Filtered Search
+      <img src="{{ url_for('static', filename='img/icons/filter-search.svg') }}" alt="" class="heading-icon">
+    </h2>
     <div class="filtered-search__content">
       <!-- Image on left -->
       <div class="filtered-search__image">
@@ -141,6 +158,9 @@
       <!-- Text on right -->
       <div class="filtered-search__text">
         <p>Use the Filtered Search tool to research multiple cars at once. Refine the your results by age, make, model, or score.</p>
+        <div class="filtered-search__cta">
+          <a class="btn btn--cta" href="/lookup">Try Filtered Search</a>
+        </div>
       </div>
     </div>
   </div>
