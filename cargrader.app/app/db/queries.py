@@ -32,12 +32,13 @@ SELECT
   ac.Make           AS Make,
   ac.Model          AS Model,
   ac.GroupID        AS GroupID,
-  ac.Count          AS ComplaintCount,
+  SUM(ac.Count)    AS ComplaintCount,
   ac.RelRatio       AS RelRatio
 FROM AllCars ac
 WHERE ac.ModelYear = :year
   AND ac.Make      = :make
   AND ac.Model     = :model
+GROUP BY ac.GroupID, ac.ModelYear, ac.Make, ac.Model, ac.RelRatio
 ORDER BY (ac.Score IS NULL), ac.Score DESC
 LIMIT 1
 """
