@@ -292,7 +292,7 @@ btn.addEventListener('click', async () => {
     } else {
       if (scoreBlock) scoreBlock.style.display = 'block';
       if (noDataMsg) noDataMsg.style.display = 'none';
-      if (scoreValueEl) animateSlotNumber(scoreValueEl, Math.round(score), { duration: 800 });
+      if (scoreValueEl) animateSlotNumber(scoreValueEl, Number(score.toFixed(1)), { duration: 800 });
       if (certaintyPctEl) {
         const pct = (certainty != null) ? (Number(certainty) <= 1 ? Number(certainty) * 100 : Number(certainty)) : null;
         certaintyPctEl.textContent = (pct != null && !Number.isNaN(pct)) ? `${Math.round(pct)}%` : '—';
@@ -567,7 +567,7 @@ async function flSearchNow(){
     }
 
     flTbody.innerHTML = rows.map(row => {
-      const score = (row.score == null || Number(row.score) === 0) ? '—' : Number(row.score).toFixed(0);
+      const score = (row.score == null || Number(row.score) === 0) ? '—' : Number(row.score).toFixed(1);
       return `
         <tr>
           <td>${row.year}</td>

@@ -190,6 +190,20 @@
     }
     .badge{ border-color: var(--cg-gray-200, #E5E8EE); color: var(--cg-text-2, #505661); }
     
+    /* Lookup navigation styling */
+    .lookup-navigation {
+      text-align: center;
+      margin-top: 24px;
+      padding: 20px;
+    }
+    
+    .lookup-subtext {
+      color: var(--cg-text-2, #505661);
+      font-size: 14px;
+      margin: 8px 0 0;
+      font-weight: 500;
+    }
+    
     /* Force light native controls on this page */
     body.page--grade{ 
       color-scheme: light; 
@@ -398,19 +412,10 @@
       </section>
 
       <!-- Quick navigation back to lookup -->
-      <section class="box" id="box-lookup">
-        <header class="box__header">
-          <div class="box__title">
-            <img class="box__icon" alt="" 
-                 src="{{ url_for('static', filename='img/icons/smart.svg') }}">
-            Compare Similar Models
-          </div>
-        </header>
-        <div class="box__content">
-          <p class="muted">Want to compare this vehicle with similar models? Use our filtered lookup to find vehicles with comparable years, makes, and scores.</p>
-          <button id="lookupBtn" class="btn-get" style="margin-top: 12px;">Filtered Lookup</button>
-        </div>
-      </section>
+      <div class="lookup-navigation">
+        <button id="lookupBtn" class="btn-get">Filtered Search</button>
+        <p class="lookup-subtext">Compare Similar Models</p>
+      </div>
     </div>
   </main>
 

@@ -154,8 +154,35 @@
       height: 16px;
       margin: 0;
       flex-shrink: 0;
-      accent-color: var(--cg-royal, #1769FF);
       cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border: 2px solid var(--cg-gray-300, #D1D5DB);
+      border-radius: 3px;
+      background: #FFFFFF;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .checks input[type="checkbox"]:checked {
+      background: var(--cg-royal, #1769FF);
+      border-color: var(--cg-royal, #1769FF);
+    }
+    
+    .checks input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    
+    .checks input[type="checkbox"]:hover {
+      border-color: var(--cg-royal, #1769FF);
     }
     
     .checks .lbl {
@@ -168,6 +195,64 @@
     .checks .chk:has(input:checked) .lbl {
       color: var(--cg-navy, #0A2145);
       font-weight: 600;
+    }
+    
+    /* Active Filters Display */
+    .active-filters {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--cg-gray-200, #E5E8EE);
+    }
+    
+    .active-filters__label {
+      color: var(--cg-text-2, #505661);
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .filter-bubbles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .filter-bubble {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--cg-royal, #1769FF);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .filter-bubble__remove {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s ease;
+    }
+    
+    .filter-bubble__remove:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .filter-bubble__remove::before {
+      content: '×';
+      font-size: 14px;
+      font-weight: bold;
     }
     .form-row{
       display: flex;
@@ -350,6 +435,12 @@
             <button id="fl-search" class="btn-get" type="button">Search</button>
             <div class="lookup__hint">Max 100 rows.</div>
           </div>
+          
+          <!-- Active Filters Display -->
+          <div id="active-filters" class="active-filters" style="display: none;">
+            <div class="active-filters__label">Active Filters:</div>
+            <div id="filter-bubbles" class="filter-bubbles"></div>
+          </div>
         </div>
 
         <!-- Results -->
@@ -421,6 +512,140 @@
           }, 300);
         }, 500);
       }
+      
+      // Filter bubbles functionality
+      function updateFilterBubbles() {
+        const activeFilters = document.getElementById('active-filters');
+        const filterBubbles = document.getElementById('filter-bubbles');
+        
+        if (!activeFilters || !filterBubbles) return;
+        
+        const bubbles = [];
+        
+        // Year range filters
+        const flMinYear = document.getElementById('fl-min-year');
+        const flMaxYear = document.getElementById('fl-max-year');
+        if (flMinYear && flMaxYear && flMinYear.value && flMaxYear.value) {
+          if (flMinYear.value === flMaxYear.value) {
+            bubbles.push({
+              type: 'year',
+              label: `Year: ${flMinYear.value}`,
+              remove: () => {
+                flMinYear.value = '';
+                flMaxYear.value = '';
+                updateFilterBubbles();
+              }
+            });
+          } else {
+            bubbles.push({
+              type: 'year',
+              label: `Years: ${flMinYear.value}-${flMaxYear.value}`,
+              remove: () => {
+                flMinYear.value = '';
+                flMaxYear.value = '';
+                updateFilterBubbles();
+              }
+            });
+          }
+        }
+        
+        // Selected makes
+        const flMakesBox = document.getElementById('fl-makes-box');
+        if (flMakesBox) {
+          const selectedMakes = Array.from(flMakesBox.querySelectorAll('input[type="checkbox"]:checked'));
+          selectedMakes.forEach(checkbox => {
+            bubbles.push({
+              type: 'make',
+              label: `Make: ${checkbox.value}`,
+              remove: () => {
+                checkbox.checked = false;
+                checkbox.dispatchEvent(new Event('change'));
+                updateFilterBubbles();
+              }
+            });
+          });
+        }
+        
+        // Selected models
+        const flModelsBox = document.getElementById('fl-models-box');
+        if (flModelsBox) {
+          const selectedModels = Array.from(flModelsBox.querySelectorAll('input[type="checkbox"]:checked'));
+          selectedModels.forEach(checkbox => {
+            bubbles.push({
+              type: 'model',
+              label: `Model: ${checkbox.value}`,
+              remove: () => {
+                checkbox.checked = false;
+                updateFilterBubbles();
+              }
+            });
+          });
+        }
+        
+        // Score filters
+        const flMinScore = document.getElementById('fl-min-score');
+        const flMaxScore = document.getElementById('fl-max-score');
+        if (flMinScore && flMaxScore && (flMinScore.value || flMaxScore.value)) {
+          let scoreLabel = 'Score: ';
+          if (flMinScore.value && flMaxScore.value) {
+            scoreLabel += `${flMinScore.value}-${flMaxScore.value}`;
+          } else if (flMinScore.value) {
+            scoreLabel += `≥${flMinScore.value}`;
+          } else {
+            scoreLabel += `≤${flMaxScore.value}`;
+          }
+          
+          bubbles.push({
+            type: 'score',
+            label: scoreLabel,
+            remove: () => {
+              flMinScore.value = '';
+              flMaxScore.value = '';
+              updateFilterBubbles();
+            }
+          });
+        }
+        
+        // Update display
+        if (bubbles.length > 0) {
+          activeFilters.style.display = 'block';
+          filterBubbles.innerHTML = bubbles.map(bubble => `
+            <div class="filter-bubble">
+              <span>${bubble.label}</span>
+              <button class="filter-bubble__remove" type="button" aria-label="Remove filter"></button>
+            </div>
+          `).join('');
+          
+          // Add event listeners to remove buttons
+          filterBubbles.querySelectorAll('.filter-bubble__remove').forEach((btn, index) => {
+            btn.addEventListener('click', bubbles[index].remove);
+          });
+        } else {
+          activeFilters.style.display = 'none';
+        }
+      }
+      
+      // Add event listeners to update bubbles when filters change
+      const flMinYear = document.getElementById('fl-min-year');
+      const flMaxYear = document.getElementById('fl-max-year');
+      const flMinScore = document.getElementById('fl-min-score');
+      const flMaxScore = document.getElementById('fl-max-score');
+      
+      if (flMinYear) flMinYear.addEventListener('change', updateFilterBubbles);
+      if (flMaxYear) flMaxYear.addEventListener('change', updateFilterBubbles);
+      if (flMinScore) flMinScore.addEventListener('input', updateFilterBubbles);
+      if (flMaxScore) flMaxScore.addEventListener('input', updateFilterBubbles);
+      
+      // Add event listeners to checkboxes (delegated)
+      document.addEventListener('change', function(e) {
+        if (e.target.type === 'checkbox' && 
+            (e.target.closest('#fl-makes-box') || e.target.closest('#fl-models-box'))) {
+          updateFilterBubbles();
+        }
+      });
+      
+      // Initial update
+      setTimeout(updateFilterBubbles, 1000);
     });
   </script>
 </body>
