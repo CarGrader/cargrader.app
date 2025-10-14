@@ -5,13 +5,214 @@
   <title>Filtered Lookup – CarGrader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Montserrat-SemiBold.woff2') }}" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Lato-Regular.woff2') }}" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- Page-scoped light theme for the lookup (new branding) -->
+  <style>
+    /* Map legacy chart vars to your new palette so app.js charts match branding */
+    :root{
+      --primary-600: var(--cg-royal, #1769FF);   /* used by history chart + labels */
+      --accent:      var(--cg-orange, #FF8C00);  /* used by history chart */
+      --border:      var(--cg-gray-200, #E5E8EE);
+      --text:        var(--cg-text, #101317);
+      --muted:       var(--cg-text-2, #505661);
+    }
+
+    /* Page shell */
+    body.page--lookup{
+      background: var(--cg-white, #FFFFFF);
+      color: var(--cg-text, #101317);
+    }
+    main.lookup-shell{
+      max-width: var(--cg-maxw, 1200px);
+      margin: 0 auto;
+      padding: 24px 16px 72px;
+    }
+
+    /* Title section */
+    .lookup-title{
+      margin: 8px 0 12px;
+      color: var(--cg-navy, #0A2145);
+      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+      font-weight: 800;
+      font-size: clamp(28px, 4vw, 44px);
+      text-align: left;
+    }
+    .lookup-sub{
+      color: var(--cg-text-2, #505661);
+      max-width: 72ch;
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
+
+    /* Panel & boxes in light theme */
+    .panel{
+      background: #FFFFFF;
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: var(--cg-radius, 16px);
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(16,19,23,.04);
+    }
+    .box{
+      background: #FFFFFF;
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: var(--cg-radius, 16px);
+    }
+    .box__header{
+      background: #FFFFFF;
+      padding: 14px 18px;
+    }
+    .box__title{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cg-navy, #0A2145);
+      font-weight: 800;
+    }
+    .box__icon{
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      flex: 0 0 20px;
+      opacity: .9;
+    }
+    .box__toggle{
+      background: #FFFFFF;
+      color: var(--cg-navy, #0A2145);
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+    }
+
+    /* Controls (selects, inputs, button) in light theme */
+    .lookup__filters{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 6px 0 0;
+    }
+    .form-row{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-row label{
+      color: var(--cg-navy, #0A2145);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .form-row select,
+    .form-row input{
+      background: #FFFFFF;
+      color: var(--cg-text, #101317);
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 0 0 0 transparent;
+    }
+    .form-row select:focus,
+    .form-row input:focus{
+      outline: none;
+      border-color: var(--cg-royal, #1769FF);
+      box-shadow: 0 0 0 4px rgba(23,105,255,.12);
+    }
+    .form-row select:disabled{
+      color: var(--cg-muted, #9AA3B5);
+      background: #F8F9FC;
+    }
+
+    /* CTA button in brand orange */
+    .btn-get{
+      display:block;
+      margin: 6px auto 0;
+      background: var(--cg-orange, #FF8C00);
+      border: 1px solid var(--cg-orange, #FF8C00);
+      color:#fff;
+      font-weight:800;
+      font-size:18px;
+      padding:12px 22px;
+      border-radius:999px;
+      box-shadow: none;
+      cursor:pointer;
+      width: fit-content;
+    }
+    .btn-get:hover{ filter:brightness(.98); }
+    .btn-get:disabled{ opacity:.5; cursor:not-allowed; }
+
+    /* Table styling */
+    .results thead th{
+      color: var(--cg-navy, #0A2145);
+      border-bottom: 2px solid var(--cg-gray-200, #E5E8EE);
+    }
+    .results tbody td{
+      color: var(--cg-text, #101317);
+    }
+    .gate{
+      border: 1px dashed var(--cg-gray-200, #E5E8EE);
+      background: #FAFBFE;
+      color: var(--cg-text, #101317);
+    }
+    .badge{ border-color: var(--cg-gray-200, #E5E8EE); color: var(--cg-text-2, #505661); }
+    
+    /* Force light native controls on this page */
+    body.page--lookup{ 
+      color-scheme: light; 
+    }
+
+    /* Stronger select styling for a white page */
+    .page--lookup .form-row select,
+    .page--lookup .form-row input{
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: #FFFFFF;
+      color: var(--cg-text, #101317);
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: none;
+    }
+    
+    /* Optional: visible hover/focus */
+    .page--lookup .form-row select:focus,
+    .page--lookup .form-row input:focus{
+      outline: none;
+      border-color: var(--cg-royal, #1769FF);
+      box-shadow: 0 0 0 4px rgba(23,105,255,.12);
+    }
+    
+    /* Disabled state that looks light, not dark */
+    .page--lookup .form-row select:disabled{
+      background-color: #F8F9FC;
+      color: var(--cg-muted, #9AA3B5);
+    }
+
+    /* Style select dropdown options to match light theme */
+    .page--lookup .form-row select option{
+      background-color: #FFFFFF;
+      color: var(--cg-text, #101317);
+      padding: 8px 12px;
+    }
+    
+    /* Ensure select dropdown background is white */
+    .page--lookup .form-row select{
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23505661' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+    }
+
+  </style>
 </head>
-<body class="container">
+
+<body class="page--lookup">
   {% include "_header.html" %}
 
-  <main style="padding:24px 16px; max-width:900px; margin:0 auto;">
-    <h1>Filtered Lookup</h1>
+  <main class="lookup-shell">
+    <h1 class="lookup-title">Filtered Lookup</h1>
+    <p class="lookup-sub">Search and filter vehicles by year range, make, model, and score to find the best options for your needs.</p>
 
     {# ———————————————————————————————————————————————— #}
     {# Paste the EXACT gated block from index.html here   #}
@@ -31,64 +232,62 @@
       </div>
     {% else %}
       <!-- ↓↓↓ COPY THIS INNER UI EXACTLY FROM the home page lookup box ↓↓↓ -->
-      <div class="lookup">
-        <!-- Filters stacked at the top -->
-        <div class="lookup__filters">
-          <div class="form-row">
-            <label for="fl-min-year">Min Year</label>
-            <select id="fl-min-year"></select>
-          </div>
-          <div class="form-row">
-            <label for="fl-max-year">Max Year</label>
-            <select id="fl-max-year"></select>
-          </div>
+      <div class="grid" style="margin-top:16px;">
+        <div class="panel">
+          <!-- Filters stacked at the top -->
+          <div class="lookup__filters">
+            <div class="form-row">
+              <label for="fl-min-year">Min Year</label>
+              <select id="fl-min-year"></select>
+            </div>
+            <div class="form-row">
+              <label for="fl-max-year">Max Year</label>
+              <select id="fl-max-year"></select>
+            </div>
 
-          <div class="form-row">
-            <label>Makes</label>
-            <!-- OPTIONAL DROPDOWN WRAPPER — keep commented as in index.html -->
-            <!-- <details class="dropdown"><summary id="fl-makes-summary">Makes</summary> -->
-              <div id="fl-makes-box" class="checks" aria-label="Makes (multi-select)"></div>
-            <!-- </details> -->
-          </div>
+            <div class="form-row">
+              <label>Makes</label>
+              <!-- OPTIONAL DROPDOWN WRAPPER — keep commented as in index.html -->
+              <!-- <details class="dropdown"><summary id="fl-makes-summary">Makes</summary> -->
+                <div id="fl-makes-box" class="checks" aria-label="Makes (multi-select)"></div>
+              <!-- </details> -->
+            </div>
 
-          <div class="form-row">
-            <label>Models</label>
-            <!-- OPTIONAL DROPDOWN WRAPPER — keep commented as in index.html -->
-            <!-- <details class="dropdown"><summary id="fl-models-summary">Models</summary> -->
-              <div id="fl-models-box" class="checks" aria-label="Models (multi-select)"></div>
-            <!-- </details> -->
-          </div>
+            <div class="form-row">
+              <label>Models</label>
+              <!-- OPTIONAL DROPDOWN WRAPPER — keep commented as in index.html -->
+              <!-- <details class="dropdown"><summary id="fl-models-summary">Models</summary> -->
+                <div id="fl-models-box" class="checks" aria-label="Models (multi-select)"></div>
+              <!-- </details> -->
+            </div>
 
-          <div class="form-row">
-            <label for="fl-min-score">Min Score</label>
-            <input id="fl-min-score" type="number" min="0" max="100" step="1" placeholder="Any">
-          </div>
-          <div class="form-row">
-            <label for="fl-max-score">Max Score</label>
-            <input id="fl-max-score" type="number" min="0" max="100" step="1" placeholder="Any">
-          </div>
+            <div class="form-row">
+              <label for="fl-min-score">Min Score</label>
+              <input id="fl-min-score" type="number" min="0" max="100" step="1" placeholder="Any">
+            </div>
+            <div class="form-row">
+              <label for="fl-max-score">Max Score</label>
+              <input id="fl-max-score" type="number" min="0" max="100" step="1" placeholder="Any">
+            </div>
 
-          <button id="fl-search" class="btn-get" type="button">Search</button>
-          <div class="lookup__hint">Max 100 rows.</div>
+            <button id="fl-search" class="btn-get" type="button">Search</button>
+            <div class="lookup__hint">Max 100 rows.</div>
+          </div>
         </div>
 
         <!-- Results -->
-        <div class="lookup__results">
-          <div class="panel">
-            <div class="panel__body">
-              <div class="table-wrap">
-                <table class="results">
-                  <thead>
-                    <tr>
-                      <th>Year</th><th>Make</th><th>Model</th><th>Score</th><th style="width:1%"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="fl-tbody">
-                    <tr><td colspan="5" style="text-align:center;opacity:.7;">Use the filters and press Search</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div class="panel">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Year</th><th>Make</th><th>Model</th><th>Score</th><th style="width:1%"></th>
+                </tr>
+              </thead>
+              <tbody id="fl-tbody">
+                <tr><td colspan="5" style="text-align:center;opacity:.7;">Use the filters and press Search</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -96,6 +295,7 @@
     {% endif %}
   </main>
 
+  {% include "_footer.html" %}
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

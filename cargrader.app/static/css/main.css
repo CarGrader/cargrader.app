@@ -680,6 +680,7 @@ ul.simple{ margin:0; padding-left:18px; }
   top: calc(100% + 8px);
   z-index: 1000;
   display: none;
+  min-width: 160px;
 
   background: var(--cg-navy);     /* navy blue background */
   color: var(--cg-white);         /* default text color */
@@ -687,6 +688,11 @@ ul.simple{ margin:0; padding-left:18px; }
   border-radius: 12px;
   padding: 8px;
   box-shadow: 0 6px 24px rgba(0,0,0,.2);
+}
+
+/* Position menu panel relative to header-actions container */
+.header-actions {
+  position: relative;
 }
 .menu-panel.open { display: block; }
 
