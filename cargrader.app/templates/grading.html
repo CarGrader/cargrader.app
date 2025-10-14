@@ -148,7 +148,19 @@
       text-shadow: none;
     }
     .results__certainty-btn{
-      color: var(--cg-royal, #101317);
+      color: var(--cg-text-2, #505661);
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+      font-weight: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .results__certainty-btn:hover{
+      color: var(--cg-royal, #1769FF);
+      text-decoration: none;
     }
     /* Make the certainty percent visible on white */
     .results__certainty-pct{
@@ -307,13 +319,13 @@
         <div class="box__content">
           {% if not is_logged_in %}
             <div class="gate">
-              <p>Login to see more!</p>
-              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+              <p>Buy a pass or login to see more!</p>
+              <a class="btn-orange" href="{{ url_for('auth.login') }}">Login/Buy Pass</a>
             </div>
           {% elif not has_pass %}
             <div class="gate">
               <p>Buy a pass to see more!</p>
-              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+              <a class="btn-orange" href="{{ url_for('billing.store') }}">Buy Pass</a>
             </div>
           {% else %}
             <ul id="topList" class="simple"></ul>
@@ -333,13 +345,13 @@
         <div class="box__content">
           {% if not is_logged_in %}
             <div class="gate">
-              <p>Login to see more!</p>
-              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+              <p>Buy a pass or login to see more!</p>
+              <a class="btn-orange" href="{{ url_for('auth.login') }}">Login/Buy Pass</a>
             </div>
           {% elif not has_pass %}
             <div class="gate">
               <p>Buy a pass to see more!</p>
-              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+              <a class="btn-orange" href="{{ url_for('billing.store') }}">Buy Pass</a>
             </div>
           {% else %}
             <div class="table-wrap trims-table">
@@ -370,13 +382,13 @@
         <div class="box__content">
           {% if not is_logged_in %}
             <div class="gate">
-              <p>Login to see more!</p>
-              <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+              <p>Buy a pass or login to see more!</p>
+              <a class="btn-orange" href="{{ url_for('auth.login') }}">Login/Buy Pass</a>
             </div>
           {% elif not has_pass %}
             <div class="gate">
               <p>Buy a pass to see more!</p>
-              <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+              <a class="btn-orange" href="{{ url_for('billing.store') }}">Buy Pass</a>
             </div>
           {% else %}
             <canvas id="historyChart" class="history-canvas"></canvas>
@@ -384,10 +396,70 @@
           {% endif %}
         </div>
       </section>
+
+      <!-- Quick navigation back to lookup -->
+      <section class="box" id="box-lookup">
+        <header class="box__header">
+          <div class="box__title">
+            <img class="box__icon" alt="" 
+                 src="{{ url_for('static', filename='img/icons/smart.svg') }}">
+            Compare Similar Models
+          </div>
+        </header>
+        <div class="box__content">
+          <p class="muted">Want to compare this vehicle with similar models? Use our filtered lookup to find vehicles with comparable years, makes, and scores.</p>
+          <button id="lookupBtn" class="btn-get" style="margin-top: 12px;">Filtered Lookup</button>
+        </div>
+      </section>
     </div>
   </main>
 
   {% include "_footer.html" %}
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  
+  <!-- Handle URL parameters for auto-population -->
+  <script>
+    // Auto-populate form from URL parameters
+    document.addEventListener('DOMContentLoaded', async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const year = urlParams.get('year');
+      const make = urlParams.get('make');
+      const model = urlParams.get('model');
+      
+      if (year && make && model) {
+        // Wait for the main app.js to initialize
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Use the existing gotoSelection function if available
+        if (typeof window.gotoSelection === 'function') {
+          await window.gotoSelection(year, make, model);
+        }
+      }
+      
+      // Handle "Filtered Lookup" button click
+      const lookupBtn = document.getElementById('lookupBtn');
+      if (lookupBtn) {
+        lookupBtn.addEventListener('click', function() {
+          // Get current car information from the form
+          const yearSel = document.getElementById('year');
+          const makeSel = document.getElementById('make');
+          const modelSel = document.getElementById('model');
+          
+          if (yearSel && makeSel && modelSel && yearSel.value && makeSel.value && modelSel.value) {
+            // Navigate to lookup page with pre-populated filters
+            const params = new URLSearchParams({
+              year: yearSel.value,
+              make: makeSel.value,
+              model: modelSel.value
+            });
+            window.location.href = `/lookup?${params.toString()}`;
+          } else {
+            // If no car is selected, just go to lookup page
+            window.location.href = '/lookup';
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>

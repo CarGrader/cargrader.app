@@ -584,7 +584,14 @@ async function flSearchNow(){
         const y     = a.getAttribute('data-y');
         const make  = decodeURIComponent(a.getAttribute('data-make'));
         const model = decodeURIComponent(a.getAttribute('data-model'));
-        await window.gotoSelection(y, make, model);
+        
+        // Navigate to grading page with URL parameters
+        const params = new URLSearchParams({
+          year: y,
+          make: make,
+          model: model
+        });
+        window.location.href = `/grade?${params.toString()}`;
       });
     });
 

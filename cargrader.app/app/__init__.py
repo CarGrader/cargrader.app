@@ -31,10 +31,15 @@ def create_app(config_object="config.Config"):
     with app.app_context():
         ensure_pass_tables()
 
-    # Make has_active_pass available in Jinja templates
+    # Make has_active_pass and user authentication status available in Jinja templates
     @app.context_processor
     def inject_access_flags():
-        return {"has_active_pass": has_active_pass_for_session()}
+        from flask import session
+        return {
+            "has_active_pass": has_active_pass_for_session(),
+            "is_logged_in": "user" in session,
+            "current_user": session.get("user", {})
+        }
     
     # Blueprints
     app.register_blueprint(public_bp)

@@ -20,7 +20,6 @@ PLAN_MAP = {
 }
 
 @billing_bp.get("/store")
-@requires_login
 def store():
     """Simple storefront that shows the two pass options."""
     # Optional: fetch amounts from Stripe so you can show $ prices.

@@ -12,7 +12,11 @@
 
       <!-- Right: Actions -->
       <div class="header-actions">
-        <a class="link-signin" href="{{ url_for('billing.account') }}">Login</a>
+        {% if is_logged_in %}
+          <a class="link-signin" href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+          <a class="link-signin" href="{{ url_for('billing.account') }}">Login</a>
+        {% endif %}
         <button class="icon-button" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
           <img src="{{ url_for('static', filename='img/icons/menu.svg') }}" alt="" aria-hidden="true" class="icon-20">
         </button>

@@ -88,9 +88,86 @@
     /* Controls (selects, inputs, button) in light theme */
     .lookup__filters{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto auto auto;
       gap: 16px;
       margin: 6px 0 0;
+    }
+    
+    /* Row 1: Min Year and Max Year */
+    .lookup__filters .form-row:nth-child(1),
+    .lookup__filters .form-row:nth-child(2) {
+      grid-column: span 1;
+    }
+    
+    /* Row 2: Make (spans both columns) */
+    .lookup__filters .form-row:nth-child(3) {
+      grid-column: span 2;
+    }
+    
+    /* Row 3: Models (spans both columns) */
+    .lookup__filters .form-row:nth-child(4) {
+      grid-column: span 2;
+    }
+    
+    /* Row 4: Min Score and Max Score */
+    .lookup__filters .form-row:nth-child(5),
+    .lookup__filters .form-row:nth-child(6) {
+      grid-column: span 1;
+    }
+    
+    /* Search button and hint (spans both columns) */
+    .lookup__filters .btn-get,
+    .lookup__filters .lookup__hint {
+      grid-column: span 2;
+    }
+    
+    /* Checkbox styling for Makes and Models */
+    .checks {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--cg-gray-200, #E5E8EE);
+      border-radius: 10px;
+      padding: 12px;
+      background: #FFFFFF;
+    }
+    
+    .checks .chk {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    .checks .chk:hover {
+      background-color: rgba(23, 105, 255, 0.04);
+      border-radius: 6px;
+      margin: 0 -6px;
+      padding: 6px;
+    }
+    
+    .checks input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      flex-shrink: 0;
+      accent-color: var(--cg-royal, #1769FF);
+      cursor: pointer;
+    }
+    
+    .checks .lbl {
+      color: var(--cg-text, #101317);
+      font-weight: 500;
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .checks .chk:has(input:checked) .lbl {
+      color: var(--cg-navy, #0A2145);
+      font-weight: 600;
     }
     .form-row{
       display: flex;
@@ -222,13 +299,13 @@
 
     {% if not is_logged_in %}
       <div class="gate">
-        <p>Login to use the Filtered Lookup.</p>
-        <a class="btn-yellow" href="{{ url_for('auth.login') }}">Login</a>
+        <p>Buy a pass or login to use the Filtered Lookup.</p>
+        <a class="btn-orange" href="{{ url_for('auth.login') }}">Login/Buy Pass</a>
       </div>
     {% elif not has_pass %}
       <div class="gate">
         <p>Buy a pass to use the Filtered Lookup.</p>
-        <a class="btn-yellow" href="{{ url_for('billing.store') }}">Buy Pass</a>
+        <a class="btn-orange" href="{{ url_for('billing.store') }}">Buy Pass</a>
       </div>
     {% else %}
       <!-- ↓↓↓ COPY THIS INNER UI EXACTLY FROM the home page lookup box ↓↓↓ -->
@@ -297,5 +374,54 @@
 
   {% include "_footer.html" %}
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  
+  <!-- Handle URL parameters for pre-populating filters -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const year = urlParams.get('year');
+      const make = urlParams.get('make');
+      const model = urlParams.get('model');
+      
+      if (year && make && model) {
+        // Wait for the main app.js to initialize and load data
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Pre-populate year filters
+        const flMinYear = document.getElementById('fl-min-year');
+        const flMaxYear = document.getElementById('fl-max-year');
+        if (flMinYear && flMaxYear) {
+          flMinYear.value = year;
+          flMaxYear.value = year;
+          
+          // Trigger the change event to load makes
+          flMinYear.dispatchEvent(new Event('change'));
+        }
+        
+        // Wait a bit more for makes to load, then pre-select the make
+        setTimeout(async () => {
+          const flMakesBox = document.getElementById('fl-makes-box');
+          if (flMakesBox) {
+            const makeCheckbox = flMakesBox.querySelector(`input[value="${make}"]`);
+            if (makeCheckbox) {
+              makeCheckbox.checked = true;
+              makeCheckbox.dispatchEvent(new Event('change'));
+            }
+          }
+          
+          // Wait for models to load, then pre-select the model
+          setTimeout(() => {
+            const flModelsBox = document.getElementById('fl-models-box');
+            if (flModelsBox) {
+              const modelCheckbox = flModelsBox.querySelector(`input[value="${model}"]`);
+              if (modelCheckbox) {
+                modelCheckbox.checked = true;
+              }
+            }
+          }, 300);
+        }, 500);
+      }
+    });
+  </script>
 </body>
 </html>
