@@ -544,13 +544,7 @@ ul.simple{ margin:0; padding-left:18px; }
 }
 
 .hero__text {
-  text-align: center;
-}
-
-@media (min-width: 768px) {
-  .hero__text {
-    text-align: left;
-  }
+  text-align: left;
 }
 
 .hero__title {

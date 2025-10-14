@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>CarGrader – Grade a Car</title>
+  <title>CarGrader – Check Vehicle Grades</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
   <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Montserrat-SemiBold.woff2') }}" type="font/woff2" crossorigin>
@@ -193,9 +193,16 @@
     /* Background for collapsible boxes section */
     .grade-shell .grid {
       background: var(--cg-gray-100, #F5F7FA);
-      border-radius: var(--cg-radius, 16px);
+      border-radius: 0;
       padding: 20px;
       margin-top: 16px;
+      margin-left: calc(-1 * (100vw - 100%) / 2);
+      margin-right: calc(-1 * (100vw - 100%) / 2);
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      transform: translateX(-50%);
     }
 
     /* Lookup navigation styling */
@@ -266,7 +273,7 @@
   {% include "_header.html" %}
 
   <main class="grade-shell">
-    <h1 class="grade-title">Check a Vehicle’s Reliability</h1>
+    <h1 class="grade-title">Check Vehicle Grades</h1>
     <p class="grade-sub">Choose a year, make, and model to see a data-driven score, certainty, complaint details, top issues, trims, and history—powered by verified NHTSA data.</p>
 
     <div class="grid" style="margin-top:16px;">
@@ -441,11 +448,17 @@
       
       if (year && make && model) {
         // Wait for the main app.js to initialize
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Use the existing gotoSelection function if available
         if (typeof window.gotoSelection === 'function') {
-          await window.gotoSelection(year, make, model);
+          try {
+            await window.gotoSelection(year, make, model);
+          } catch (error) {
+            console.error('Error calling gotoSelection:', error);
+          }
+        } else {
+          console.error('gotoSelection function not available');
         }
       }
       

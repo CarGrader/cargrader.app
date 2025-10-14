@@ -127,8 +127,12 @@ function animateSlotNumber(el, finalValue, opts = {}){
   const duration = prefersReduced ? 0 : (opts.duration ?? 800);
   const scramblePortion = 0.6;
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
-  const end = clamp(Math.round(finalValue ?? 0), 0, 100);
-  if (duration <= 0){ el.textContent = String(end); return; }
+  const end = clamp(finalValue ?? 0, 0, 100);
+  const hasDecimal = String(finalValue).includes('.');
+  if (duration <= 0){ 
+    el.textContent = hasDecimal ? end.toFixed(1) : String(Math.round(end)); 
+    return; 
+  }
   const startTime = performance.now();
   let raf;
   function frame(now){
@@ -138,10 +142,11 @@ function animateSlotNumber(el, finalValue, opts = {}){
     }else{
       const p = (t - scramblePortion) / (1 - scramblePortion);
       const eased = easeOutCubic(p);
-      el.textContent = String(Math.round(end * eased)).padStart(2,'0');
+      const currentValue = end * eased;
+      el.textContent = hasDecimal ? currentValue.toFixed(1) : String(Math.round(currentValue));
     }
     if (t < 1){ raf = requestAnimationFrame(frame); }
-    else { el.textContent = String(end).padStart(2,'0'); }
+    else { el.textContent = hasDecimal ? end.toFixed(1) : String(Math.round(end)); }
   }
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(frame);
@@ -432,36 +437,66 @@ if (document.readyState === 'loading') {
 if (typeof window.gotoSelection !== 'function') {
   window.gotoSelection = async function(y, make, model){
     try{
+      console.log('gotoSelection called with:', y, make, model);
+      
+      // Ensure DOM elements exist
+      if (!yearSel || !makeSel || !modelSel) {
+        console.error('Required DOM elements not found');
+        return;
+      }
+      
       // Set Year & load makes
-      if (yearSel && yearSel.value !== String(y)){
+      if (yearSel.value !== String(y)){
+        console.log('Setting year to:', y);
         yearSel.value = String(y);
-        if (makeSel && modelSel){
-          makeSel.disabled = true; modelSel.disabled = true; if (btn) btn.disabled = true;
-          makeSel.innerHTML = '<option value="">Select...</option>';
-          modelSel.innerHTML = '<option value="">Select...</option>';
-          const respMks = await getJSON(`/api/makes?year=${y}`);
-          const makes = Array.isArray(respMks) ? respMks : (respMks.makes || []);
-          makeSel.insertAdjacentHTML('beforeend', makes.map(m=>`<option value="${m}">${m}</option>`).join(''));
-          makeSel.disabled = false;
-        }
+        makeSel.disabled = true; 
+        modelSel.disabled = true; 
+        if (btn) btn.disabled = true;
+        makeSel.innerHTML = '<option value="">Select...</option>';
+        modelSel.innerHTML = '<option value="">Select...</option>';
+        
+        const respMks = await getJSON(`/api/makes?year=${y}`);
+        const makes = Array.isArray(respMks) ? respMks : (respMks.makes || []);
+        console.log('Loaded makes:', makes.length);
+        makeSel.insertAdjacentHTML('beforeend', makes.map(m=>`<option value="${m}">${m}</option>`).join(''));
+        makeSel.disabled = false;
       }
+      
+      // Wait a bit for makes to load
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Set Make & load models
-      if (makeSel && makeSel.value !== make){
+      if (makeSel.value !== make){
+        console.log('Setting make to:', make);
         makeSel.value = make;
-        if (modelSel){
-          modelSel.disabled = true; if (btn) btn.disabled = true;
-          modelSel.innerHTML = '<option value="">Select...</option>';
-          const respModels = await getJSON(`/api/models?year=${y}&make=${encodeURIComponent(make)}`);
-          const models = Array.isArray(respModels) ? respModels : (respModels.models || []);
-          modelSel.insertAdjacentHTML('beforeend', models.map(m=>`<option value="${m}">${m}</option>`).join(''));
-          modelSel.disabled = false;
-        }
+        modelSel.disabled = true; 
+        if (btn) btn.disabled = true;
+        modelSel.innerHTML = '<option value="">Select...</option>';
+        
+        const respModels = await getJSON(`/api/models?year=${y}&make=${encodeURIComponent(make)}`);
+        const models = Array.isArray(respModels) ? respModels : (respModels.models || []);
+        console.log('Loaded models:', models.length);
+        modelSel.insertAdjacentHTML('beforeend', models.map(m=>`<option value="${m}">${m}</option>`).join(''));
+        modelSel.disabled = false;
       }
+      
+      // Wait a bit for models to load
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Set Model & run main search
-      if (modelSel) modelSel.value = model;
+      if (modelSel.value !== model){
+        console.log('Setting model to:', model);
+        modelSel.value = model;
+      }
+      
       if (btn) btn.disabled = !(yearSel?.value && makeSel?.value && modelSel?.value);
-      if (btn && !btn.disabled) btn.click();
-    }catch(e){ console.error('gotoSelection shim error', e); }
+      if (btn && !btn.disabled) {
+        console.log('Clicking button to get results');
+        btn.click();
+      }
+    }catch(e){ 
+      console.error('gotoSelection error:', e); 
+    }
   }
 }
 

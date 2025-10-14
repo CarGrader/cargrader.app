@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Filtered Lookup – CarGrader</title>
+  <title>Filtered Search – CarGrader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
   <link rel="preload" as="font" href="{{ url_for('static', filename='fonts/Montserrat-SemiBold.woff2') }}" type="font/woff2" crossorigin>
@@ -320,9 +320,16 @@
     /* Background for results section */
     .lookup-shell .grid {
       background: var(--cg-gray-100, #F5F7FA);
-      border-radius: var(--cg-radius, 16px);
+      border-radius: 0;
       padding: 20px;
       margin-top: 16px;
+      margin-left: calc(-1 * (100vw - 100%) / 2);
+      margin-right: calc(-1 * (100vw - 100%) / 2);
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      transform: translateX(-50%);
     }
     
     /* Force light native controls on this page */
@@ -381,7 +388,7 @@
   {% include "_header.html" %}
 
   <main class="lookup-shell">
-    <h1 class="lookup-title">Filtered Lookup</h1>
+    <h1 class="lookup-title">Filtered Search</h1>
     <p class="lookup-sub">Search and filter vehicles by year range, make, model, and score to find the best options for your needs.</p>
 
     {# ———————————————————————————————————————————————— #}
