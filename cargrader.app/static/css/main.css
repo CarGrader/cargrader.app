@@ -253,11 +253,11 @@ ul.simple{ margin:0; padding-left:18px; }
 .results__value{
   color:#fff;
   font-family:"Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight:800;
-  font-size: clamp(72px, 12vw, 160px); /* very large white number */
-  line-height: 1.05;
+  font-weight: 400;
+  font-size: clamp(48px, 8vw, 96px);
+  line-height: 1.1;
   margin: 6px 0 6px 0;
-  text-shadow: 0 4px 18px rgba(0,0,0,.35);
+  text-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 
 .results__certainty{

@@ -146,6 +146,8 @@
     .results__value{
       color: var(--cg-navy, #0A2145);
       text-shadow: none;
+      font-weight: 400;
+      font-size: clamp(48px, 8vw, 96px);
     }
     .results__certainty-btn{
       color: var(--cg-text-2, #505661);
@@ -190,21 +192,6 @@
     }
     .badge{ border-color: var(--cg-gray-200, #E5E8EE); color: var(--cg-text-2, #505661); }
     
-    /* Background for collapsible boxes section */
-    .grade-shell .grid {
-      background: var(--cg-gray-100, #F5F7FA);
-      border-radius: 0;
-      padding: 20px;
-      margin-top: 16px;
-      margin-left: calc(-1 * (100vw - 100%) / 2);
-      margin-right: calc(-1 * (100vw - 100%) / 2);
-      width: 100vw;
-      position: relative;
-      left: 50%;
-      right: 50%;
-      transform: translateX(-50%);
-    }
-
     /* Lookup navigation styling */
     .lookup-navigation {
       text-align: center;
