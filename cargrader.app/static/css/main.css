@@ -74,7 +74,7 @@ h1,h2,h3,h4{
 html,body{height:100%}
 body{
   margin:0; 
-  background:#000;
+  background:var(--cg-white);
   color:var(--text);
   font-family:'Lato', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
@@ -521,21 +521,6 @@ ul.simple{ margin:0; padding-left:18px; }
   position: relative;
 }
 
-.hero--primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('../img/logo-notext.png');
-  background-size: 80vh;
-  background-repeat: no-repeat;
-  background-position: center;
-  opacity: 0.3;
-  z-index: 1;
-  pointer-events: none;
-}
 
 .hero__inner {
   max-width: var(--cg-maxw);
@@ -554,7 +539,7 @@ ul.simple{ margin:0; padding-left:18px; }
 @media (min-width: 768px) {
   .hero__grid {
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    gap: 100px;
   }
 }
 
@@ -627,19 +612,26 @@ ul.simple{ margin:0; padding-left:18px; }
   background: var(--cg-orange);
   color: var(--cg-white);
   border-color: var(--cg-orange);
+  font-weight: 800;
+  font-size: 18px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  box-shadow: none;
+  width: fit-content;
 }
 
 .btn--cta:hover {
   background: #e67e00;
   border-color: #e67e00;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 140, 0, 0.3);
+  transform: none;
+  box-shadow: none;
   text-decoration: none;
   color: var(--cg-white);
+  filter: brightness(0.98);
 }
 
 .btn--cta:active {
-  transform: translateY(0);
+  transform: none;
 }
 
 /* === Three feature cards === */

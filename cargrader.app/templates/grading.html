@@ -152,8 +152,8 @@
       background: none;
       border: none;
       padding: 0;
-      font-size: inherit;
-      font-weight: inherit;
+      font-weight: 800;
+      font-size: clamp(16px, 2vw, 24px);
       text-decoration: none;
       cursor: pointer;
       transition: color 0.2s ease;
@@ -190,6 +190,14 @@
     }
     .badge{ border-color: var(--cg-gray-200, #E5E8EE); color: var(--cg-text-2, #505661); }
     
+    /* Background for collapsible boxes section */
+    .grade-shell .grid {
+      background: var(--cg-gray-100, #F5F7FA);
+      border-radius: var(--cg-radius, 16px);
+      padding: 20px;
+      margin-top: 16px;
+    }
+
     /* Lookup navigation styling */
     .lookup-navigation {
       text-align: center;

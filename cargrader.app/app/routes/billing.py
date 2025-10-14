@@ -137,4 +137,14 @@ def account():
         if s:
             days_remaining = s.get("days_remaining_ceil")
             expires_at = s.get("expires_at")
-    return render_template("account.html", has_pass=has_pass, days_remaining=days_remaining, expires_at=expires_at)
+    # Get user information from session
+    user = session.get("user") or {}
+    user_email = user.get("email")
+    user_name = user.get("name")
+    
+    return render_template("account.html", 
+                         has_pass=has_pass, 
+                         days_remaining=days_remaining, 
+                         expires_at=expires_at,
+                         user_email=user_email,
+                         user_name=user_name)

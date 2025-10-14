@@ -144,6 +144,20 @@
     <h1 class="account-title">Your Account</h1>
     <p class="account-sub">Manage your CarGrader pass and account settings.</p>
 
+    <!-- Account Information Section -->
+    <section class="panel">
+      <h2 style="margin-top: 0; margin-bottom: 12px; color: var(--cg-navy, #0A2145); font-weight: 800;">Account Information</h2>
+      {% if user_email %}
+        <p style="margin: 8px 0;"><strong>Email:</strong> {{ user_email }}</p>
+      {% endif %}
+      {% if user_name %}
+        <p style="margin: 8px 0;"><strong>Name:</strong> {{ user_name }}</p>
+      {% endif %}
+      {% if not user_email and not user_name %}
+        <p class="muted">Account information not available.</p>
+      {% endif %}
+    </section>
+
     {# Optional success notice after returning from Stripe #}
     {% if request.args.get('paid') == '1' %}
       <div class="notice success" style="margin:12px 0; padding:10px 12px; border-radius:12px; background:rgba(46,160,67,.1); border:1px solid rgba(46,160,67,.35);">
