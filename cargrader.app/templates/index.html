@@ -76,9 +76,73 @@
       <!-- NEW: wrap text -->
       <div class="card__content">
         <h3>Fast &amp; Easy</h3>
-        <p>Search and compare thousands of cars in seconds. Whether you’re researching your next ride or checking your current one, CarGrader makes it easy.</p>
+        <p>Search and compare thousands of cars in seconds. Whether you're researching your next ride or checking your current one, CarGrader makes it easy.</p>
       </div>
     </article>
+  </div>
+</section>
+
+<!-- === EXAMPLE SCREENSHOTS === -->
+<section class="examples">
+  <div class="examples__inner">
+    <h2 class="examples__heading">Select from thousands of vehicles</h2>
+    <div class="examples__grid">
+      <img 
+        src="{{ url_for('static', filename='img/example-search.png') }}" 
+        alt="Vehicle search interface" 
+        class="examples__img">
+      <img 
+        src="{{ url_for('static', filename='img/example-results.png') }}" 
+        alt="Search results display" 
+        class="examples__img">
+    </div>
+  </div>
+</section>
+
+<!-- === INSIGHTS SECTION === -->
+<section class="insights">
+  <div class="insights__inner">
+    <h2 class="insights__heading">Get powerful insights</h2>
+    
+    <!-- Centered graph image -->
+    <div class="insights__featured">
+      <img 
+        src="{{ url_for('static', filename='img/example-graph.png') }}" 
+        alt="Vehicle reliability graph" 
+        class="insights__img insights__img--featured">
+    </div>
+    
+    <!-- Two side-by-side images -->
+    <div class="insights__grid">
+      <img 
+        src="{{ url_for('static', filename='img/example-top.png') }}" 
+        alt="Top complaints view" 
+        class="insights__img">
+      <img 
+        src="{{ url_for('static', filename='img/example-trims.png') }}" 
+        alt="Vehicle trims comparison" 
+        class="insights__img">
+    </div>
+  </div>
+</section>
+
+<!-- === FILTERED SEARCH SECTION === -->
+<section class="filtered-search">
+  <div class="filtered-search__inner">
+    <div class="filtered-search__content">
+      <!-- Image on left -->
+      <div class="filtered-search__image">
+        <img 
+          src="{{ url_for('static', filename='img/example-lookup.png') }}" 
+          alt="Filtered search interface" 
+          class="filtered-search__img">
+      </div>
+      
+      <!-- Text on right -->
+      <div class="filtered-search__text">
+        <p>Use the Filtered Search tool to research multiple cars at once. Refine the your results by age, make, model, or score.</p>
+      </div>
+    </div>
   </div>
 </section>
     {% include "_footer.html" %}
