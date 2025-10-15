@@ -200,7 +200,11 @@ document.querySelectorAll('.box__header').forEach(h => {
     if(!box) return;
     const open = box.classList.toggle('open');
     const t = h.querySelector('.box__toggle');
-    if(t) t.textContent = open ? '-' : '+';
+    const content = h.nextElementSibling;
+    if(t) t.classList.toggle('active');
+    if(content && content.classList.contains('box__content')) {
+      content.classList.toggle('active');
+    }
     if (open && window.__historyItems && box.querySelector('#historyChart')) {
       setTimeout(() => renderHistory(window.__historyItems), 0);
     }

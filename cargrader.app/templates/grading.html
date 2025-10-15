@@ -477,26 +477,6 @@
   {% include "_footer.html" %}
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   
-  <!-- Handle collapsible boxes -->
-  <script>
-    // Collapsible box toggle functionality (same as FAQ accordion)
-    document.addEventListener('DOMContentLoaded', function() {
-      const headers = document.querySelectorAll('.box__header[data-toggle]');
-      
-      headers.forEach(header => {
-        header.addEventListener('click', function() {
-          const toggle = this.querySelector('.box__toggle');
-          const content = this.nextElementSibling;
-          
-          if (toggle && content) {
-            toggle.classList.toggle('active');
-            content.classList.toggle('active');
-          }
-        });
-      });
-    });
-  </script>
-  
   <!-- Handle URL parameters for auto-population -->
   <script>
     // Auto-populate form from URL parameters
