@@ -97,12 +97,14 @@
       flex-shrink: 0;
       line-height: 1;
       /* Override main.css dark theme box styles */
-      width: auto;
-      height: auto;
-      border: none;
-      background: none;
-      display: inline-block;
-      border-radius: 0;
+      width: auto !important;
+      height: auto !important;
+      border: none !important;
+      background: none !important;
+      display: inline-block !important;
+      border-radius: 0 !important;
+      grid: none !important;
+      place-items: unset !important;
     }
     .box__toggle::after{
       content: '+';
@@ -112,6 +114,11 @@
     }
     .box__toggle.active{
       transform: rotate(180deg);
+      /* Override main.css active state styles */
+      color: var(--cg-orange, #FF8C00) !important;
+      background: none !important;
+      border: none !important;
+      border-color: transparent !important;
     }
     .box__content{
       max-height: 0;
