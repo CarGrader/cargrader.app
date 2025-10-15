@@ -60,17 +60,7 @@
       background: #FFFFFF;
       border: 1px solid var(--cg-gray-200, #E5E8EE);
       border-radius: var(--cg-radius, 16px);
-      overflow: hidden;
-    }
-    .box__content{
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-      padding: 0 18px;
-    }
-    .box.open .box__content{
-      max-height: 2000px;
-      padding: 0 18px 18px;
+      margin-bottom: 12px;
     }
     .box__header{
       background: #FFFFFF;
@@ -80,6 +70,7 @@
       align-items: center;
       cursor: pointer;
       transition: background-color 0.2s ease;
+      border-radius: var(--cg-radius, 16px);
     }
     .box__header:hover{
       background: #f8f9fa;
@@ -106,8 +97,23 @@
       flex-shrink: 0;
       line-height: 1;
     }
-    .box.open .box__toggle{
+    .box__toggle::after{
+      content: '+';
+    }
+    .box__toggle.active::after{
+      content: '−';
+    }
+    .box__toggle.active{
       transform: rotate(180deg);
+    }
+    .box__content{
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .box__content.active{
+      max-height: 2000px;
+      padding: 0 18px 18px;
     }
 
     /* Controls (selects, button) in light theme */
@@ -348,7 +354,7 @@
                  src="{{ url_for('static', filename='img/icons/details.svg') }}">
             Details
           </div>
-          <div class="box__toggle" aria-hidden="true">−</div>
+          <div class="box__toggle" aria-hidden="true"></div>
         </header>
         <div class="box__content">
           <p id="detailsText" class="muted">Select a car to see details.</p>
@@ -362,7 +368,7 @@
                  src="{{ url_for('static', filename='img/icons/topcomplaints.svg') }}">
             Top Complaints
           </div>
-          <div class="box__toggle" aria-hidden="true">−</div>
+          <div class="box__toggle" aria-hidden="true"></div>
         </header>
         <div class="box__content">
           {% if not is_logged_in %}
@@ -388,7 +394,7 @@
                  src="{{ url_for('static', filename='img/icons/trims.svg') }}">
             Complaint % by Trim
           </div>
-          <div class="box__toggle" aria-hidden="true">−</div>
+          <div class="box__toggle" aria-hidden="true"></div>
         </header>
         <div class="box__content">
           {% if not is_logged_in %}
@@ -425,7 +431,7 @@
                  src="{{ url_for('static', filename='img/icons/history.svg') }}">
             Complaint Accumulation Over Time
           </div>
-          <div class="box__toggle" aria-hidden="true">−</div>
+          <div class="box__toggle" aria-hidden="true"></div>
         </header>
         <div class="box__content">
           {% if not is_logged_in %}
@@ -458,17 +464,18 @@
   
   <!-- Handle collapsible boxes -->
   <script>
-    // Collapsible box toggle functionality
+    // Collapsible box toggle functionality (same as FAQ accordion)
     document.addEventListener('DOMContentLoaded', function() {
       const headers = document.querySelectorAll('.box__header[data-toggle]');
       
       headers.forEach(header => {
         header.addEventListener('click', function() {
-          const targetSelector = this.getAttribute('data-toggle');
-          const box = document.querySelector(targetSelector);
+          const toggle = this.querySelector('.box__toggle');
+          const content = this.nextElementSibling;
           
-          if (box) {
-            box.classList.toggle('open');
+          if (toggle && content) {
+            toggle.classList.toggle('active');
+            content.classList.toggle('active');
           }
         });
       });
