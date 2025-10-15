@@ -60,3 +60,36 @@ def grade():
     has_pass = has_active_pass_for_session()
     return render_template("grading.html", is_logged_in=is_logged_in, has_pass=has_pass)
 
+@pages_bp.get("/faq")
+def faq():
+    questions_dir = os.path.join(current_app.static_folder, "questions")
+    faqs = []
+    
+    try:
+        # Get all files in the questions directory
+        for filename in os.listdir(questions_dir):
+            filepath = os.path.join(questions_dir, filename)
+            if os.path.isfile(filepath):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        answer = f.read().strip()
+                    # Add question mark if the filename doesn't end with one
+                    question = filename if filename.endswith('?') else filename + '?'
+                    # Create a simple ID from the filename (lowercase, replace spaces/special chars with hyphens)
+                    faq_id = filename.lower().replace(' ', '-').replace("'", '').replace('"', '')
+                    faqs.append({
+                        "id": faq_id,
+                        "question": question,
+                        "answer": answer
+                    })
+                except Exception as e:
+                    print(f"Error reading {filename}: {e}")
+    except FileNotFoundError:
+        pass
+    
+    # Sort FAQs alphabetically by question
+    faqs.sort(key=lambda x: x["question"])
+    
+    is_logged_in = bool(session.get("user"))
+    return render_template("faq.html", faqs=faqs, is_logged_in=is_logged_in)
+

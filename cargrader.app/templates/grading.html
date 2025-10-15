@@ -143,6 +143,15 @@
     .results__label{
       color: var(--cg-text-2, #505661);
     }
+    .results__label--link{
+      cursor: pointer;
+      transition: color 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .results__label--link:hover{
+      color: var(--cg-royal, #1769FF);
+    }
     .results__value{
       color: var(--cg-navy, #0A2145);
       text-shadow: none;
@@ -290,17 +299,15 @@
           <h2 id="resultTitle" class="results__title">Year Make Model</h2>
 
           <div id="scoreBlock">
-            <div class="results__label">Score</div>
+            <a href="{{ url_for('pages.faq') }}#what-is-the-score-supposed-represent" class="results__label results__label--link">Score</a>
             <div id="scoreValue" class="results__value">00</div>
             <div class="results__label">Out of 100</div>
 
             <div class="results__certainty">
-              <button id="certaintyToggle" class="results__certainty-btn" type="button">Certainty</button>
+              <a href="{{ url_for('pages.faq') }}#what-is-certainty-supposed-to-mean" class="results__certainty-btn">Certainty</a>
               <span id="certaintyPct" class="results__certainty-pct">0%</span>
             </div>
           </div>
-
-          <div id="certaintyBlurb" class="results__blurb" hidden></div>
 
           <div id="noDataMsg" class="no-data-message" style="display:none;">
             We don't have enough information yet!

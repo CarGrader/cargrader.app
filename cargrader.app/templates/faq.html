@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FAQ • CarGrader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <style>
+    /* Page-scoped styles for FAQ page */
+    .faq-page {
+      background: #fff;
+    }
+
+    .faq__wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 16px 80px;
+    }
+
+    .faq__title {
+      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--cg-navy);
+      font-weight: 800;
+      font-size: clamp(32px, 5vw, 48px);
+      margin: 0 0 12px;
+      text-align: center;
+    }
+
+    .faq__subtitle {
+      font-family: "Lato", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 18px;
+      color: #555;
+      text-align: center;
+      margin: 0 0 40px;
+    }
+
+    /* Accordion styles */
+    .faq__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .faq__item {
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .faq__item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .faq__question {
+      width: 100%;
+      padding: 20px 24px;
+      background: #fff;
+      border: none;
+      text-align: left;
+      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--cg-navy);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s ease;
+    }
+
+    .faq__question:hover {
+      background: #f8f9fa;
+    }
+
+    .faq__question::after {
+      content: '+';
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--cg-teal, #00bcd4);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .faq__question.active::after {
+      content: '−';
+      transform: rotate(180deg);
+    }
+
+    .faq__answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq__answer-content {
+      padding: 0 24px 24px;
+      font-family: "Lato", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #333;
+    }
+
+    .faq__answer.active {
+      max-height: 500px;
+    }
+
+    @media (max-width: 640px) {
+      .faq__question {
+        padding: 16px 18px;
+        font-size: 16px;
+      }
+      
+      .faq__answer-content {
+        padding: 0 18px 18px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body class="faq-page">
+  {% include "_header.html" %}
+
+  <main class="faq__wrap">
+    <h1 class="faq__title">Frequently Asked Questions</h1>
+    <p class="faq__subtitle">Find answers to common questions about CarGrader scores and ratings</p>
+
+    <ul class="faq__list">
+      {% for faq in faqs %}
+      <li class="faq__item" id="{{ faq.id }}">
+        <button class="faq__question" aria-expanded="false">
+          {{ faq.question }}
+        </button>
+        <div class="faq__answer">
+          <div class="faq__answer-content">
+            {{ faq.answer }}
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </main>
+
+  {% include "_footer.html" %}
+
+  <script>
+    // FAQ accordion functionality
+    (function() {
+      const questions = document.querySelectorAll('.faq__question');
+      
+      questions.forEach(question => {
+        question.addEventListener('click', function() {
+          const answer = this.nextElementSibling;
+          const isActive = this.classList.contains('active');
+          
+          // Close all other answers
+          questions.forEach(q => {
+            q.classList.remove('active');
+            q.setAttribute('aria-expanded', 'false');
+            q.nextElementSibling.classList.remove('active');
+          });
+          
+          // Toggle current answer
+          if (!isActive) {
+            this.classList.add('active');
+            this.setAttribute('aria-expanded', 'true');
+            answer.classList.add('active');
+          }
+        });
+      });
+      
+      // Auto-expand FAQ if there's a hash in the URL
+      if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        const targetItem = document.getElementById(targetId);
+        
+        if (targetItem) {
+          const question = targetItem.querySelector('.faq__question');
+          const answer = targetItem.querySelector('.faq__answer');
+          
+          if (question && answer) {
+            question.classList.add('active');
+            question.setAttribute('aria-expanded', 'true');
+            answer.classList.add('active');
+            
+            // Scroll to the question with a small delay to ensure it's expanded
+            setTimeout(() => {
+              targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
+
