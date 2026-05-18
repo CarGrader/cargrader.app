@@ -20,27 +20,23 @@ PLAN_MAP = {
 }
 
 
-def _metadata_dict(meta):
-    """Stripe returns metadata as a StripeObject, not a plain dict — normalize it."""
-    if not meta:
-        return {}
-    if isinstance(meta, dict):
-        return meta
-    try:
-        return dict(meta)
-    except (TypeError, ValueError):
-        pass
-    try:
-        return {k: meta[k] for k in meta.keys()}
-    except Exception:
-        return {}
-
-
-def _checkout_session_meta(sess):
-    """Read metadata from a Checkout Session (webhook dict or API StripeObject)."""
+def _session_metadata(sess):
+    """Raw metadata object/dict from a Checkout Session."""
     if isinstance(sess, dict):
-        return _metadata_dict(sess.get("metadata"))
-    return _metadata_dict(getattr(sess, "metadata", None))
+        return sess.get("metadata")
+    return getattr(sess, "metadata", None)
+
+
+def _meta_get(meta, key, default=None):
+    """Read one metadata field from a dict or StripeObject."""
+    if not meta:
+        return default
+    if isinstance(meta, dict):
+        return meta.get(key, default)
+    try:
+        return meta[key]
+    except Exception:
+        return getattr(meta, key, default)
 
 
 def _session_attr(sess, key, default=None):
@@ -125,9 +121,9 @@ def stripe_webhook():
 
     if event["type"] == "checkout.session.completed":
         sess = event["data"]["object"]
-        md = _checkout_session_meta(sess)
-        user_sub = md.get("user_sub") or _session_attr(sess, "client_reference_id")
-        days = int(md.get("days") or 0)
+        md = _session_metadata(sess)
+        user_sub = _meta_get(md, "user_sub") or _session_attr(sess, "client_reference_id")
+        days = int(_meta_get(md, "days") or 0)
         stripe_session_id = _session_attr(sess, "id")
         stripe_customer_id = _session_attr(sess, "customer")
 
@@ -152,9 +148,9 @@ def account():
             cs = s.checkout.Session.retrieve(sess_id)
             # 'complete' means Checkout finished; payment_status can be 'paid' or 'no_payment_required' for 100% off
             if getattr(cs, "status", None) == "complete" and getattr(cs, "payment_status", None) in ("paid", "no_payment_required"):
-                md = _checkout_session_meta(cs)
-                user_sub = md.get("user_sub") or cs.client_reference_id
-                days = int(md.get("days") or 0)
+                md = _session_metadata(cs)
+                user_sub = _meta_get(md, "user_sub") or cs.client_reference_id
+                days = int(_meta_get(md, "days") or 0)
                 if user_sub and days > 0:
                     # UNIQUE(stripe_session_id) makes this idempotent if the webhook already granted it.
                     try:
