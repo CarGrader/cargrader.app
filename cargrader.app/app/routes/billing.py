@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, jsonify
 from app.utils.auth import requires_login
 from app.utils.access import grant_or_extend_pass, has_active_pass_for_session, active_pass_summary
-import os, stripe
+import os, sqlite3, stripe
 
 billing_bp = Blueprint("billing", __name__)
 
@@ -18,6 +18,36 @@ PLAN_MAP = {
     "10": {"price": PRICE_10, "days": 10},
     "30": {"price": PRICE_30, "days": 30},
 }
+
+
+def _metadata_dict(meta):
+    """Stripe returns metadata as a StripeObject, not a plain dict — normalize it."""
+    if not meta:
+        return {}
+    if isinstance(meta, dict):
+        return meta
+    try:
+        return dict(meta)
+    except (TypeError, ValueError):
+        pass
+    try:
+        return {k: meta[k] for k in meta.keys()}
+    except Exception:
+        return {}
+
+
+def _checkout_session_meta(sess):
+    """Read metadata from a Checkout Session (webhook dict or API StripeObject)."""
+    if isinstance(sess, dict):
+        return _metadata_dict(sess.get("metadata"))
+    return _metadata_dict(getattr(sess, "metadata", None))
+
+
+def _session_attr(sess, key, default=None):
+    if isinstance(sess, dict):
+        return sess.get(key, default)
+    return getattr(sess, key, default)
+
 
 @billing_bp.get("/store")
 def store():
@@ -95,14 +125,17 @@ def stripe_webhook():
 
     if event["type"] == "checkout.session.completed":
         sess = event["data"]["object"]
-        user_sub = (sess.get("metadata") or {}).get("user_sub") or sess.get("client_reference_id")
-        days = int((sess.get("metadata") or {}).get("days") or 0)
-        stripe_session_id = sess.get("id")
-        stripe_customer_id = sess.get("customer")
+        md = _checkout_session_meta(sess)
+        user_sub = md.get("user_sub") or _session_attr(sess, "client_reference_id")
+        days = int(md.get("days") or 0)
+        stripe_session_id = _session_attr(sess, "id")
+        stripe_customer_id = _session_attr(sess, "customer")
 
         if user_sub and days > 0:
             try:
                 grant_or_extend_pass(user_sub, days, stripe_session_id, stripe_customer_id)
+            except sqlite3.IntegrityError:
+                pass  # already granted for this checkout session
             except Exception:
                 current_app.logger.exception("Failed to grant/extend pass in DB")
 
@@ -119,12 +152,15 @@ def account():
             cs = s.checkout.Session.retrieve(sess_id)
             # 'complete' means Checkout finished; payment_status can be 'paid' or 'no_payment_required' for 100% off
             if getattr(cs, "status", None) == "complete" and getattr(cs, "payment_status", None) in ("paid", "no_payment_required"):
-                md = (cs.metadata or {})
+                md = _checkout_session_meta(cs)
                 user_sub = md.get("user_sub") or cs.client_reference_id
                 days = int(md.get("days") or 0)
                 if user_sub and days > 0:
                     # UNIQUE(stripe_session_id) makes this idempotent if the webhook already granted it.
-                    grant_or_extend_pass(user_sub, days, cs.id, cs.customer)
+                    try:
+                        grant_or_extend_pass(user_sub, days, cs.id, cs.customer)
+                    except sqlite3.IntegrityError:
+                        pass  # already granted for this checkout session
         except Exception:
             current_app.logger.exception("Account fulfillment grant failed")
 
